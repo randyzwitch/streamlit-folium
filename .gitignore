@@ -27,8 +27,10 @@ cffi_bin
 # Pyenv Stuff
 .python-version
 
+# testing with seleniumbase
 latest_logs
 archived_logs
+current-screenshot.png
 
 ########################################################################
 # OSX - https://github.com/github/gitignore/blob/master/Global/macOS.gitignore
