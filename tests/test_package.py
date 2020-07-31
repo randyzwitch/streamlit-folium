@@ -25,6 +25,8 @@ class ComponentsTest(BaseCase):
         )
         duplicate = cv2.imread("current-screenshot.png")
 
+        assert original.shape == duplicate.shape
+
         difference = cv2.subtract(original, duplicate)
         b, g, r = cv2.split(difference)
         assert cv2.countNonZero(b) == cv2.countNonZero(g) == cv2.countNonZero(r) == 0

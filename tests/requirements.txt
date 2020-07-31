@@ -1,4 +1,4 @@
 streamlit>=0.63
 pytest>=5.4
-seleniumbase
+seleniumbase>=1.45
 opencv-python>=4.3
