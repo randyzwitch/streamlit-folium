@@ -6,8 +6,9 @@ import cv2
 class ComponentsTest(BaseCase):
     def test_basic(self):
 
-        # open the app
+        # open the app and take a screenshot
         self.open("http://localhost:8501")
+        self.save_screenshot("current-screenshot.png")
 
         # automated visual regression testing
         # https://github.com/seleniumbase/SeleniumBase/tree/master/examples/visual_testing
@@ -19,7 +20,6 @@ class ComponentsTest(BaseCase):
         self.assert_text("streamlit-folium")
 
         # test screenshots look exactly the same
-        self.save_screenshot("current-screenshot.png")
         original = cv2.imread(
             "visual_baseline/test_package.test_basic/first_test/screenshot.png"
         )
