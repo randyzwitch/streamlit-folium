@@ -10,7 +10,7 @@ class ComponentsTest(BaseCase):
         # open the app and take a screenshot
         self.open("http://localhost:8501")
 
-        time.sleep(15)
+        time.sleep(10)  # give leaflet time to load from web
         self.save_screenshot("current-screenshot.png")
 
         # automated visual regression testing
