@@ -1,6 +1,6 @@
 # streamlit-folium
 
-![Python package](https://github.com/randyzwitch/streamlit-folium/workflows/run_tests_each_PR/badge.svg)
+![Run tests each PR](https://github.com/randyzwitch/streamlit-folium/workflows/Run%20tests%20each%20PR/badge.svg)
 
 This Streamlit Component is a work-in-progress to determine what functionality is desirable for a Folium and Streamlit integration. Currently, one method `folium_static()` is defined, which takes a `folium.Map` or `folium.Figure` object and displays it in a Streamlit app.
 
