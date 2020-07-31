@@ -1,6 +1,7 @@
 import streamlit as st
 from seleniumbase import BaseCase
 import cv2
+import time
 
 
 class ComponentsTest(BaseCase):
@@ -8,9 +9,12 @@ class ComponentsTest(BaseCase):
 
         # open the app and take a screenshot
         self.open("http://localhost:8501")
+
+        time.sleep(15)
         self.save_screenshot("current-screenshot.png")
 
         # automated visual regression testing
+        # tests page has identical structure to baseline
         # https://github.com/seleniumbase/SeleniumBase/tree/master/examples/visual_testing
         # level 2 chosen, as id values dynamically generated on each page run
         self.check_window(name="first_test", level=2)
