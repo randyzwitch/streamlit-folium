@@ -2,6 +2,8 @@ import streamlit as st
 from streamlit_folium import folium_static
 import folium
 
+st.beta_set_page_config(page_title="streamlit-folium documentation")
+
 "# streamlit-folium"
 
 with st.echo():
@@ -20,4 +22,3 @@ with st.echo():
 
     # call to render Folium map in Streamlit
     folium_static(m)
-
