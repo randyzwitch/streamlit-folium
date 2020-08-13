@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_folium import folium_static
 import folium
+from folium.plugins import Fullscreen
 
 "# streamlit-folium"
 
@@ -17,7 +18,10 @@ with st.echo():
     folium.Marker(
         [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
     ).add_to(m)
-
+    
+    #Add full screen functionality
+    Fullscreen().add_to(m)
+    
     # call to render Folium map in Streamlit
     folium_static(m)
 
