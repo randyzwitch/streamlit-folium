@@ -6,12 +6,15 @@ import folium
 def folium_static(fig, width=700, height=500):
 
     """
-    Renders `folium.Figure` or `folium.Map` in a Streamlit app. This method is 
+    Renders `folium.Figure` or `folium.Map` in a Streamlit app. This method is
     a static Streamlit Component, meaning, no information is passed back from
     Leaflet on browser interaction.
 
     Parameters
     ----------
+    fig  : folium.Map or folium.Figure
+        Geospatial visualization to render
+
     width : int
         Width of result
 
@@ -20,8 +23,8 @@ def folium_static(fig, width=700, height=500):
 
     Note
     ----
-    If `height` is set on a `folium.Map` or `folium.Figure` object, 
-    that value supersedes the values set with the keyword arguments of this function. 
+    If `height` is set on a `folium.Map` or `folium.Figure` object,
+    that value supersedes the values set with the keyword arguments of this function.
 
     Example
     -------
@@ -39,103 +42,85 @@ def folium_static(fig, width=700, height=500):
     )
 
 
-# # Create a _RELEASE constant. We'll set this to False while we're developing
-# # the component, and True when we're ready to package and distribute it.
-# # (This is, of course, optional - there are innumerable ways to manage your
-# # release process.)
-# _RELEASE = False
+# Create a _RELEASE constant. We'll set this to False while we're developing
+# the component, and True when we're ready to package and distribute it.
+_RELEASE = False
 
-# # Declare a Streamlit component. `declare_component` returns a function
-# # that is used to create instances of the component. We're naming this
-# # function "_component_func", with an underscore prefix, because we don't want
-# # to expose it directly to users. Instead, we will create a custom wrapper
-# # function, below, that will serve as our component's public API.
-
-# # It's worth noting that this call to `declare_component` is the
-# # *only thing* you need to do to create the binding between Streamlit and
-# # your component frontend. Everything else we do in this file is simply a
-# # best practice.
-
-# if not _RELEASE:
-#     _component_func = components.declare_component(
-#         # We give the component a simple, descriptive name ("my_component"
-#         # does not fit this bill, so please choose something better for your
-#         # own component :)
-#         "my_component",
-#         # Pass `url` here to tell Streamlit that the component will be served
-#         # by the local dev server that you run via `npm run start`.
-#         # (This is useful while your component is in development.)
-#         url="http://localhost:3001",
-#     )
-# else:
-#     # When we're distributing a production version of the component, we'll
-#     # replace the `url` param with `path`, and point it to to the component's
-#     # build directory:
-#     parent_dir = os.path.dirname(os.path.abspath(__file__))
-#     build_dir = os.path.join(parent_dir, "frontend/build")
-#     _component_func = components.declare_component("my_component", path=build_dir)
+if not _RELEASE:
+    _component_func = components.declare_component(
+        "st_folium",
+        url="http://localhost:3001",
+    )
+else:
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+    build_dir = os.path.join(parent_dir, "frontend/build")
+    _component_func = components.declare_component("st_folium", path=build_dir)
 
 
-# # Create a wrapper function for the component. This is an optional
-# # best practice - we could simply expose the component function returned by
-# # `declare_component` and call it done. The wrapper allows us to customize
-# # our component's API: we can pre-process its input args, post-process its
-# # output value, and add a docstring for users.
-# def my_component(name, key=None):
-#     """Create a new instance of "my_component".
-#     Parameters
-#     ----------
-#     name: str
-#         The name of the thing we're saying hello to. The component will display
-#         the text "Hello, {name}!"
-#     key: str or None
-#         An optional key that uniquely identifies this component. If this is
-#         None, and the component's arguments are changed, the component will
-#         be re-mounted in the Streamlit frontend and lose its current state.
-#     Returns
-#     -------
-#     int
-#         The number of times the component's "Click Me" button has been clicked.
-#         (This is the value passed to `Streamlit.setComponentValue` on the
-#         frontend.)
-#     """
-#     # Call through to our private component function. Arguments we pass here
-#     # will be sent to the frontend, where they'll be available in an "args"
-#     # dictionary.
-#     #
-#     # "default" is a special argument that specifies the initial return
-#     # value of the component before the user has interacted with it.
-#     component_value = _component_func(name=name, key=key, default=0)
+def st_folium(fig, key=None):
+    """Display a Folium object in Streamlit, returning data as user interacts
+    with app.
 
-#     # We could modify the value returned from the component if we wanted.
-#     # There's no need to do this in our simple example - but it's an option.
-#     return component_value
+    Parameters
+    ----------
+    fig  : folium.Map or folium.Figure
+        Geospatial visualization to render
+
+    key: str or None
+        An optional key that uniquely identifies this component. If this is
+        None, and the component's arguments are changed, the component will
+        be re-mounted in the Streamlit frontend and lose its current state.
+    Returns
+    -------
+    dict
+        Selected data from Folium/leaflet.js interactions in browser
+    """
+    # Call through to our private component function. Arguments we pass here
+    # will be sent to the frontend, where they'll be available in an "args"
+    # dictionary.
+    #
+    # "default" is a special argument that specifies the initial return
+    # value of the component before the user has interacted with it.
+
+    # TODO: think about data to pass to React. It's not the value of "fig"
+    component_value = _component_func(
+        fig=fig, key=key, default={"bbox": [0.01, 0.01], "no": False}
+    )
+
+    # We could modify the value returned from the component if we wanted.
+    # There's no need to do this in our simple example - but it's an option.
+    return component_value
 
 
-# # Add some test code to play with the component while it's in development.
-# # During development, we can run this just as we would any other Streamlit
-# # app: `$ streamlit run my_component/__init__.py`
-# if not _RELEASE:
-#     import streamlit as st
+# Add some test code to play with the component while it's in development.
+# During development, we can run this just as we would any other Streamlit
+# app: `$ streamlit run my_component/__init__.py`
+if not _RELEASE:
+    import streamlit as st
+    from streamlit_folium import folium_static
 
-#     st.subheader("Component with constant args")
+    import folium
+    from bs4 import BeautifulSoup
 
-#     # Create an instance of our component with a constant `name` arg, and
-#     # print its output value.
-#     num_clicks = my_component("World")
-#     st.markdown("You've clicked %s times!" % int(num_clicks))
+    m = folium.Map(location=[45.372, -121.6972], zoom_start=12, tiles="Stamen Terrain")
+    tooltip = "Click me!"
+    folium.Marker(
+        [45.3288, -121.6625], popup="<i>Mt. Hood Meadows</i>", tooltip=tooltip
+    ).add_to(m)
+    folium.Marker(
+        [45.3311, -121.7113], popup="<b>Timberline Lodge</b>", tooltip=tooltip
+    ).add_to(m)
 
-#     st.markdown("---")
-#     st.subheader("Component with variable args")
+    # m.save("test.html")
 
-#     # Create a second instance of our component whose `name` arg will vary
-#     # based on a text_input widget.
-#     #
-#     # We use the special "key" argument to assign a fixed identity to this
-#     # component instance. By default, when a component's arguments change,
-#     # it is considered a new instance and will be re-mounted on the frontend
-#     # and lose its current state. In this case, we want to vary the component's
-#     # "name" argument without having it get recreated.
-#     name_input = st.text_input("Enter a name", value="Streamlit")
-#     num_clicks = my_component(name_input, key="foo")
-#     st.markdown("You've clicked %s times!" % int(num_clicks))
+    # fig = folium.Figure().add_child(m)
+
+    # parse out object, pull data-html value from it
+    # surrounding divs and iframes prob not
+    soup = BeautifulSoup(m._repr_html_(), "html.parser")
+    data_html = soup.iframe["data-html"]
+
+    # ideally, this should return a Dict with expected keys
+    retdata = st_folium(data_html)
+
+    retdata
