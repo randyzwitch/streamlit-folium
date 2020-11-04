@@ -1,6 +1,7 @@
 import os
 import streamlit.components.v1 as components
 import folium
+from bs4 import BeautifulSoup
 
 
 def folium_static(fig, width=700, height=500):
@@ -70,6 +71,7 @@ def st_folium(fig, key=None):
         An optional key that uniquely identifies this component. If this is
         None, and the component's arguments are changed, the component will
         be re-mounted in the Streamlit frontend and lose its current state.
+
     Returns
     -------
     dict
@@ -82,13 +84,20 @@ def st_folium(fig, key=None):
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
 
+    # parse out folium figure html from Jupyter representation
+    # since this contains everything needed to build chart
+    soup = BeautifulSoup(fig._repr_html_(), "html.parser")
+
+    # base64 representation of the data inside the iframe
+    # represents most if not all code needed to build map
+    data_html = soup.iframe["data-html"]
+
     # TODO: think about data to pass to React. It's not the value of "fig"
+    # data_html currently there since str can be mapped to JSON
     component_value = _component_func(
-        fig=fig, key=key, default={"bbox": [0.01, 0.01], "no": False}
+        fig=data_html, key=key, default={"bbox": [0.01, 0.01]}
     )
 
-    # We could modify the value returned from the component if we wanted.
-    # There's no need to do this in our simple example - but it's an option.
     return component_value
 
 
@@ -99,9 +108,6 @@ if not _RELEASE:
     import streamlit as st
     from streamlit_folium import folium_static
 
-    import folium
-    from bs4 import BeautifulSoup
-
     m = folium.Map(location=[45.372, -121.6972], zoom_start=12, tiles="Stamen Terrain")
     tooltip = "Click me!"
     folium.Marker(
@@ -111,8 +117,6 @@ if not _RELEASE:
         [45.3311, -121.7113], popup="<b>Timberline Lodge</b>", tooltip=tooltip
     ).add_to(m)
 
-    # m.save("test.html")
-
     # fig = folium.Figure().add_child(m)
 
     # parse out object, pull data-html value from it
@@ -121,6 +125,8 @@ if not _RELEASE:
     data_html = soup.iframe["data-html"]
 
     # ideally, this should return a Dict with expected keys
-    retdata = st_folium(data_html)
+    retdata = st_folium(m)
 
-    retdata
+    # retdata
+
+    print(m._repr_html_())

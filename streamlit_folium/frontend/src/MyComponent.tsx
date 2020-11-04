@@ -6,8 +6,7 @@ import {
 import React, { ReactNode } from "react"
 
 interface ReturnData {
-  bbox: number[];
-  clickedPoint: boolean;
+  bbox: number[];  //start by always returning the bounding box shown
 }
 
 /**
@@ -15,11 +14,10 @@ interface ReturnData {
  * automatically when your component should be re-rendered.
  */
 class MyComponent extends StreamlitComponentBase<ReturnData> {
-  public state = { bbox: [34.454, -57.876], clickedPoint: false }
+  //public state = { bbox: [34.454, -57.876] }
 
   public render = (): ReactNode => {
-    // Arguments that are passed to the plugin in Python are accessible
-    // via `this.props.args`. Here, we access the "name" arg.
+    // Arguments that are passed to the plugin in Python are accessible via `this.props.args`
     // const name = this.props.args["fig"]
 
     return (
