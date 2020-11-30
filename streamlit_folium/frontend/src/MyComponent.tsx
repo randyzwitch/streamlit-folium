@@ -18,10 +18,36 @@ class MyComponent extends StreamlitComponentBase<ReturnData> {
 
   public render = (): ReactNode => {
     // Arguments that are passed to the plugin in Python are accessible via `this.props.args`
-    // const name = this.props.args["fig"]
+    const fig: string = this.props.args["fig"]
+    console.log(fig)
+
+    function createMarkup() {
+      return {
+        __html: atob(fig)
+      }
+    }
 
     return (
-      <div>Hello!</div>
+      // <div style={{ width: "100%" }}>
+      //   <div style={{ position: "relative", width: "100%", height: 0, paddingBottom: "60%" }}>
+      //     <iframe
+      //       title="hello"
+      //       src="about:blank"
+      //       style={{
+      //         position: "absolute",
+      //         width: "100%",
+      //         height: "100%",
+      //         left: 0,
+      //         top: 0,
+      //         border: "none !important"
+      //       }}
+      //       data-html={fig}
+      //       allowFullScreen
+      //       onLoad="this.contentDocument.open();this.contentDocument.write(atob(this.getAttribute('data-html')));this.contentDocument.close();"
+      //     ></iframe>
+      //   </div>
+      // </div>
+      <div dangerouslySetInnerHTML={createMarkup()} />
     )
   }
 
