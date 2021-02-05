@@ -1,1 +1,3 @@
 recursive-include package/frontend/build *
+include README.md
+include LICENSE
