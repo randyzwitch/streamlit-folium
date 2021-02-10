@@ -10,6 +10,10 @@ This Streamlit Component is a work-in-progress to determine what functionality i
 
 ```python
 pip install streamlit-folium
+
+or
+
+conda install -c conda-forge streamlit-folium
 ```
 
 ## Example
