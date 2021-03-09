@@ -1,6 +1,7 @@
 import os
 import streamlit.components.v1 as components
 import folium
+from folium import plugins
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
@@ -105,7 +106,14 @@ def folium_static(fig, width=700, height=500):
     # if Map, wrap in Figure
     if isinstance(fig, folium.Map):
         fig = folium.Figure().add_child(fig)
+        return components.html(
+            fig.render(), height=(fig.height or height) + 10, width=width
+            )
 
-    return components.html(
-        fig.render(), height=(fig.height or height) + 10, width=width
-    )
+    # if DualMap, get HTML representation
+    elif isinstance(fig, plugins.DualMap):
+        return components.html(
+            fig._repr_html_(), height=height + 10, width=width
+        )
+
+    
