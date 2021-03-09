@@ -43,4 +43,4 @@ with st.echo():
     folium_static(m)
 ```
 
-!["streamlit_folium example"](_static/streamlit_folium_example.png)
+!["streamlit_folium example"](tests/visual_baseline/test_package.test_basic/screenshot.png)
