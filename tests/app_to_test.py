@@ -2,11 +2,6 @@ import streamlit as st
 from streamlit_folium import folium_static
 import folium
 
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-
-driver = webdriver.Chrome(ChromeDriverManager().install())
-
 "# streamlit-folium"
 
 with st.echo():

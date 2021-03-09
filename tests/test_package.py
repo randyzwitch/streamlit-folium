@@ -2,6 +2,11 @@ from seleniumbase import BaseCase
 import cv2
 import time
 
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+
+driver = webdriver.Chrome(ChromeDriverManager().install())
+
 
 class ComponentsTest(BaseCase):
     def test_basic(self):
