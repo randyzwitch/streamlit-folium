@@ -5,7 +5,7 @@ import time
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
-driver = webdriver.Chrome(ChromeDriverManager("88.0").install())
+driver = webdriver.Chrome(ChromeDriverManager("88.0.4324.27").install())
 
 
 class ComponentsTest(BaseCase):
