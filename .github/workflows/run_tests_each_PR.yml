@@ -37,7 +37,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install chromedriver
       run: |
-        seleniumbase install chromedriver latest
+        seleniumbase install chromedriver latest 88
     - name: Start Streamlit app
       run: |
         streamlit run tests/app_to_test.py &
