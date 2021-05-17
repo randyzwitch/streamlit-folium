@@ -40,7 +40,7 @@ jobs:
         seleniumbase install chromedriver 90
     - name: Start Streamlit app
       run: |
-        streamlit run tests/app_to_test.py &
+        streamlit run examples/streamlit_app.py &
     - name: Test with pytest
       run: |
         pytest
