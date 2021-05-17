@@ -1,4 +1,3 @@
-import os
 import streamlit.components.v1 as components
 import folium
 from folium import plugins
@@ -108,12 +107,9 @@ def folium_static(fig, width=700, height=500):
         fig = folium.Figure().add_child(fig)
         return components.html(
             fig.render(), height=(fig.height or height) + 10, width=width
-            )
+        )
 
     # if DualMap, get HTML representation
     elif isinstance(fig, plugins.DualMap):
-        return components.html(
-            fig._repr_html_(), height=height + 10, width=width
-        )
+        return components.html(fig._repr_html_(), height=height + 10, width=width)
 
-    
