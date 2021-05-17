@@ -1,2 +1,2 @@
 streamlit>=0.70
-streamlit-folium
+streamlit-folium > 0.3
