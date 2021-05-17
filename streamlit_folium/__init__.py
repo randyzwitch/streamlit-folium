@@ -78,7 +78,7 @@ from folium import plugins
 def folium_static(fig, width=700, height=500):
 
     """
-    Renders `folium.Figure` or `folium.Map` in a Streamlit app. This method is 
+    Renders `folium.Figure` or `folium.Map` in a Streamlit app. This method is
     a static Streamlit Component, meaning, no information is passed back from
     Leaflet on browser interaction.
 
@@ -86,14 +86,14 @@ def folium_static(fig, width=700, height=500):
     ----------
     width : int
         Width of result
-    
+
     Height : int
         Height of result
 
     Note
     ----
-    If `height` is set on a `folium.Map` or `folium.Figure` object, 
-    that value supersedes the values set with the keyword arguments of this function. 
+    If `height` is set on a `folium.Map` or `folium.Figure` object,
+    that value supersedes the values set with the keyword arguments of this function.
 
     Example
     -------
@@ -112,4 +112,3 @@ def folium_static(fig, width=700, height=500):
     # if DualMap, get HTML representation
     elif isinstance(fig, plugins.DualMap):
         return components.html(fig._repr_html_(), height=height + 10, width=width)
-
