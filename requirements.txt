@@ -1,2 +1,2 @@
-streamlit>=0.79
+streamlit==0.83
 folium>=0.11
