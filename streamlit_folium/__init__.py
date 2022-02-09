@@ -1,5 +1,5 @@
-import streamlit.components.v1 as components
 import folium
+import streamlit.components.v1 as components
 from folium import plugins
 
 # Create a _RELEASE constant. We'll set this to False while we're developing

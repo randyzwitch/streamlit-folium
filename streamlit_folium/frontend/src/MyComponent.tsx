@@ -1,9 +1,9 @@
 import React, { ReactNode } from "react"
 import {
-  withStreamlitConnection,
-  StreamlitComponentBase,
   Streamlit,
-} from "./streamlit"
+  StreamlitComponentBase,
+  withStreamlitConnection,
+} from "streamlit-component-lib"
 
 interface State {
   numClicks: number
