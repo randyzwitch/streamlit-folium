@@ -23,7 +23,7 @@ class ComponentsTest(BaseCase):
         self.assert_text("streamlit-folium")
 
         # test screenshots look exactly the same
-        original = cv2.imread("visual_baseline/test_basic/first_test/screenshot.png")
+        original = cv2.imread("visual_baseline/test_package.test_basic/first_test/screenshot.png")
         duplicate = cv2.imread("current-screenshot.png")
 
         assert original.shape == duplicate.shape
