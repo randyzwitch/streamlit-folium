@@ -1,6 +1,7 @@
 import streamlit.components.v1 as components
 import folium
 from folium import plugins
+import branca
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
@@ -110,5 +111,5 @@ def folium_static(fig, width=700, height=500):
         )
 
     # if DualMap, get HTML representation
-    elif isinstance(fig, plugins.DualMap):
+    elif isinstance(fig, plugins.DualMap) or isinstance(fig, branca.element.Figure):
         return components.html(fig._repr_html_(), height=height + 10, width=width)
