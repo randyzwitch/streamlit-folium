@@ -1,12 +1,9 @@
 import {
-  Streamlit,
   StreamlitComponentBase,
   withStreamlitConnection
 } from "streamlit-component-lib";
-import React, { useEffect, ReactNode } from "react"
+import React, { ReactNode } from "react"
 import InnerHTML from 'dangerously-set-html-content'
-
-//import * as L from "leaflet"
 
 interface ReturnData {
   bbox: number[];  //start by always returning the bounding box shown
@@ -17,48 +14,20 @@ interface ReturnData {
  * automatically when your component should be re-rendered.
  */
 class MyComponent extends StreamlitComponentBase<ReturnData> {
-  //public state = { bbox: [34.454, -57.876] }
   public state = { bbox: [0, 0] }
-
-  //public componentDidMount = (): void => {
-  //  const fig: string = this.props.args["fig"]
-  //window.eval(fig);
-  //}
-  public componentDidUpdate = (): void => {
-    // After we're updated, tell Streamlit that our height may have changed.
-    Streamlit.setFrameHeight(500);
-  }
-
 
   public render = (): ReactNode => {
     // Arguments that are passed to the plugin in Python are accessible via `this.props.args`
     const fig: string = this.props.args["fig"]
     const top_id: string = this.props.args["id"]
-    //console.log(fig)
-
-    function createMarkup() {
-      return {
-        __html: JSON.stringify(fig)
-      }
-    }
-
     const script = `<script>${fig}</script>`;
-
-    //useEffect(() => Streamlit.setFrameHeight());
-    //Streamlit.setFrameHeight(500);
 
     return (
       <div style={{ border: "1px solid black" }}>
-        <div id={top_id}></div>
+        <div id={top_id} style={{ height: 500, width: 500 }}></div>
         <InnerHTML html={script} />
       </div >
     )
-
-    /*
-        <script
-          dangerouslySetInnerHTML={{ __html: `${fig}` }}
-        />
-    */
 
     return (
       <script>

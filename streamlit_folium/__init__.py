@@ -115,65 +115,6 @@ def generate_leaflet_string(m: folium.MacroElement) -> str:
     return leaflet
 
 
-def map_to_dict(m: folium.Map) -> Dict:
-    name = m._name
-    location = m.location
-    crs = m.crs
-    options = m.options
-    m._template
-
-    for child in m._children:
-        child._name
-
-    return {}
-
-
-x = """
-{
-  "_name": "Map",
-  "_id": "2a49529b79ec42a89c5739373d3d7c86",
-  "_env": "<jinja2.environment.Environment object at 0x12d454af0>",
-  "_children": {
-    "stamenterrain": "<folium.raster_layers.TileLayer object at 0x12d7fe7f0>",
-    "marker_88cdf44f57a2408ab5966f3c96fb4757": "<folium.map.Marker object at 0x12cddf9d0>",
-    "marker_a02bba96eb864e8fae49a4e440e650db": "<folium.map.Marker object at 0x12d7fefd0>"
-  },
-  "_parent": "<branca.element.Figure object at 0x12d728460>",
-  "_png_image": null,
-  "png_enabled": false,
-  "location": [
-    45.372,
-    -121.6972
-  ],
-  "width": [
-    100,
-    "%"
-  ],
-  "height": [
-    100,
-    "%"
-  ],
-  "left": [
-    0,
-    "%"
-  ],
-  "top": [
-    0,
-    "%"
-  ],
-  "position": "relative",
-  "crs": "EPSG3857",
-  "control_scale": false,
-  "options": {
-    "zoom": 12,
-    "zoomControl": true,
-    "preferCanvas": false
-  },
-  "global_switches": "<folium.folium.GlobalSwitches object at 0x12d7fef40>",
-  "objects_to_stay_in_front": []
-}
-"""
-
 # Add some test code to play with the component while it's in development.
 # During development, we can run this just as we would any other Streamlit
 # app: `$ streamlit run my_component/__init__.py`
@@ -191,34 +132,6 @@ if not _RELEASE:
         [45.3311, -121.7113], popup="<b>Timberline Lodge</b>", tooltip=tooltip
     ).add_to(m)
 
-    # fig = folium.Figure().add_child(m)
-
-    _ = """
-    st.write(m.to_json())
-    st.write(m.to_dict())
-
-    for _, c in m._children.items():
-        st.write("RENDERED")
-        st.write(str(c._template.render()))
-
-    components.html(fig._repr_html_(), height=500 + 10, width=700)
-    """
-
-    # parse out object, pull data-html value from it
-    # surrounding divs and iframes prob not
-    # soup = BeautifulSoup(m._repr_html_(), "html.parser")
-    # st.write(soup.iframe["data-html"])
-    # st.write(vars(m))
-    # st.write("Children:")
-    # for key, child in m._children.items():
-    #    st.write(key)
-    #    st.write(vars(child))
-    # st.write(vars(m._env))
-    # data_html = soup.iframe["data-html"]
-
-    # ideally, this should return a Dict with expected keys
     retdata = st_folium(m)
 
-    # retdata
-
-    # print(m._repr_html_())
+    st.write(retdata)
