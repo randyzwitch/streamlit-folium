@@ -8,7 +8,6 @@ import folium.plugins
 import streamlit.components.v1 as components
 from folium.utilities import normalize
 from jinja2 import UndefinedError
-from numpy import isin
 
 
 def generate_js_hash(js_string: str, key: str = None) -> str:
@@ -19,11 +18,8 @@ def generate_js_hash(js_string: str, key: str = None) -> str:
     the hash.
     """
     pattern = r"(_[a-z0-9]+)"
-
     standardized_js = re.sub(pattern, "", js_string) + str(key)
-
     s = hashlib.sha256(standardized_js.encode()).hexdigest()
-    st.code(s)
     return s
 
 
@@ -201,5 +197,5 @@ if not _RELEASE:
         ).add_to(fm)
         m.add_child(fm)
 
-    retdata = st_folium(m, key="fig1", width=500, height=200)
+    retdata = st_folium(m, key="fig1", width=500, height=500)
     st.write(retdata)
