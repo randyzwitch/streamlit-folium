@@ -1,13 +1,15 @@
 import { Streamlit, RenderData } from "streamlit-component-lib"
 import * as L from "leaflet"
 import { updateContinue } from "typescript";
+import { debug } from "console";
 //import { render } from "@testing-library/react"
 
 let map: any = null;
 
 type GlobalData = {
   map: any;
-  lastClicked: any;
+  lat_lng_clicked: any;
+  last_object_clicked: any;
   bounds: any;
 };
 
@@ -46,7 +48,7 @@ function onRender(event: Event): void {
 
   function onMapClick(e: any) {
     const global_data = __GLOBAL_DATA__;
-    global_data.lastClicked = e.latlng;
+    global_data.lat_lng_clicked = e.latlng;
     updateComponentValue()
   }
 
@@ -55,12 +57,19 @@ function onRender(event: Event): void {
     let map = global_data.map;
     let bounds = map.getBounds();
     Streamlit.setComponentValue({
-      last_clicked: global_data.lastClicked,
+      last_clicked: global_data.lat_lng_clicked,
+      last_object_clicked: global_data.last_object_clicked,
       bounds: bounds,
     })
   }
 
   function onMapMove(e: any) {
+    updateComponentValue()
+  }
+
+  function onLayerClick(e: any) {
+    const global_data = __GLOBAL_DATA__;
+    global_data.last_object_clicked = e.latlng;
     updateComponentValue()
   }
 
@@ -82,8 +91,9 @@ function onRender(event: Event): void {
           window.__GLOBAL_DATA__ = {
             map: map_div,
             bounds: map_div.getBounds(),
-            lastClicked: null};
-        `;
+            lat_lng_clicked: null,
+            last_object_clicked: null,
+        };`;
         let replaced = fig + set_global_data;
         render_script.innerHTML = replaced;
         document.body.appendChild(render_script);
@@ -94,6 +104,10 @@ function onRender(event: Event): void {
         map.on('click', onMapClick);
         map.on('zoomend', onMapMove);
         map.on('moveend', onMapMove);
+        for (let key in map._layers) {
+          let layer = map._layers[key];
+          layer.on("click", onLayerClick)
+        }
         Streamlit.setFrameHeight()
         updateComponentValue();
       }
