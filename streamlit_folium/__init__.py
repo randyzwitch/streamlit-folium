@@ -237,7 +237,7 @@ if not _RELEASE:
     retdata = st_folium(m, key="fig1")
     st.write(retdata)
 
-    retdata = st_folium(m, key="fig2")
+    #retdata = st_folium(m, key="fig2")
     st.write(retdata)
 
     x = """

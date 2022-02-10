@@ -78,7 +78,7 @@ function onRender(event: Event): void {
     try {
       map = __GLOBAL_DATA__.map;
     } catch (e) {
-      debugger;
+      //debugger;
       // Only run this if the map hasn't already been created (and thus the global
       //data hasn't been initialized)
       const map_div = document.getElementById("map_div");
@@ -104,7 +104,6 @@ function onRender(event: Event): void {
         let map = global_data.map;
 
         map.on('click', onMapClick);
-        map.on('zoomend', onMapMove);
         map.on('moveend', onMapMove);
         for (let key in map._layers) {
           let layer = map._layers[key];
