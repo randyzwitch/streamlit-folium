@@ -1,9 +1,10 @@
 import os
-from typing import Dict
+import re
 
 import folium
 import streamlit.components.v1 as components
 from bs4 import BeautifulSoup
+from folium.utilities import get_bounds, normalize
 from jinja2 import UndefinedError
 
 
@@ -54,7 +55,9 @@ else:
     _component_func = components.declare_component("st_folium", path=build_dir)
 
 
-def st_folium(fig, key=None):
+def st_folium(
+    fig: folium.MacroElement, key: str = None, height: int = 500, width: int = 500
+):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
     Parameters
@@ -88,12 +91,33 @@ def st_folium(fig, key=None):
     # TODO: think about data to pass to React. It's not the value of "fig"
     # data_html currently there since str can be mapped to JSON
     leaflet = generate_leaflet_string(fig)
+    map_leaflet = generate_leaflet_string(fig, nested=False)
+    leaflet_without_map = leaflet.replace(map_leaflet, "")
+
     top_id = get_full_id(fig)
 
+    leaflet = leaflet.replace(top_id, "map_div")
+
+    # TODO: Handle a generic Figure
+
+    map_details = {
+        "center": fig.location,
+        # "crs": f"L.CRS.{fig.crs}",
+        "crs": f"{fig.crs}",
+    }
+    map_details.update(fig.options)
+
     st.expander("Show running code:").code(leaflet)
+    st.expander("Show running code:").code(leaflet_without_map)
 
     component_value = _component_func(
-        fig=leaflet, id=top_id, key=key, default={"bbox": [0.01, 0.01]}, height=500
+        fig=leaflet,
+        id=top_id,
+        key=key,
+        # default={"bbox": [0.01, 0.01]},
+        height=height,
+        width=width,
+        map_details=map_details,
     )
 
     return component_value
@@ -103,8 +127,11 @@ def get_full_id(m: folium.MacroElement) -> str:
     return f"{m._name.lower()}_{m._id}"
 
 
-def generate_leaflet_string(m: folium.MacroElement) -> str:
-    leaflet: str = m._template.module.script(m)
+def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
+    leaflet: str = normalize(m._template.module.script(m))
+
+    if not nested:
+        return leaflet
 
     for _, child in m._children.items():
         try:
@@ -132,6 +159,6 @@ if not _RELEASE:
         [45.3311, -121.7113], popup="<b>Timberline Lodge</b>", tooltip=tooltip
     ).add_to(m)
 
-    retdata = st_folium(m)
+    retdata = st_folium(m, key="blah")
 
     st.write(retdata)
