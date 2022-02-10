@@ -2,6 +2,7 @@ import { Streamlit, RenderData } from "streamlit-component-lib"
 import * as L from "leaflet"
 import { updateContinue } from "typescript";
 import { debug } from "console";
+import { debounce } from "underscore";
 //import { render } from "@testing-library/react"
 
 let map: any = null;
@@ -50,8 +51,10 @@ function onRender(event: Event): void {
   function onMapClick(e: any) {
     const global_data = __GLOBAL_DATA__;
     global_data.lat_lng_clicked = e.latlng;
-    updateComponentValue()
+    debouncedUpdateComponentValue()
   }
+
+  let debouncedUpdateComponentValue = debounce(updateComponentValue, 250)
 
   function updateComponentValue() {
     const global_data = __GLOBAL_DATA__;
@@ -65,13 +68,13 @@ function onRender(event: Event): void {
   }
 
   function onMapMove(e: any) {
-    updateComponentValue()
+    debouncedUpdateComponentValue()
   }
 
   function onLayerClick(e: any) {
     const global_data = __GLOBAL_DATA__;
     global_data.last_object_clicked = e.latlng;
-    updateComponentValue()
+    debouncedUpdateComponentValue()
   }
 
   if (map == null) {
@@ -82,6 +85,11 @@ function onRender(event: Event): void {
       // Only run this if the map hasn't already been created (and thus the global
       //data hasn't been initialized)
       const map_div = document.getElementById("map_div");
+      const map_div2 = document.getElementById("map_div2");
+      if (map_div2) {
+        map_div2.style.height = `${height}px`
+        map_div2.style.width = `${width}px`
+      }
       if (map_div) {
         map_div.style.height = `${height}px`
         map_div.style.width = `${width}px`

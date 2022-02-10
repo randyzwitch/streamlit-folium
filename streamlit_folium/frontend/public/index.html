@@ -11,14 +11,36 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/gh/jieter/Leaflet.Sync/L.Map.Sync.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    .float-container {
+      /*border: 3px solid #fff;*/
+      padding: 20px;
+    }
+
+    .float-child {
+      width: 50%;
+      float: left;
+      padding: 20px;
+      /*border: 2px solid red;*/
+    }
+  </style>
 </head>
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root">
-    <div id="map_div">
+    <div class="float-container">
+      <div class="float-child">
+        <div id="map_div"></div>
+      </div>
+      <div class="float-child">
+        <div id="map_div2">
+        </div>
+      </div>
     </div>
+  </div>
   </div>
   <!--
       This HTML file is a template.

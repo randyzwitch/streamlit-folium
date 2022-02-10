@@ -99,21 +99,27 @@ def st_folium(
     # value of the component before the user has interacted with it.
 
     leaflet = generate_leaflet_string(fig)
-    map_leaflet = generate_leaflet_string(fig, nested=False)
-    leaflet_without_map = leaflet.replace(map_leaflet, "")
+    if isinstance(fig, folium.plugins.DualMap):
+        m_id = m1_id = get_full_id(fig.m1)
+        leaflet = leaflet.replace(m1_id, "map_div")
+        m2_id = get_full_id(fig.m2)
+        leaflet = leaflet.replace(m2_id, "map_div2")
+    else:
+        m_id = get_full_id(fig)
+        leaflet = leaflet.replace(m_id, "map_div")
 
-    top_id = get_full_id(fig)
-
-    leaflet = leaflet.replace(top_id, "map_div")
+    # map_leaflet = generate_leaflet_string(fig, nested=False)
+    # st.code(map_leaflet)
+    # leaflet_without_map = leaflet.replace(map_leaflet, "")
 
     # TODO: Handle a generic Figure
 
     st.expander("Show running code:").code(leaflet)
-    st.expander("Show running code:").code(leaflet_without_map)
+    # st.expander("Show running code:").code(leaflet_without_map)
 
     component_value = _component_func(
         fig=leaflet,
-        id=top_id,
+        id=m_id,
         key=generate_js_hash(leaflet, key),
         height=height,
         width=width,
@@ -130,6 +136,8 @@ def get_full_id(m: folium.MacroElement) -> str:
 
 def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
     if isinstance(m, folium.plugins.DualMap):
+        if not nested:
+            return generate_leaflet_string(m.m1, nested=False)
         # Generate the script for map1
         leaflet = generate_leaflet_string(m.m1, nested=nested)
         # Add the script for map2
@@ -203,7 +211,7 @@ if not _RELEASE:
     page = st.radio(
         "Select map type",
         ["Single map", "Dual map", "Branca figure"],
-        index=0,
+        index=1,
         key="blah",
     )
 
@@ -237,8 +245,8 @@ if not _RELEASE:
     retdata = st_folium(m, key="fig1")
     st.write(retdata)
 
-    #retdata = st_folium(m, key="fig2")
-    st.write(retdata)
+    # retdata = st_folium(m, key="fig2")
+    # st.write(retdata)
 
     x = """
     url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data"
