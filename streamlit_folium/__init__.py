@@ -3,7 +3,6 @@ import re
 
 import folium
 import streamlit.components.v1 as components
-from bs4 import BeautifulSoup
 from folium.utilities import get_bounds, normalize
 from jinja2 import UndefinedError
 
@@ -80,16 +79,6 @@ def st_folium(
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
 
-    # parse out folium figure html from Jupyter representation
-    # since this contains everything needed to build chart
-    # soup = BeautifulSoup(fig._repr_html_(), "html.parser")
-
-    # base64 representation of the data inside the iframe
-    # represents most if not all code needed to build map
-    # data_html = soup.iframe["data-html"]
-
-    # TODO: think about data to pass to React. It's not the value of "fig"
-    # data_html currently there since str can be mapped to JSON
     leaflet = generate_leaflet_string(fig)
     map_leaflet = generate_leaflet_string(fig, nested=False)
     leaflet_without_map = leaflet.replace(map_leaflet, "")
