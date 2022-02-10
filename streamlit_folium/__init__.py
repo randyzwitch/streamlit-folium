@@ -1,10 +1,29 @@
+import hashlib
 import os
 import re
 
+import branca
 import folium
+import folium.plugins
 import streamlit.components.v1 as components
-from folium.utilities import get_bounds, normalize
+from folium.utilities import normalize
 from jinja2 import UndefinedError
+
+
+def generate_js_hash(js_string: str, key: str = None) -> str:
+    """
+    Generate a standard key from a javascript string representing a series
+    of folium-generated leaflet objects by replacing the hash's at the end
+    of variable names (e.g. "marker_5f9d46..." -> "marker"), and returning
+    the hash.
+    """
+    pattern = r"(_[a-z0-9]+)"
+
+    standardized_js = re.sub(pattern, "", js_string) + str(key)
+
+    s = hashlib.sha256(standardized_js.encode()).hexdigest()
+    st.code(s)
+    return s
 
 
 def folium_static(fig, width=700, height=500):
@@ -89,35 +108,37 @@ def st_folium(
 
     # TODO: Handle a generic Figure
 
-    map_details = {
-        "center": fig.location,
-        # "crs": f"L.CRS.{fig.crs}",
-        "crs": f"{fig.crs}",
-    }
-    map_details.update(fig.options)
-
     st.expander("Show running code:").code(leaflet)
     st.expander("Show running code:").code(leaflet_without_map)
 
     component_value = _component_func(
         fig=leaflet,
         id=top_id,
-        key=key,
-        # default={"bbox": [0.01, 0.01]},
+        key=generate_js_hash(leaflet, key),
         height=height,
         width=width,
-        map_details=map_details,
     )
 
     return component_value
 
 
 def get_full_id(m: folium.MacroElement) -> str:
+    if isinstance(m, folium.plugins.DualMap):
+        m = m.m1
     return f"{m._name.lower()}_{m._id}"
 
 
 def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
-    leaflet: str = normalize(m._template.module.script(m))
+    if isinstance(m, folium.plugins.DualMap):
+        # Generate the script for map1
+        leaflet = generate_leaflet_string(m.m1, nested=nested)
+        # Add the script for map2
+        leaflet += "\n" + generate_leaflet_string(m.m2, nested=nested)
+        # Add the script that syncs them together
+        leaflet += normalize(m._template.module.script(m))
+        return leaflet
+
+    leaflet = normalize(m._template.module.script(m))
 
     if not nested:
         return leaflet
@@ -137,8 +158,7 @@ def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
 if not _RELEASE:
     import streamlit as st
 
-    from streamlit_folium import folium_static
-
+    x = """
     m = folium.Map(location=[45.372, -121.6972], zoom_start=12, tiles="Stamen Terrain")
     tooltip = "Click me!"
     folium.Marker(
@@ -151,3 +171,97 @@ if not _RELEASE:
     retdata = st_folium(m, key="blah")
 
     st.write(retdata)
+
+    import streamlit as st
+
+    m = folium.Map(location=[45.5236, -122.6750], tiles="Stamen Toner", zoom_start=13)
+
+    folium.Circle(
+        radius=100,
+        location=[45.5244, -122.6699],
+        popup="The Waterfront",
+        color="crimson",
+        fill=False,
+    ).add_to(m)
+
+    folium.CircleMarker(
+        location=[45.5215, -122.6261],
+        radius=50,
+        popup="Laurelhurst Park",
+        color="#3186cc",
+        fill=True,
+        fill_color="#3186cc",
+    ).add_to(m)
+
+    retdata = st_folium(m, key="blah")
+
+    st.write(retdata)
+    """
+
+    # from streamlit_folium import folium_static
+
+    page = st.radio(
+        "Select map type",
+        ["Single map", "Dual map", "Branca figure"],
+        index=0,
+        key="blah",
+    )
+
+    zoom = st.slider("Zoom", 1, 20, 16)
+    # center on Liberty Bell, add marker
+    if page == "Single map":
+        m = folium.Map(location=[39.949610, -75.150282], zoom_start=zoom)
+        tooltip = "Liberty Bell"
+        folium.Marker(
+            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+        ).add_to(m)
+
+    elif page == "Dual map":
+        m = folium.plugins.DualMap(location=[39.949610, -75.150282], zoom_start=16)
+        tooltip = "Liberty Bell"
+        folium.Marker(
+            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+        ).add_to(m)
+
+    elif page == "Branca figure":
+        m = branca.element.Figure()
+        fm = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
+        tooltip = "Liberty Bell"
+        folium.Marker(
+            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+        ).add_to(fm)
+        m.add_child(fm)
+
+    # call to render Folium map in Streamlit
+    # folium_static(m)
+    retdata = st_folium(m, key="fig1")
+    st.write(retdata)
+
+    retdata = st_folium(m, key="fig2")
+    st.write(retdata)
+
+    x = """
+    url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data"
+    antarctic_ice_edge = f"{url}/antarctic_ice_edge.json"
+    antarctic_ice_shelf_topo = f"{url}/antarctic_ice_shelf_topo.json"
+
+    m = folium.Map(
+        location=[-59.1759, -11.6016],
+        tiles="cartodbpositron",
+        zoom_start=2,
+    )
+
+    folium.GeoJson(antarctic_ice_edge, name="geojson").add_to(m)
+
+    folium.TopoJson(
+        json.loads(requests.get(antarctic_ice_shelf_topo).text),
+        "objects.antarctic_ice_shelf",
+        name="topojson",
+    ).add_to(m)
+
+    folium.LayerControl().add_to(m)
+
+    retdata2 = st_folium(m, key="blah2")
+
+    st.write(retdata2)
+    """

@@ -32,7 +32,7 @@ function onRender(event: Event): void {
   const top_id: string = data.args["id"];
   const height: number = data.args["height"];
   const width: number = data.args["width"];
-  const map_details: { [key: string]: string } = data.args["map_details"];
+  /*const map_details: { [key: string]: string } = data.args["map_details"];
 
   let crs_lookup: { [key: string]: any } = {
     "EPSG3857": L.CRS.EPSG3857,
@@ -43,6 +43,7 @@ function onRender(event: Event): void {
   }
 
   map_details["crs"] = crs_lookup[map_details["crs"]] || L.CRS.EPSG3857;
+  */
 
   //Streamlit.setComponentValue(3);
 
@@ -77,13 +78,14 @@ function onRender(event: Event): void {
     try {
       map = __GLOBAL_DATA__.map;
     } catch (e) {
+      debugger;
       // Only run this if the map hasn't already been created (and thus the global
       //data hasn't been initialized)
       const map_div = document.getElementById("map_div");
       if (map_div) {
         map_div.style.height = `${height}px`
         map_div.style.width = `${width}px`
-        document.body.appendChild(map_div)
+        //document.body.appendChild(map_div);
 
         const render_script = document.createElement("script")
         // HACK -- there must be a better way
