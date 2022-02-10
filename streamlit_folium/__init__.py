@@ -50,10 +50,15 @@ def folium_static(fig, width=700, height=500):
     # if Map, wrap in Figure
     if isinstance(fig, folium.Map):
         fig = folium.Figure().add_child(fig)
+        return components.html(
+            fig.render(), height=(fig.height or height) + 10, width=width
+        )
 
-    return components.html(
-        fig.render(), height=(fig.height or height) + 10, width=width
-    )
+    # if DualMap, get HTML representation
+    elif isinstance(fig, folium.plugins.DualMap) or isinstance(
+        fig, branca.element.Figure
+    ):
+        return components.html(fig._repr_html_(), height=height + 10, width=width)
 
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
