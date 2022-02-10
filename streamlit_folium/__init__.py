@@ -8,6 +8,7 @@ import folium.plugins
 import streamlit.components.v1 as components
 from folium.utilities import normalize
 from jinja2 import UndefinedError
+from numpy import isin
 
 
 def generate_js_hash(js_string: str, key: str = None) -> str:
@@ -97,6 +98,11 @@ def st_folium(
     #
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
+
+    # handle the case where you pass in a figure rather than a map
+    # this assumes that a map is the first child
+    if not (isinstance(fig, folium.Map) or isinstance(fig, folium.plugins.DualMap)):
+        fig = list(fig._children.values())[0]
 
     leaflet = generate_leaflet_string(fig)
     if isinstance(fig, folium.plugins.DualMap):
@@ -225,7 +231,7 @@ if not _RELEASE:
         ).add_to(m)
 
     elif page == "Dual map":
-        m = folium.plugins.DualMap(location=[39.949610, -75.150282], zoom_start=16)
+        m = folium.plugins.DualMap(location=[39.949610, -75.150282], zoom_start=zoom)
         tooltip = "Liberty Bell"
         folium.Marker(
             [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
@@ -233,7 +239,7 @@ if not _RELEASE:
 
     elif page == "Branca figure":
         m = branca.element.Figure()
-        fm = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
+        fm = folium.Map(location=[39.949610, -75.150282], zoom_start=zoom)
         tooltip = "Liberty Bell"
         folium.Marker(
             [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
