@@ -1,9 +1,5 @@
 import { Streamlit, RenderData } from "streamlit-component-lib"
-import * as L from "leaflet"
-import { updateContinue } from "typescript";
-import { debug } from "console";
 import { debounce } from "underscore";
-//import { render } from "@testing-library/react"
 
 let map: any = null;
 
@@ -16,9 +12,6 @@ type GlobalData = {
 
 declare var __GLOBAL_DATA__: GlobalData;
 
-//console.log("SET INITIAL DATA");
-//console.log(window.__INITIAL_DATA__);
-
 /**
  * The component's render function. This will be called immediately after
  * the component is initially loaded, and then again every time the
@@ -30,23 +23,8 @@ function onRender(event: Event): void {
 
   //console.log(data.args)
   const fig: string = data.args["fig"];
-  const top_id: string = data.args["id"];
   const height: number = data.args["height"];
   const width: number = data.args["width"];
-  /*const map_details: { [key: string]: string } = data.args["map_details"];
-
-  let crs_lookup: { [key: string]: any } = {
-    "EPSG3857": L.CRS.EPSG3857,
-    "EPSG3395": L.CRS.EPSG3395,
-    "Earth": L.CRS.Earth,
-    "EPSG4326": L.CRS.EPSG4326,
-    "Simple": L.CRS.Simple,
-  }
-
-  map_details["crs"] = crs_lookup[map_details["crs"]] || L.CRS.EPSG3857;
-  */
-
-  //Streamlit.setComponentValue(3);
 
   function onMapClick(e: any) {
     const global_data = __GLOBAL_DATA__;
@@ -81,7 +59,6 @@ function onRender(event: Event): void {
     try {
       map = __GLOBAL_DATA__.map;
     } catch (e) {
-      //debugger;
       // Only run this if the map hasn't already been created (and thus the global
       //data hasn't been initialized)
       const map_div = document.getElementById("map_div");
@@ -93,10 +70,11 @@ function onRender(event: Event): void {
       if (map_div) {
         map_div.style.height = `${height}px`
         map_div.style.width = `${width}px`
-        //document.body.appendChild(map_div);
 
         const render_script = document.createElement("script")
-        // HACK -- there must be a better way
+        // HACK -- update the folium-generated JS to add, most importantly,
+        // the map to this global variable so that it can be used elsewhere
+        // in the script.
         let set_global_data = `
           window.__GLOBAL_DATA__ = {
             map: map_div,
@@ -130,8 +108,6 @@ Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender)
 // Tell Streamlit we're ready to start receiving data. We won't get our
 // first RENDER_EVENT until we call this function.
 Streamlit.setComponentReady()
-
-//Streamlit.setComponentValue(3);
 
 // Finally, tell Streamlit to update our initial height. We omit the
 // `height` parameter here to have it default to our scrollHeight.

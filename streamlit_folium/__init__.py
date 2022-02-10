@@ -105,6 +105,10 @@ def st_folium(
         fig = list(fig._children.values())[0]
 
     leaflet = generate_leaflet_string(fig)
+    # Replace the folium generated map_{random characters} variables
+    # with map_div and map_div2 (these end up being both the assumed)
+    # div id where the maps are inserted into the DOM, and the names of
+    # the variables themselves.
     if isinstance(fig, folium.plugins.DualMap):
         m_id = m1_id = get_full_id(fig.m1)
         leaflet = leaflet.replace(m1_id, "map_div")
@@ -113,15 +117,6 @@ def st_folium(
     else:
         m_id = get_full_id(fig)
         leaflet = leaflet.replace(m_id, "map_div")
-
-    # map_leaflet = generate_leaflet_string(fig, nested=False)
-    # st.code(map_leaflet)
-    # leaflet_without_map = leaflet.replace(map_leaflet, "")
-
-    # TODO: Handle a generic Figure
-
-    st.expander("Show running code:").code(leaflet)
-    # st.expander("Show running code:").code(leaflet_without_map)
 
     component_value = _component_func(
         fig=leaflet,
@@ -172,52 +167,12 @@ def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
 if not _RELEASE:
     import streamlit as st
 
-    x = """
-    m = folium.Map(location=[45.372, -121.6972], zoom_start=12, tiles="Stamen Terrain")
-    tooltip = "Click me!"
-    folium.Marker(
-        [45.3288, -121.6625], popup="<i>Mt. Hood Meadows</i>", tooltip=tooltip
-    ).add_to(m)
-    folium.Marker(
-        [45.3311, -121.7113], popup="<b>Timberline Lodge</b>", tooltip=tooltip
-    ).add_to(m)
-
-    retdata = st_folium(m, key="blah")
-
-    st.write(retdata)
-
-    import streamlit as st
-
-    m = folium.Map(location=[45.5236, -122.6750], tiles="Stamen Toner", zoom_start=13)
-
-    folium.Circle(
-        radius=100,
-        location=[45.5244, -122.6699],
-        popup="The Waterfront",
-        color="crimson",
-        fill=False,
-    ).add_to(m)
-
-    folium.CircleMarker(
-        location=[45.5215, -122.6261],
-        radius=50,
-        popup="Laurelhurst Park",
-        color="#3186cc",
-        fill=True,
-        fill_color="#3186cc",
-    ).add_to(m)
-
-    retdata = st_folium(m, key="blah")
-
-    st.write(retdata)
-    """
-
     # from streamlit_folium import folium_static
 
     page = st.radio(
         "Select map type",
         ["Single map", "Dual map", "Branca figure"],
-        index=1,
+        index=0,
         key="blah",
     )
 
@@ -246,36 +201,5 @@ if not _RELEASE:
         ).add_to(fm)
         m.add_child(fm)
 
-    # call to render Folium map in Streamlit
-    # folium_static(m)
-    retdata = st_folium(m, key="fig1")
+    retdata = st_folium(m, key="fig1", width=500, height=200)
     st.write(retdata)
-
-    # retdata = st_folium(m, key="fig2")
-    # st.write(retdata)
-
-    x = """
-    url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data"
-    antarctic_ice_edge = f"{url}/antarctic_ice_edge.json"
-    antarctic_ice_shelf_topo = f"{url}/antarctic_ice_shelf_topo.json"
-
-    m = folium.Map(
-        location=[-59.1759, -11.6016],
-        tiles="cartodbpositron",
-        zoom_start=2,
-    )
-
-    folium.GeoJson(antarctic_ice_edge, name="geojson").add_to(m)
-
-    folium.TopoJson(
-        json.loads(requests.get(antarctic_ice_shelf_topo).text),
-        "objects.antarctic_ice_shelf",
-        name="topojson",
-    ).add_to(m)
-
-    folium.LayerControl().add_to(m)
-
-    retdata2 = st_folium(m, key="blah2")
-
-    st.write(retdata2)
-    """
