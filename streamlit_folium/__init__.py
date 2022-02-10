@@ -76,7 +76,7 @@ else:
 
 
 def st_folium(
-    fig: folium.MacroElement, key: str = None, height: int = 500, width: int = 500
+    fig: folium.MacroElement, key: str = None, height: int = 700, width: int = 500
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -160,47 +160,3 @@ def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
             pass
 
     return leaflet
-
-
-# Add some test code to play with the component while it's in development.
-# During development, we can run this just as we would any other Streamlit
-# app: `$ streamlit run my_component/__init__.py`
-if not _RELEASE:
-    import streamlit as st
-
-    # from streamlit_folium import folium_static
-
-    page = st.radio(
-        "Select map type",
-        ["Single map", "Dual map", "Branca figure"],
-        index=0,
-        key="blah",
-    )
-
-    zoom = st.slider("Zoom", 1, 20, 16)
-    # center on Liberty Bell, add marker
-    if page == "Single map":
-        m = folium.Map(location=[39.949610, -75.150282], zoom_start=zoom)
-        tooltip = "Liberty Bell"
-        folium.Marker(
-            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
-        ).add_to(m)
-
-    elif page == "Dual map":
-        m = folium.plugins.DualMap(location=[39.949610, -75.150282], zoom_start=zoom)
-        tooltip = "Liberty Bell"
-        folium.Marker(
-            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
-        ).add_to(m)
-
-    elif page == "Branca figure":
-        m = branca.element.Figure()
-        fm = folium.Map(location=[39.949610, -75.150282], zoom_start=zoom)
-        tooltip = "Liberty Bell"
-        folium.Marker(
-            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
-        ).add_to(fm)
-        m.add_child(fm)
-
-    retdata = st_folium(m, key="fig1", width=500, height=500)
-    st.write(retdata)
