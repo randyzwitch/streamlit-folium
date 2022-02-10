@@ -1,14 +1,17 @@
 import { Streamlit, RenderData } from "streamlit-component-lib"
 import * as L from "leaflet"
+import { updateContinue } from "typescript";
 //import { render } from "@testing-library/react"
 
 let map: any = null;
 
-type InitialData = {
+type GlobalData = {
   map: any;
+  lastClicked: any;
+  bounds: any;
 };
 
-declare var __INITIAL_DATA__: InitialData;
+declare var __GLOBAL_DATA__: GlobalData;
 
 //console.log("SET INITIAL DATA");
 //console.log(window.__INITIAL_DATA__);
@@ -22,7 +25,7 @@ function onRender(event: Event): void {
   // Get the RenderData from the event
   const data = (event as CustomEvent<RenderData>).detail
 
-  console.log(data.args)
+  //console.log(data.args)
   const fig: string = data.args["fig"];
   const top_id: string = data.args["id"];
   const height: number = data.args["height"];
@@ -42,43 +45,60 @@ function onRender(event: Event): void {
   //Streamlit.setComponentValue(3);
 
   function onMapClick(e: any) {
-    //console.log(Streamlit);
-    //console.log(Streamlit.setComponentValue);
-    Streamlit.setComponentValue(e.latlng);
+    const global_data = __GLOBAL_DATA__;
+    global_data.lastClicked = e.latlng;
+    updateComponentValue()
+  }
+
+  function updateComponentValue() {
+    const global_data = __GLOBAL_DATA__;
+    let map = global_data.map;
+    let bounds = map.getBounds();
+    Streamlit.setComponentValue({
+      last_clicked: global_data.lastClicked,
+      bounds: bounds,
+    })
+  }
+
+  function onMapMove(e: any) {
+    updateComponentValue()
   }
 
   if (map == null) {
     try {
-      map = __INITIAL_DATA__.map;
+      map = __GLOBAL_DATA__.map;
     } catch (e) {
+      // Only run this if the map hasn't already been created (and thus the global
+      //data hasn't been initialized)
       const map_div = document.getElementById("map_div");
       if (map_div) {
         map_div.style.height = `${height}px`
         map_div.style.width = `${width}px`
-        //map_div.setAttribute("id", top_id)
         document.body.appendChild(map_div)
 
-        //map = L.map("map_div", map_details);
-
         const render_script = document.createElement("script")
-        //let replaced = fig.split(top_id).join("map");
-        let replaced = fig + `\nwindow.__INITIAL_DATA__ = {map: map_div};`;
+        // HACK -- there must be a better way
+        let set_global_data = `
+          window.__GLOBAL_DATA__ = {
+            map: map_div,
+            bounds: map_div.getBounds(),
+            lastClicked: null};
+        `;
+        let replaced = fig + set_global_data;
         render_script.innerHTML = replaced;
         document.body.appendChild(render_script);
 
-        const initial_data = __INITIAL_DATA__;
-        let map = initial_data.map;
+        const global_data = __GLOBAL_DATA__;
+        let map = global_data.map;
 
-        map.on('click', onMapClick)
+        map.on('click', onMapClick);
+        map.on('zoomend', onMapMove);
+        map.on('moveend', onMapMove);
+        Streamlit.setFrameHeight()
+        updateComponentValue();
       }
     }
   }
-
-  // We tell Streamlit to update our frameHeight after each render event, in
-  // case it has changed. (This isn't strictly necessary for the example
-  // because our height stays fixed, but this is a low-cost function, so
-  // there's no harm in doing it redundantly.)
-  //Streamlit.setFrameHeight(height + 10)
 }
 
 // Attach our `onRender` handler to Streamlit's render event.
@@ -92,4 +112,4 @@ Streamlit.setComponentReady()
 
 // Finally, tell Streamlit to update our initial height. We omit the
 // `height` parameter here to have it default to our scrollHeight.
-Streamlit.setFrameHeight(500)
+Streamlit.setFrameHeight()
