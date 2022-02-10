@@ -27,6 +27,12 @@ jobs:
       run: |
         sudo apt install nodejs npm
         npm --version
+    - name: build streamlit-folium JS
+      run: |
+        pwd
+        cd streamlit_folium/frontend/
+        npm install
+        npm run build
     - name: Install python dependencies
       run: |
         python -m pip install --upgrade pip
