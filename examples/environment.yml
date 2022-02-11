@@ -39,7 +39,6 @@ dependencies:
     - cffi==1.15.0
     - chardet==4.0.0
     - charset-normalizer==2.0.7
-    - click==7.1.2
     - colorama==0.4.4
     - commonmark==0.9.1
     - cryptography==35.0.0
