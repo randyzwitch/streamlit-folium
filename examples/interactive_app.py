@@ -6,6 +6,8 @@ import requests
 import streamlit as st
 from streamlit_folium import st_folium
 
+st.set_page_config("National Parks Explorer", ":national_park:", layout="wide")
+
 
 @st.experimental_singleton
 def get_data() -> List[Dict]:
@@ -61,9 +63,9 @@ class Bounds:
 
 parks = get_data()
 
-"## Click on one of the markers"
+st.title("National Parks Explorer")
 
-m = folium.Map(location=[39.949610, -75.150282], zoom_start=5)
+m = folium.Map(location=[41.638, -87.096], zoom_start=5)
 
 for park in parks:
     tooltip = park["name"]
@@ -72,7 +74,12 @@ for park in parks:
     ).add_to(m)
 
 
-map_data = st_folium(m, key="fig1", width=700, height=700)
+col1, col2 = st.columns(2)
+with col1:
+    map_data = st_folium(m, key="fig1", width=740, height=700)
+
+if map_data is None:
+    st.stop()
 
 map_bounds = Bounds.from_dict(map_data["bounds"])
 
@@ -81,12 +88,18 @@ try:
 except TypeError:
     point_clicked = None
 
-if point_clicked is not None:
-    with st.spinner(text="loading image..."):
-        for park in parks:
-            if park["_point"].is_close_to(point_clicked):
-                st.image(park["images"][0]["url"])
-                st.expander("Show park full details").write(park)
+with col2:
+    if point_clicked is not None:
+        with st.spinner(text="loading image..."):
+            for park in parks:
+                if park["_point"].is_close_to(point_clicked):
+                    st.write(f"**{park['name']}**")
+                    images = park["images"]
+                    st.image(images[0]["url"])
+                    st.write(park["description"])
+                    st.expander("Show park full details").write(park)
+    else:
+        st.write("## Click on one of the parks!")
 
 parks_in_view: List[Dict] = []
 for park in parks:
@@ -100,4 +113,6 @@ for park in parks_in_view:
 
 st.sidebar.write("---")
 
-st.sidebar.expander("Show map data").write(map_data)
+st.sidebar.write("Map data:")
+st.sidebar.write(map_data)
+# st.sidebar.expander("Show map data").write(map_data)
