@@ -6,7 +6,6 @@ import branca
 import folium
 import folium.plugins
 import streamlit.components.v1 as components
-from folium.utilities import normalize
 from jinja2 import UndefinedError
 
 
@@ -63,7 +62,7 @@ def folium_static(fig, width=700, height=500):
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
-_RELEASE = True
+_RELEASE = False
 
 if not _RELEASE:
     _component_func = components.declare_component(
@@ -119,6 +118,9 @@ def st_folium(
         m_id = get_full_id(fig)
         leaflet = leaflet.replace(m_id, "map_div")
 
+    # Get rid of the annoying popup
+    leaflet = leaflet.replace("alert(coords);", "")
+
     component_value = _component_func(
         fig=leaflet,
         id=m_id,
@@ -145,10 +147,10 @@ def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
         # Add the script for map2
         leaflet += "\n" + generate_leaflet_string(m.m2, nested=nested)
         # Add the script that syncs them together
-        leaflet += normalize(m._template.module.script(m))
+        leaflet += m._template.module.script(m)
         return leaflet
 
-    leaflet = normalize(m._template.module.script(m))
+    leaflet = m._template.module.script(m)
 
     if not nested:
         return leaflet

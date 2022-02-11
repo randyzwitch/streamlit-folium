@@ -1,5 +1,7 @@
 import { Streamlit, RenderData } from "streamlit-component-lib"
 import { debounce } from "underscore";
+//import "leaflet-draw";
+import * as L from "leaflet";
 
 let map: any = null;
 
@@ -7,6 +9,8 @@ type GlobalData = {
   map: any;
   lat_lng_clicked: any;
   last_object_clicked: any;
+  last_active_drawing: any,
+  all_drawings: any,
   bounds: any;
 };
 
@@ -41,6 +45,8 @@ function onRender(event: Event): void {
     Streamlit.setComponentValue({
       last_clicked: global_data.lat_lng_clicked,
       last_object_clicked: global_data.last_object_clicked,
+      all_drawings: global_data.all_drawings,
+      last_active_drawing: global_data.last_active_drawing,
       bounds: bounds,
     })
   }
@@ -49,9 +55,27 @@ function onRender(event: Event): void {
     debouncedUpdateComponentValue()
   }
 
+  function onDraw(e: any) {
+    return onLayerClick(e);
+  }
+
   function onLayerClick(e: any) {
     const global_data = __GLOBAL_DATA__;
     global_data.last_object_clicked = e.latlng;
+    if (e.layer.toGeoJSON) {
+      global_data.last_active_drawing = e.layer.toGeoJSON();
+    }
+    if (e.target._layers) {
+      let details = []
+      let layers = e.target._layers;
+      for (let key in layers) {
+        let layer = layers[key];
+        if (layer.toGeoJSON) {
+          details.push(layer.toGeoJSON());
+        }
+      }
+      global_data.all_drawings = details;
+    }
     debouncedUpdateComponentValue()
   }
 
@@ -81,6 +105,8 @@ function onRender(event: Event): void {
             bounds: map_div.getBounds(),
             lat_lng_clicked: null,
             last_object_clicked: null,
+            all_drawings: null,
+            last_active_drawing: null,
         };`;
         let replaced = fig + set_global_data;
         render_script.innerHTML = replaced;
@@ -95,6 +121,10 @@ function onRender(event: Event): void {
           let layer = map._layers[key];
           layer.on("click", onLayerClick)
         }
+        debugger;
+        map.on('draw:created', onDraw);
+        //map.on('draw:edited', onDraw);
+
         Streamlit.setFrameHeight()
         updateComponentValue();
       }
