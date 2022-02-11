@@ -1,3 +1,4 @@
 streamlit==1.2
 streamlit-folium==0.6.0a3
 requests
+pip==22.0.3
