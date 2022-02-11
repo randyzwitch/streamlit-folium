@@ -106,13 +106,12 @@ for park in parks:
     if map_bounds.contains_point(park["_point"]):
         parks_in_view.append(park)
 
+
+st.sidebar.write(map_data)
+
+st.sidebar.write("---")
+
 st.sidebar.write("## Parks visible")
 for park in parks_in_view:
     with st.sidebar.expander(park["name"]):
         st.write(park["description"])
-
-st.sidebar.write("---")
-
-st.sidebar.write("Map data:")
-st.sidebar.write(map_data)
-# st.sidebar.expander("Show map data").write(map_data)
