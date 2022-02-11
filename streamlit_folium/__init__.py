@@ -1,79 +1,26 @@
-import streamlit.components.v1 as components
-import folium
-from folium import plugins
+import hashlib
+import os
+import re
+
 import branca
-
-# Create a _RELEASE constant. We'll set this to False while we're developing
-# the component, and True when we're ready to package and distribute it.
-# (This is, of course, optional - there are innumerable ways to manage your
-# release process.)
-# _RELEASE = False
-
-# Declare a Streamlit component. `declare_component` returns a function
-# that is used to create instances of the component. We're naming this
-# function "_component_func", with an underscore prefix, because we don't want
-# to expose it directly to users. Instead, we will create a custom wrapper
-# function, below, that will serve as our component's public API.
-
-# It's worth noting that this call to `declare_component` is the
-# *only thing* you need to do to create the binding between Streamlit and
-# your component frontend. Everything else we do in this file is simply a
-# best practice.
-
-# if not _RELEASE:
-#     _component_func = components.declare_component(
-#         # We give the component a simple, descriptive name ("my_component"
-#         # does not fit this bill, so please choose something better for your
-#         # own component :)
-#         "my_component",
-#         # Pass `url` here to tell Streamlit that the component will be served
-#         # by the local dev server that you run via `npm run start`.
-#         # (This is useful while your component is in development.)
-#         url="http://localhost:3001",
-#     )
-# else:
-#     # When we're distributing a production version of the component, we'll
-#     # replace the `url` param with `path`, and point it to to the component's
-#     # build directory:
-#     parent_dir = os.path.dirname(os.path.abspath(__file__))
-#     build_dir = os.path.join(parent_dir, "frontend/build")
-#     _component_func = components.declare_component("my_component", path=build_dir)
+import folium
+import folium.plugins
+import streamlit.components.v1 as components
+from folium.utilities import normalize
+from jinja2 import UndefinedError
 
 
-# Create a wrapper function for the component. This is an optional
-# best practice - we could simply expose the component function returned by
-# `declare_component` and call it done. The wrapper allows us to customize
-# our component's API: we can pre-process its input args, post-process its
-# output value, and add a docstring for users.
-# def my_component(name, key=None):
-#     """Create a new instance of "my_component".
-#     Parameters
-#     ----------
-#     name: str
-#         The name of the thing we're saying hello to. The component will display
-#         the text "Hello, {name}!"
-#     key: str or None
-#         An optional key that uniquely identifies this component. If this is
-#         None, and the component's arguments are changed, the component will
-#         be re-mounted in the Streamlit frontend and lose its current state.
-#     Returns
-#     -------
-#     int
-#         The number of times the component's "Click Me" button has been clicked.
-#         (This is the value passed to `Streamlit.setComponentValue` on the
-#         frontend.)
-#     """
-#     # Call through to our private component function. Arguments we pass here
-#     # will be sent to the frontend, where they'll be available in an "args"
-#     # dictionary.
-#     #
-#     # "default" is a special argument that specifies the initial return
-#     # value of the component before the user has interacted with it.
-#     component_value = _component_func(name=name, key=key, default=0)
-
-#     # We could modify the value returned from the component if we wanted.
-#     # There's no need to do this in our simple example - but it's an option.
-#     return component_value
+def generate_js_hash(js_string: str, key: str = None) -> str:
+    """
+    Generate a standard key from a javascript string representing a series
+    of folium-generated leaflet objects by replacing the hash's at the end
+    of variable names (e.g. "marker_5f9d46..." -> "marker"), and returning
+    the hash.
+    """
+    pattern = r"(_[a-z0-9]+)"
+    standardized_js = re.sub(pattern, "", js_string) + str(key)
+    s = hashlib.sha256(standardized_js.encode()).hexdigest()
+    return s
 
 
 def folium_static(fig, width=700, height=500):
@@ -82,25 +29,22 @@ def folium_static(fig, width=700, height=500):
     Renders `folium.Figure` or `folium.Map` in a Streamlit app. This method is
     a static Streamlit Component, meaning, no information is passed back from
     Leaflet on browser interaction.
-
     Parameters
     ----------
+    fig  : folium.Map or folium.Figure
+        Geospatial visualization to render
     width : int
         Width of result
-
     Height : int
         Height of result
-
     Note
     ----
     If `height` is set on a `folium.Map` or `folium.Figure` object,
     that value supersedes the values set with the keyword arguments of this function.
-
     Example
     -------
     >>> m = folium.Map(location=[45.5236, -122.6750])
     >>> folium_static(m)
-
     """
 
     # if Map, wrap in Figure
@@ -111,5 +55,108 @@ def folium_static(fig, width=700, height=500):
         )
 
     # if DualMap, get HTML representation
-    elif isinstance(fig, plugins.DualMap) or isinstance(fig, branca.element.Figure):
+    elif isinstance(fig, folium.plugins.DualMap) or isinstance(
+        fig, branca.element.Figure
+    ):
         return components.html(fig._repr_html_(), height=height + 10, width=width)
+
+
+# Create a _RELEASE constant. We'll set this to False while we're developing
+# the component, and True when we're ready to package and distribute it.
+_RELEASE = True
+
+if not _RELEASE:
+    _component_func = components.declare_component(
+        "st_folium", url="http://localhost:3001"
+    )
+else:
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+    build_dir = os.path.join(parent_dir, "frontend/build")
+    _component_func = components.declare_component("st_folium", path=build_dir)
+
+
+def st_folium(
+    fig: folium.MacroElement, key: str = None, height: int = 700, width: int = 500
+):
+    """Display a Folium object in Streamlit, returning data as user interacts
+    with app.
+    Parameters
+    ----------
+    fig  : folium.Map or folium.Figure
+        Geospatial visualization to render
+    key: str or None
+        An optional key that uniquely identifies this component. If this is
+        None, and the component's arguments are changed, the component will
+        be re-mounted in the Streamlit frontend and lose its current state.
+    Returns
+    -------
+    dict
+        Selected data from Folium/leaflet.js interactions in browser
+    """
+    # Call through to our private component function. Arguments we pass here
+    # will be sent to the frontend, where they'll be available in an "args"
+    # dictionary.
+    #
+    # "default" is a special argument that specifies the initial return
+    # value of the component before the user has interacted with it.
+
+    # handle the case where you pass in a figure rather than a map
+    # this assumes that a map is the first child
+    if not (isinstance(fig, folium.Map) or isinstance(fig, folium.plugins.DualMap)):
+        fig = list(fig._children.values())[0]
+
+    leaflet = generate_leaflet_string(fig)
+    # Replace the folium generated map_{random characters} variables
+    # with map_div and map_div2 (these end up being both the assumed)
+    # div id where the maps are inserted into the DOM, and the names of
+    # the variables themselves.
+    if isinstance(fig, folium.plugins.DualMap):
+        m_id = m1_id = get_full_id(fig.m1)
+        leaflet = leaflet.replace(m1_id, "map_div")
+        m2_id = get_full_id(fig.m2)
+        leaflet = leaflet.replace(m2_id, "map_div2")
+    else:
+        m_id = get_full_id(fig)
+        leaflet = leaflet.replace(m_id, "map_div")
+
+    component_value = _component_func(
+        fig=leaflet,
+        id=m_id,
+        key=generate_js_hash(leaflet, key),
+        height=height,
+        width=width,
+    )
+
+    return component_value
+
+
+def get_full_id(m: folium.MacroElement) -> str:
+    if isinstance(m, folium.plugins.DualMap):
+        m = m.m1
+    return f"{m._name.lower()}_{m._id}"
+
+
+def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
+    if isinstance(m, folium.plugins.DualMap):
+        if not nested:
+            return generate_leaflet_string(m.m1, nested=False)
+        # Generate the script for map1
+        leaflet = generate_leaflet_string(m.m1, nested=nested)
+        # Add the script for map2
+        leaflet += "\n" + generate_leaflet_string(m.m2, nested=nested)
+        # Add the script that syncs them together
+        leaflet += normalize(m._template.module.script(m))
+        return leaflet
+
+    leaflet = normalize(m._template.module.script(m))
+
+    if not nested:
+        return leaflet
+
+    for _, child in m._children.items():
+        try:
+            leaflet += "\n" + generate_leaflet_string(child)
+        except UndefinedError:
+            pass
+
+    return leaflet
