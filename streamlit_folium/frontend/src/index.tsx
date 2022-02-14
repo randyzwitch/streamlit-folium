@@ -1,7 +1,5 @@
 import { Streamlit, RenderData } from "streamlit-component-lib"
 import { debounce } from "underscore";
-//import "leaflet-draw";
-import * as L from "leaflet";
 
 let map: any = null;
 
