@@ -6,7 +6,6 @@ import branca
 import folium
 import folium.plugins
 import streamlit.components.v1 as components
-from folium.utilities import normalize
 from jinja2 import UndefinedError
 
 
@@ -119,6 +118,9 @@ def st_folium(
         m_id = get_full_id(fig)
         leaflet = leaflet.replace(m_id, "map_div")
 
+    # Get rid of the annoying popup
+    leaflet = leaflet.replace("alert(coords);", "")
+
     component_value = _component_func(
         fig=leaflet,
         id=m_id,
@@ -145,10 +147,10 @@ def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
         # Add the script for map2
         leaflet += "\n" + generate_leaflet_string(m.m2, nested=nested)
         # Add the script that syncs them together
-        leaflet += normalize(m._template.module.script(m))
+        leaflet += m._template.module.script(m)
         return leaflet
 
-    leaflet = normalize(m._template.module.script(m))
+    leaflet = m._template.module.script(m)
 
     if not nested:
         return leaflet
