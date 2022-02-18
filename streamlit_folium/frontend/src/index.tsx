@@ -60,7 +60,7 @@ function onRender(event: Event): void {
   function onLayerClick(e: any) {
     const global_data = __GLOBAL_DATA__;
     global_data.last_object_clicked = e.latlng;
-    if (e.layer.toGeoJSON) {
+    if (e.layer && e.layer.toGeoJSON) {
       global_data.last_active_drawing = e.layer.toGeoJSON();
     }
     if (e.target._layers) {
