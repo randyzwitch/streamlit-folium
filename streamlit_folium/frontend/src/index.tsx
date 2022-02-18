@@ -119,9 +119,7 @@ function onRender(event: Event): void {
           let layer = map._layers[key];
           layer.on("click", onLayerClick)
         }
-        debugger;
         map.on('draw:created', onDraw);
-        //map.on('draw:edited', onDraw);
 
         Streamlit.setFrameHeight()
         updateComponentValue();
