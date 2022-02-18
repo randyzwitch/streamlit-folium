@@ -101,6 +101,8 @@ def st_folium(
 
     # handle the case where you pass in a figure rather than a map
     # this assumes that a map is the first child
+    fig.render()
+
     if not (isinstance(fig, folium.Map) or isinstance(fig, folium.plugins.DualMap)):
         fig = list(fig._children.values())[0]
 
