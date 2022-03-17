@@ -10,6 +10,7 @@ type GlobalData = {
   last_active_drawing: any,
   all_drawings: any,
   bounds: any;
+  zoom: any;
 };
 
 declare var __GLOBAL_DATA__: GlobalData;
@@ -40,12 +41,14 @@ function onRender(event: Event): void {
     const global_data = __GLOBAL_DATA__;
     let map = global_data.map;
     let bounds = map.getBounds();
+    let zoom = map.getZoom();
     Streamlit.setComponentValue({
       last_clicked: global_data.lat_lng_clicked,
       last_object_clicked: global_data.last_object_clicked,
       all_drawings: global_data.all_drawings,
       last_active_drawing: global_data.last_active_drawing,
       bounds: bounds,
+      zoom: zoom,
     })
   }
 
@@ -105,6 +108,7 @@ function onRender(event: Event): void {
             last_object_clicked: null,
             all_drawings: null,
             last_active_drawing: null,
+            zoom: null,
         };`;
         let replaced = fig + set_global_data;
         render_script.innerHTML = replaced;
