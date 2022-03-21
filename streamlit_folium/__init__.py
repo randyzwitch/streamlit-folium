@@ -123,6 +123,9 @@ def st_folium(
     # Get rid of the annoying popup
     leaflet = leaflet.replace("alert(coords);", "")
 
+    if "drawnItems" not in leaflet:
+        leaflet += "\nvar drawnItems = [];"
+
     component_value = _component_func(
         fig=leaflet,
         id=m_id,
