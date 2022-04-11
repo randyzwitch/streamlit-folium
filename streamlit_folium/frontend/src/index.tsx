@@ -62,6 +62,7 @@ function onRender(event: Event): void {
   }
 
   function onLayerClick(e: any) {
+    console.log("OnLayerClick");
     const global_data = __GLOBAL_DATA__;
     global_data.last_object_clicked = e.latlng;
     if (e.layer && e.layer.toGeoJSON) {
@@ -125,6 +126,8 @@ function onRender(event: Event): void {
           layer.on("click", onLayerClick)
         }
         map.on('draw:created', onDraw);
+        map.on('draw:edited', onDraw);
+        map.on('draw:deleted', onDraw);
 
         Streamlit.setFrameHeight()
         updateComponentValue();
