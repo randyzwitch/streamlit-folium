@@ -125,6 +125,8 @@ function onRender(event: Event): void {
           layer.on("click", onLayerClick)
         }
         map.on('draw:created', onDraw);
+        map.on('draw:edited', onDraw);
+        map.on('draw:deleted', onDraw);
 
         Streamlit.setFrameHeight()
         updateComponentValue();
