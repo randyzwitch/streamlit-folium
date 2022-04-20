@@ -107,6 +107,7 @@ def st_folium(
         fig = list(fig._children.values())[0]
 
     leaflet = generate_leaflet_string(fig)
+
     # Replace the folium generated map_{random characters} variables
     # with map_div and map_div2 (these end up being both the assumed)
     # div id where the maps are inserted into the DOM, and the names of
@@ -132,6 +133,14 @@ def st_folium(
         key=generate_js_hash(leaflet, key),
         height=height,
         width=width,
+        default={
+            "last_clicked": None,
+            "last_object_clicked": None,
+            "all_drawings": None,
+            "last_active_drawing": None,
+            "bounds": fig.get_bounds(),
+            "zoom": fig.options.get('zoom'),
+        }
     )
 
     return component_value
@@ -155,7 +164,12 @@ def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
         leaflet += m._template.module.script(m)
         return leaflet
 
-    leaflet = m._template.module.script(m)
+    try:
+        leaflet = m._template.module.script(m)
+    except UndefinedError:
+        # Correctly render Popup elements, and perhaps others. Not sure why
+        # this is necessary. Some deep magic related to jinja2 templating, perhaps.
+        leaflet = m._template.render(this=m, kwargs={})
 
     if not nested:
         return leaflet
