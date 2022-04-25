@@ -139,8 +139,8 @@ def st_folium(
             "all_drawings": None,
             "last_active_drawing": None,
             "bounds": fig.get_bounds(),
-            "zoom": fig.options.get('zoom'),
-        }
+            "zoom": fig.options.get("zoom") if hasattr(fig, "options") else {},
+        },
     )
 
     return component_value
