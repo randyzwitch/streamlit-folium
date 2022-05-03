@@ -4,7 +4,7 @@ import streamlit_folium
 st.set_page_config(page_title="streamlit-folium documentation")
 
 page = st.sidebar.radio(
-    "Select page", ["Home", "Bi-directional data model"], index=0
+    "Select page", ["Home", "Bi-directional data model", "Use case: dynamic API queries"], index=0
 )
 
 "# streamlit-folium"
@@ -36,9 +36,10 @@ if page == "Home":
     
         # center on Liberty Bell, add marker
         m = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
-        tooltip = "Liberty Bell"
         folium.Marker(
-            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+            [39.949610, -75.150282], 
+            popup="Liberty Bell", 
+            tooltip="Liberty Bell"
         ).add_to(m)
 
         # call to render Folium map in Streamlit
@@ -67,9 +68,10 @@ elif page == "Bi-directional data model":
     
         # center on Liberty Bell, add marker
         m = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
-        tooltip = "Liberty Bell"
         folium.Marker(
-            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+            [39.949610, -75.150282], 
+            popup="Liberty Bell", 
+            tooltip="Liberty Bell"
         ).add_to(m)
 
         # call to render Folium map in Streamlit
@@ -88,3 +90,5 @@ elif page == "Bi-directional data model":
     with `zoom`. With these values available in Python, we can now limit queries based on bounding box, change
     the marker size based on the `zoom` value and much more!
     """
+elif page == "Use case: dynamic API queries":
+    "Coming soon"
