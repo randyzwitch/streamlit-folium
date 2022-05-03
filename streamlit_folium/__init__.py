@@ -101,10 +101,13 @@ def st_folium(
 
     # handle the case where you pass in a figure rather than a map
     # this assumes that a map is the first child
+    fig.render()
+
     if not (isinstance(fig, folium.Map) or isinstance(fig, folium.plugins.DualMap)):
         fig = list(fig._children.values())[0]
 
     leaflet = generate_leaflet_string(fig)
+
     # Replace the folium generated map_{random characters} variables
     # with map_div and map_div2 (these end up being both the assumed)
     # div id where the maps are inserted into the DOM, and the names of
@@ -121,12 +124,23 @@ def st_folium(
     # Get rid of the annoying popup
     leaflet = leaflet.replace("alert(coords);", "")
 
+    if "drawnItems" not in leaflet:
+        leaflet += "\nvar drawnItems = [];"
+
     component_value = _component_func(
         fig=leaflet,
         id=m_id,
         key=generate_js_hash(leaflet, key),
         height=height,
         width=width,
+        default={
+            "last_clicked": None,
+            "last_object_clicked": None,
+            "all_drawings": None,
+            "last_active_drawing": None,
+            "bounds": fig.get_bounds(),
+            "zoom": fig.options.get("zoom") if hasattr(fig, "options") else {},
+        },
     )
 
     return component_value
@@ -150,7 +164,12 @@ def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
         leaflet += m._template.module.script(m)
         return leaflet
 
-    leaflet = m._template.module.script(m)
+    try:
+        leaflet = m._template.module.script(m)
+    except UndefinedError:
+        # Correctly render Popup elements, and perhaps others. Not sure why
+        # this is necessary. Some deep magic related to jinja2 templating, perhaps.
+        leaflet = m._template.render(this=m, kwargs={})
 
     if not nested:
         return leaflet

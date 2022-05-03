@@ -10,6 +10,8 @@ type GlobalData = {
   last_active_drawing: any,
   all_drawings: any,
   bounds: any;
+  zoom: any;
+  drawnItems: any;
 };
 
 declare var __GLOBAL_DATA__: GlobalData;
@@ -40,12 +42,14 @@ function onRender(event: Event): void {
     const global_data = __GLOBAL_DATA__;
     let map = global_data.map;
     let bounds = map.getBounds();
+    let zoom = map.getZoom();
     Streamlit.setComponentValue({
       last_clicked: global_data.lat_lng_clicked,
       last_object_clicked: global_data.last_object_clicked,
       all_drawings: global_data.all_drawings,
       last_active_drawing: global_data.last_active_drawing,
       bounds: bounds,
+      zoom: zoom,
     })
   }
 
@@ -60,20 +64,11 @@ function onRender(event: Event): void {
   function onLayerClick(e: any) {
     const global_data = __GLOBAL_DATA__;
     global_data.last_object_clicked = e.latlng;
-    if (e.layer.toGeoJSON) {
+    if (e.layer && e.layer.toGeoJSON) {
       global_data.last_active_drawing = e.layer.toGeoJSON();
     }
-    if (e.target._layers) {
-      let details = []
-      let layers = e.target._layers;
-      for (let key in layers) {
-        let layer = layers[key];
-        if (layer.toGeoJSON) {
-          details.push(layer.toGeoJSON());
-        }
-      }
-      global_data.all_drawings = details;
-    }
+    let details: Array<any> = global_data.drawnItems.toGeoJSON().features;
+    global_data.all_drawings = details;
     debouncedUpdateComponentValue()
   }
 
@@ -93,6 +88,14 @@ function onRender(event: Event): void {
         map_div.style.height = `${height}px`
         map_div.style.width = `${width}px`
 
+        if (fig.indexOf("document.getElementById('export')") !== -1) {
+          let a = document.createElement("a");
+          a.href = "#";
+          a.id = "export";
+          a.innerHTML = "Export";
+          document.body.appendChild(a);
+        }
+
         const render_script = document.createElement("script")
         // HACK -- update the folium-generated JS to add, most importantly,
         // the map to this global variable so that it can be used elsewhere
@@ -105,6 +108,8 @@ function onRender(event: Event): void {
             last_object_clicked: null,
             all_drawings: null,
             last_active_drawing: null,
+            zoom: null,
+            drawnItems: drawnItems,
         };`;
         let replaced = fig + set_global_data;
         render_script.innerHTML = replaced;
@@ -119,9 +124,9 @@ function onRender(event: Event): void {
           let layer = map._layers[key];
           layer.on("click", onLayerClick)
         }
-        debugger;
         map.on('draw:created', onDraw);
-        //map.on('draw:edited', onDraw);
+        map.on('draw:edited', onDraw);
+        map.on('draw:deleted', onDraw);
 
         Streamlit.setFrameHeight()
         updateComponentValue();
