@@ -4,7 +4,7 @@ import streamlit_folium
 st.set_page_config(page_title="streamlit-folium documentation")
 
 page = st.sidebar.radio(
-    "Select page", ["Home", "Bi-directional data model", "Use case: dynamic API queries"], index=0
+    "Select page", ["Home", "Bi-directional data model"], index=0
 )
 
 "# streamlit-folium"
@@ -90,5 +90,3 @@ elif page == "Bi-directional data model":
     with `zoom`. With these values available in Python, we can now limit queries based on bounding box, change
     the marker size based on the `zoom` value and much more!
     """
-elif page == "Use case: dynamic API queries":
-    "Coming soon"
