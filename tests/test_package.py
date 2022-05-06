@@ -8,6 +8,7 @@ class ComponentsTest(BaseCase):
 
         # open the app and take a screenshot
         self.open("http://localhost:8501")
+        time.sleep(10)
         self.save_screenshot("current-screenshot.png")
 
         # automated visual regression testing
