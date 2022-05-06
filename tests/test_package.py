@@ -8,8 +8,6 @@ class ComponentsTest(BaseCase):
 
         # open the app and take a screenshot
         self.open("http://localhost:8501")
-
-        time.sleep(10)  # give leaflet time to load from web
         self.save_screenshot("current-screenshot.png")
 
         # automated visual regression testing
@@ -23,7 +21,7 @@ class ComponentsTest(BaseCase):
         self.assert_text("streamlit-folium")
 
         # test screenshots look exactly the same
-        original = cv2.imread("visual_baseline/test_basic/first_test/screenshot.png")
+        original = cv2.imread("visual_baseline/test_basic/first_test/baseline.png")
         duplicate = cv2.imread("current-screenshot.png")
 
         assert original.shape == duplicate.shape
