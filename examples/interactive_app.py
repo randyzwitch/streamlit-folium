@@ -81,6 +81,7 @@ parks = get_data()
 
 # layout map
 with c1:
+    """(_Double-click on a pin to bring up more information_)"""
     m = folium.Map(location=[39.949610, -75.150282], zoom_start=4)
 
     for park in parks:
