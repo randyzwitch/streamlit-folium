@@ -1,7 +1,8 @@
 import streamlit as st
 import streamlit_folium
 
-st.set_page_config(page_title="streamlit-folium documentation")
+st.set_page_config(page_title="streamlit-folium documentation",
+layout = "wide")
 
 page = st.sidebar.radio(
     "Select page", ["Home", "Bi-directional data model", "Plugin: Draw"], index=0
