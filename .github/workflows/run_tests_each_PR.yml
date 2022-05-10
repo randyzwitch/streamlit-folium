@@ -51,4 +51,4 @@ jobs:
           streamlit run examples/streamlit_app.py &
       - name: Test with pytest
         run: |
-          pytest --headless --maximize
+          cd tests && pytest --headless --maximize
