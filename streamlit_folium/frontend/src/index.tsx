@@ -64,10 +64,13 @@ function onRender(event: Event): void {
   function onLayerClick(e: any) {
     const global_data = __GLOBAL_DATA__;
     global_data.last_object_clicked = e.latlng;
+    let details: Array<any> = [];
     if (e.layer && e.layer.toGeoJSON) {
       global_data.last_active_drawing = e.layer.toGeoJSON();
     }
-    let details: Array<any> = global_data.drawnItems.toGeoJSON().features;
+    if (global_data.drawnItems.toGeoJSON) {
+      details = global_data.drawnItems.toGeoJSON().features;
+    }
     global_data.all_drawings = details;
     debouncedUpdateComponentValue()
   }
