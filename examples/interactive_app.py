@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
-import time
 
 import folium
 import requests
@@ -101,12 +100,7 @@ with c1:
     map_data = st_folium(m, key="fig1", width=700, height=700)
 
 # get data from map for further processing
-# try just used to swallow error trying to process bounds before leaflet returns it
-try:
-    map_bounds = Bounds.from_dict(map_data["bounds"])
-except TypeError:
-    time.sleep(0.1)
-    map_bounds = Bounds.from_dict(map_data["bounds"])
+map_bounds = Bounds.from_dict(map_data["bounds"])
 
 # when a point is clicked, display additional information about the park
 try:
