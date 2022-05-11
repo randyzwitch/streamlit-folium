@@ -1,6 +1,7 @@
 import hashlib
 import os
 import re
+from typing import Dict, List
 
 import branca
 import folium
@@ -127,6 +128,19 @@ def st_folium(
     if "drawnItems" not in leaflet:
         leaflet += "\nvar drawnItems = [];"
 
+    def bounds_to_dict(bounds_list: List[List[float]]) -> Dict[str, Dict[str, float]]:
+        southwest, northeast = bounds_list
+        return {
+            "_southWest": {
+                "lat": southwest[0],
+                "lng": southwest[1],
+            },
+            "_northEast": {
+                "lat": northeast[0],
+                "lng": northeast[1],
+            },
+        }
+
     component_value = _component_func(
         fig=leaflet,
         id=m_id,
@@ -138,7 +152,7 @@ def st_folium(
             "last_object_clicked": None,
             "all_drawings": None,
             "last_active_drawing": None,
-            "bounds": fig.get_bounds(),
+            "bounds": bounds_to_dict(fig.get_bounds()),
             "zoom": fig.options.get("zoom") if hasattr(fig, "options") else {},
         },
     )
