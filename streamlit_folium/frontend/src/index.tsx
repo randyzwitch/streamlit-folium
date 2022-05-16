@@ -1,5 +1,6 @@
-import { Streamlit, RenderData } from "streamlit-component-lib"
+import { Streamlit, RenderData } from "streamlit-component-lib";
 import { debounce } from "underscore";
+import { circleToPolygon } from "./circle-to-polygon";
 
 let map: any = null;
 
@@ -11,7 +12,9 @@ type GlobalData = {
   all_drawings: any,
   bounds: any;
   zoom: any;
-  drawnItems: any;
+  drawn_items: any;
+  last_circle_radius: number;
+  last_circle_polygon: any;
 };
 
 declare var __GLOBAL_DATA__: GlobalData;
@@ -25,7 +28,6 @@ function onRender(event: Event): void {
   // Get the RenderData from the event
   const data = (event as CustomEvent<RenderData>).detail
 
-  //console.log(data.args)
   const fig: string = data.args["fig"];
   const height: number = data.args["height"];
   const width: number = data.args["width"];
@@ -50,6 +52,8 @@ function onRender(event: Event): void {
       last_active_drawing: global_data.last_active_drawing,
       bounds: bounds,
       zoom: zoom,
+      last_circle_radius: global_data.last_circle_radius,
+      last_circle_polygon: global_data.last_circle_polygon,
     })
   }
 
@@ -58,6 +62,18 @@ function onRender(event: Event): void {
   }
 
   function onDraw(e: any) {
+    const global_data = __GLOBAL_DATA__;
+
+    var type = e.layerType,
+      layer = e.layer;
+
+    if (type === "circle") {
+      var center: [number, number] = [layer._latlng.lng, layer._latlng.lat];
+      var radius = layer.options.radius; // In km
+      var polygon = circleToPolygon(center, radius);
+      global_data.last_circle_radius = radius / 1000; // Convert to km to match what UI shows
+      global_data.last_circle_polygon = polygon;
+    }
     return onLayerClick(e);
   }
 
@@ -68,8 +84,8 @@ function onRender(event: Event): void {
     if (e.layer && e.layer.toGeoJSON) {
       global_data.last_active_drawing = e.layer.toGeoJSON();
     }
-    if (global_data.drawnItems.toGeoJSON) {
-      details = global_data.drawnItems.toGeoJSON().features;
+    if (global_data.drawn_items.toGeoJSON) {
+      details = global_data.drawn_items.toGeoJSON().features;
     }
     global_data.all_drawings = details;
     debouncedUpdateComponentValue()
@@ -112,7 +128,9 @@ function onRender(event: Event): void {
             all_drawings: null,
             last_active_drawing: null,
             zoom: null,
-            drawnItems: drawnItems,
+            drawn_items: [],
+            last_circle_radius: null,
+            last_circle_polygon: null,
         };`;
         let replaced = fig + set_global_data;
         render_script.innerHTML = replaced;
