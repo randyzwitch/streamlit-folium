@@ -154,6 +154,8 @@ def st_folium(
             "last_active_drawing": None,
             "bounds": bounds_to_dict(fig.get_bounds()),
             "zoom": fig.options.get("zoom") if hasattr(fig, "options") else {},
+            "last_circle_radius": None,
+            "last_circle_polygon": None,
         },
     )
 
