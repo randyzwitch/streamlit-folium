@@ -29,4 +29,6 @@ class ComponentsTest(BaseCase):
 
         difference = cv2.subtract(original, duplicate)
         b, g, r = cv2.split(difference)
-        assert cv2.countNonZero(b) == cv2.countNonZero(g) == cv2.countNonZero(r) == 0
+        assert cv2.countNonZero(b) == cv2.countNonZero(g) == 0
+        assert cv2.countNonZero(b) == cv2.countNonZero(r) == 0
+        assert cv2.countNonZero(g) == cv2.countNonZero(r) == 0
