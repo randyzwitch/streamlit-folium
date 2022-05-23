@@ -144,8 +144,9 @@ function onRender(event: Event): void {
         last_circle_polygon: null,
       }
       // The folium-generated script creates a variable called "map_div", which
-      // is the actual Leaflet map
-      render_script.innerHTML = fig + `window.map = map_div; window.initComponent(map_div);`
+      // is the actual Leaflet map.
+      render_script.innerHTML =
+        fig + `window.map = map_div; window.initComponent(map_div);`
       document.body.appendChild(render_script)
     }
   }
