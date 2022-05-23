@@ -6,6 +6,7 @@ from typing import Dict, List
 import branca
 import folium
 import folium.plugins
+import streamlit as st
 import streamlit.components.v1 as components
 from jinja2 import UndefinedError
 
@@ -63,7 +64,7 @@ def folium_static(fig, width=700, height=500):
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
-_RELEASE = True
+_RELEASE = False
 
 if not _RELEASE:
     _component_func = components.declare_component(
@@ -141,6 +142,8 @@ def st_folium(
             },
         }
 
+    st.expander("Show code").code(leaflet)
+
     component_value = _component_func(
         fig=leaflet,
         id=m_id,
@@ -197,3 +200,16 @@ def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
             pass
 
     return leaflet
+
+
+import ee
+import geemap.foliumap as geemap
+import streamlit as st
+
+m = geemap.Map()
+dem = ee.Image("USGS/SRTMGL1_003")
+m.addLayer(dem, {}, "DEM")
+
+st_data = st_folium(m, width=1000)
+
+st.write(st_data)

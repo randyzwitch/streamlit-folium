@@ -10,14 +10,98 @@ type GlobalData = {
   last_object_clicked: any;
   last_active_drawing: any,
   all_drawings: any,
-  bounds: any;
   zoom: any;
   drawn_items: any;
-  last_circle_radius: number;
+  last_circle_radius: number | null;
   last_circle_polygon: any;
 };
 
-declare var __GLOBAL_DATA__: GlobalData;
+//declare var __GLOBAL_DATA__: GlobalData;
+
+declare global {
+  interface Window {
+    __GLOBAL_DATA__: GlobalData;
+    initComponent: any;
+  }
+}
+
+function onMapClick(e: any) {
+  const global_data = window.__GLOBAL_DATA__;
+  global_data.lat_lng_clicked = e.latlng;
+  debouncedUpdateComponentValue()
+}
+
+let debouncedUpdateComponentValue = debounce(updateComponentValue, 1250)
+
+function updateComponentValue() {
+  const global_data = window.__GLOBAL_DATA__;
+  let map = global_data.map;
+  let bounds = map.getBounds();
+  let zoom = map.getZoom();
+  Streamlit.setComponentValue({
+    last_clicked: global_data.lat_lng_clicked,
+    last_object_clicked: global_data.last_object_clicked,
+    all_drawings: global_data.all_drawings,
+    last_active_drawing: global_data.last_active_drawing,
+    bounds: bounds,
+    zoom: zoom,
+    last_circle_radius: global_data.last_circle_radius,
+    last_circle_polygon: global_data.last_circle_polygon,
+  })
+}
+
+function onMapMove(e: any) {
+  debouncedUpdateComponentValue()
+}
+
+function onDraw(e: any) {
+  const global_data = window.__GLOBAL_DATA__;
+
+  var type = e.layerType,
+    layer = e.layer;
+
+  if (type === "circle") {
+    var center: [number, number] = [layer._latlng.lng, layer._latlng.lat];
+    var radius = layer.options.radius; // In km
+    var polygon = circleToPolygon(center, radius);
+    global_data.last_circle_radius = radius / 1000; // Convert to km to match what UI shows
+    global_data.last_circle_polygon = polygon;
+  }
+  return onLayerClick(e);
+}
+
+function onLayerClick(e: any) {
+  const global_data = window.__GLOBAL_DATA__;
+  global_data.last_object_clicked = e.latlng;
+  let details: Array<any> = [];
+  if (e.layer && e.layer.toGeoJSON) {
+    global_data.last_active_drawing = e.layer.toGeoJSON();
+  }
+  if (global_data.drawn_items.toGeoJSON) {
+    details = global_data.drawn_items.toGeoJSON().features;
+  }
+  global_data.all_drawings = details;
+  debouncedUpdateComponentValue()
+}
+
+
+window.initComponent = () => {
+  const { map } = window.__GLOBAL_DATA__;
+
+  map.on('click', onMapClick);
+  map.on('moveend', onMapMove);
+  for (let key in map._layers) {
+    let layer = map._layers[key];
+    layer.on("click", onLayerClick)
+  }
+  map.on('draw:created', onDraw);
+  map.on('draw:edited', onDraw);
+  map.on('draw:deleted', onDraw);
+
+  Streamlit.setFrameHeight()
+  updateComponentValue();
+}
+
 
 /**
  * The component's render function. This will be called immediately after
@@ -32,68 +116,10 @@ function onRender(event: Event): void {
   const height: number = data.args["height"];
   const width: number = data.args["width"];
 
-  function onMapClick(e: any) {
-    const global_data = __GLOBAL_DATA__;
-    global_data.lat_lng_clicked = e.latlng;
-    debouncedUpdateComponentValue()
-  }
-
-  let debouncedUpdateComponentValue = debounce(updateComponentValue, 250)
-
-  function updateComponentValue() {
-    const global_data = __GLOBAL_DATA__;
-    let map = global_data.map;
-    let bounds = map.getBounds();
-    let zoom = map.getZoom();
-    Streamlit.setComponentValue({
-      last_clicked: global_data.lat_lng_clicked,
-      last_object_clicked: global_data.last_object_clicked,
-      all_drawings: global_data.all_drawings,
-      last_active_drawing: global_data.last_active_drawing,
-      bounds: bounds,
-      zoom: zoom,
-      last_circle_radius: global_data.last_circle_radius,
-      last_circle_polygon: global_data.last_circle_polygon,
-    })
-  }
-
-  function onMapMove(e: any) {
-    debouncedUpdateComponentValue()
-  }
-
-  function onDraw(e: any) {
-    const global_data = __GLOBAL_DATA__;
-
-    var type = e.layerType,
-      layer = e.layer;
-
-    if (type === "circle") {
-      var center: [number, number] = [layer._latlng.lng, layer._latlng.lat];
-      var radius = layer.options.radius; // In km
-      var polygon = circleToPolygon(center, radius);
-      global_data.last_circle_radius = radius / 1000; // Convert to km to match what UI shows
-      global_data.last_circle_polygon = polygon;
-    }
-    return onLayerClick(e);
-  }
-
-  function onLayerClick(e: any) {
-    const global_data = __GLOBAL_DATA__;
-    global_data.last_object_clicked = e.latlng;
-    let details: Array<any> = [];
-    if (e.layer && e.layer.toGeoJSON) {
-      global_data.last_active_drawing = e.layer.toGeoJSON();
-    }
-    if (global_data.drawn_items.toGeoJSON) {
-      details = global_data.drawn_items.toGeoJSON().features;
-    }
-    global_data.all_drawings = details;
-    debouncedUpdateComponentValue()
-  }
-
   if (map == null) {
     try {
-      map = __GLOBAL_DATA__.map;
+      // @ts-ignore
+      map = window.__GLOBAL_DATA__.map;
     } catch (e) {
       // Only run this if the map hasn't already been created (and thus the global
       //data hasn't been initialized)
@@ -119,25 +145,33 @@ function onRender(event: Event): void {
         // HACK -- update the folium-generated JS to add, most importantly,
         // the map to this global variable so that it can be used elsewhere
         // in the script.
-        let set_global_data = `
-          window.__GLOBAL_DATA__ = {
-            map: map_div,
-            bounds: map_div.getBounds(),
-            lat_lng_clicked: null,
-            last_object_clicked: null,
-            all_drawings: null,
-            last_active_drawing: null,
-            zoom: null,
-            drawn_items: [],
-            last_circle_radius: null,
-            last_circle_polygon: null,
-        };`;
-        let replaced = fig + set_global_data;
-        render_script.innerHTML = replaced;
+        //let set_global_data = `
+
+        window.__GLOBAL_DATA__ = {
+          map: map_div,
+          lat_lng_clicked: null,
+          last_object_clicked: null,
+          all_drawings: null,
+          last_active_drawing: null,
+          zoom: null,
+          drawn_items: [],
+          last_circle_radius: null,
+          last_circle_polygon: null,
+        };
+        render_script.innerHTML = fig + "window.initComponent()";
+        //window.__GLOBAL_DATA__.bounds = window.__GLOBAL_DATA__.map.getBounds();
+        //`;
         document.body.appendChild(render_script);
 
-        const global_data = __GLOBAL_DATA__;
-        let map = global_data.map;
+        // @ts-ignore
+
+        //};`;
+        //let replaced = fig + set_global_data;
+
+        //const global_data = __GLOBAL_DATA__;
+        //let map = global_data.map;
+        /*
+        let map = map_div;
 
         map.on('click', onMapClick);
         map.on('moveend', onMapMove);
@@ -149,20 +183,22 @@ function onRender(event: Event): void {
         map.on('draw:edited', onDraw);
         map.on('draw:deleted', onDraw);
 
-        Streamlit.setFrameHeight()
-        updateComponentValue();
+        Streamlit.setFrameHeight();
+        //updateComponentValue();
+        debouncedUpdateComponentValue();
+        */
       }
     }
   }
 }
 
 // Attach our `onRender` handler to Streamlit's render event.
-Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender)
+Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender);
 
 // Tell Streamlit we're ready to start receiving data. We won't get our
 // first RENDER_EVENT until we call this function.
-Streamlit.setComponentReady()
+Streamlit.setComponentReady();
 
 // Finally, tell Streamlit to update our initial height. We omit the
 // `height` parameter here to have it default to our scrollHeight.
-Streamlit.setFrameHeight()
+Streamlit.setFrameHeight();
