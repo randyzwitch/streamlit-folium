@@ -68,7 +68,7 @@ def folium_static(fig, width=700, height=500):
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
-_RELEASE = False
+_RELEASE = True
 
 if not _RELEASE:
     _component_func = components.declare_component(
@@ -204,30 +204,3 @@ def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
             pass
 
     return leaflet
-
-
-# center on Liberty Bell, add marker
-m = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
-folium.Marker(
-    [39.949610, -75.150282],
-    popup="Liberty Bell",
-    tooltip="Liberty Bell"
-).add_to(m)
-
-# call to render Folium map in Streamlit
-st_data = st_folium(m, width = 725)
-
-#st.write(st_data)
-
-
-import ee
-import geemap.foliumap as geemap
-import streamlit as st
-
-m = geemap.Map()
-dem = ee.Image("USGS/SRTMGL1_003")
-m.addLayer(dem, {}, "DEM")
-
-st_data = st_folium(m, width=1000)
-
-st.write(st_data)
