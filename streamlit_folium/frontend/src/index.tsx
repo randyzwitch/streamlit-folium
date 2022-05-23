@@ -110,15 +110,15 @@ function onRender(event: Event): void {
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
     //data hasn't been initialized)
-    const map_div = document.getElementById("map_div")
-    const map_div2 = document.getElementById("map_div2")
-    if (map_div2) {
-      map_div2.style.height = `${height}px`
-      map_div2.style.width = `${width}px`
+    const div1 = document.getElementById("map_div")
+    const div2 = document.getElementById("map_div2")
+    if (div2) {
+      div2.style.height = `${height}px`
+      div2.style.width = `${width}px`
     }
-    if (map_div) {
-      map_div.style.height = `${height}px`
-      map_div.style.width = `${width}px`
+    if (div1) {
+      div1.style.height = `${height}px`
+      div1.style.width = `${width}px`
 
       if (fig.indexOf("document.getElementById('export')") !== -1) {
         let a = document.createElement("a")
@@ -143,6 +143,8 @@ function onRender(event: Event): void {
         last_circle_radius: null,
         last_circle_polygon: null,
       }
+      // The folium-generated script creates a variable called "map_div", which
+      // is the actual Leaflet map
       render_script.innerHTML = fig + `window.map = map_div; window.initComponent(map_div);`
       document.body.appendChild(render_script)
     }
