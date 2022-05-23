@@ -2,10 +2,7 @@ import { Streamlit, RenderData } from "streamlit-component-lib"
 import { debounce } from "underscore"
 import { circleToPolygon } from "./circle-to-polygon"
 
-let map: any = null
-
 type GlobalData = {
-  map: any
   lat_lng_clicked: any
   last_object_clicked: any
   last_active_drawing: any
@@ -20,16 +17,17 @@ declare global {
   interface Window {
     __GLOBAL_DATA__: GlobalData
     initComponent: any
+    map: any
   }
 }
 
 function onMapClick(e: any) {
   const global_data = window.__GLOBAL_DATA__
   global_data.lat_lng_clicked = e.latlng
-  debouncedUpdateComponentValue(map)
+  debouncedUpdateComponentValue(window.map)
 }
 
-let debouncedUpdateComponentValue = debounce(updateComponentValue, 1250)
+let debouncedUpdateComponentValue = debounce(updateComponentValue, 250)
 
 function updateComponentValue(map: any) {
   const global_data = window.__GLOBAL_DATA__
@@ -48,7 +46,7 @@ function updateComponentValue(map: any) {
 }
 
 function onMapMove(e: any) {
-  debouncedUpdateComponentValue(map)
+  debouncedUpdateComponentValue(window.map)
 }
 
 function onDraw(e: any) {
@@ -78,7 +76,7 @@ function onLayerClick(e: any) {
     details = global_data.drawn_items.toGeoJSON().features
   }
   global_data.all_drawings = details
-  debouncedUpdateComponentValue(map)
+  debouncedUpdateComponentValue(window.map)
 }
 
 window.initComponent = (map: any) => {
@@ -109,7 +107,7 @@ function onRender(event: Event): void {
   const height: number = data.args["height"]
   const width: number = data.args["width"]
 
-  if (!window.__GLOBAL_DATA__ || !window.__GLOBAL_DATA__.map) {
+  if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
     //data hasn't been initialized)
     const map_div = document.getElementById("map_div")
@@ -136,7 +134,6 @@ function onRender(event: Event): void {
       // in the script.
 
       window.__GLOBAL_DATA__ = {
-        map: map_div,
         lat_lng_clicked: null,
         last_object_clicked: null,
         all_drawings: null,
@@ -146,7 +143,7 @@ function onRender(event: Event): void {
         last_circle_radius: null,
         last_circle_polygon: null,
       }
-      render_script.innerHTML = fig + `window.initComponent(map_div)`
+      render_script.innerHTML = fig + `window.map = map_div; window.initComponent(map_div);`
       document.body.appendChild(render_script)
     }
   }
