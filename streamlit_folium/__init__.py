@@ -146,8 +146,6 @@ def st_folium(
             },
         }
 
-    st.expander("Show code").code(leaflet)
-
     component_value = _component_func(
         fig=leaflet,
         id=m_id,
