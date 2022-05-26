@@ -146,6 +146,11 @@ def st_folium(
             },
         }
 
+    try:
+        bounds = fig.get_bounds()
+    except AttributeError:
+        bounds = [[None, None], [None, None]]
+
     component_value = _component_func(
         fig=leaflet,
         id=m_id,
@@ -157,7 +162,7 @@ def st_folium(
             "last_object_clicked": None,
             "all_drawings": None,
             "last_active_drawing": None,
-            "bounds": bounds_to_dict(fig.get_bounds()),
+            "bounds": bounds_to_dict(bounds),
             "zoom": fig.options.get("zoom") if hasattr(fig, "options") else {},
             "last_circle_radius": None,
             "last_circle_polygon": None,
