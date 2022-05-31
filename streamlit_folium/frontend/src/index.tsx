@@ -42,6 +42,7 @@ function updateComponentValue(map: any) {
     zoom: zoom,
     last_circle_radius: global_data.last_circle_radius,
     last_circle_polygon: global_data.last_circle_polygon,
+    center: map.getCenter(),
   })
 }
 
