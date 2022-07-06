@@ -8,7 +8,6 @@ type GlobalData = {
   last_active_drawing: any
   all_drawings: any
   zoom: any
-  drawn_items: any
   last_circle_radius: number | null
   last_circle_polygon: any
 }
@@ -18,6 +17,7 @@ declare global {
     __GLOBAL_DATA__: GlobalData
     initComponent: any
     map: any
+    drawnItems: any
   }
 }
 
@@ -73,8 +73,8 @@ function onLayerClick(e: any) {
   if (e.layer && e.layer.toGeoJSON) {
     global_data.last_active_drawing = e.layer.toGeoJSON()
   }
-  if (global_data.drawn_items.toGeoJSON) {
-    details = global_data.drawn_items.toGeoJSON().features
+  if (window.drawnItems.toGeoJSON) {
+    details = window.drawnItems.toGeoJSON().features
   }
   global_data.all_drawings = details
   debouncedUpdateComponentValue(window.map)
@@ -140,7 +140,6 @@ function onRender(event: Event): void {
         all_drawings: null,
         last_active_drawing: null,
         zoom: null,
-        drawn_items: [],
         last_circle_radius: null,
         last_circle_polygon: null,
       }
