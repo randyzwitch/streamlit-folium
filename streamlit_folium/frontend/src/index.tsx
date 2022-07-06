@@ -18,6 +18,7 @@ declare global {
     __GLOBAL_DATA__: GlobalData
     initComponent: any
     map: any
+    drawnItems: any
   }
 }
 
@@ -73,9 +74,10 @@ function onLayerClick(e: any) {
   if (e.layer && e.layer.toGeoJSON) {
     global_data.last_active_drawing = e.layer.toGeoJSON()
   }
-  if (global_data.drawn_items.toGeoJSON) {
-    details = global_data.drawn_items.toGeoJSON().features
+  if (window.drawnItems.toGeoJSON) {
+    details = window.drawnItems.toGeoJSON().features
   }
+  debugger
   global_data.all_drawings = details
   debouncedUpdateComponentValue(window.map)
 }
