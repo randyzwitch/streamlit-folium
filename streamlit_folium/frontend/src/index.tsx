@@ -77,7 +77,6 @@ function onLayerClick(e: any) {
   if (window.drawnItems.toGeoJSON) {
     details = window.drawnItems.toGeoJSON().features
   }
-  debugger
   global_data.all_drawings = details
   debouncedUpdateComponentValue(window.map)
 }
