@@ -8,7 +8,6 @@ type GlobalData = {
   last_active_drawing: any
   all_drawings: any
   zoom: any
-  drawn_items: any
   last_circle_radius: number | null
   last_circle_polygon: any
 }
@@ -141,7 +140,6 @@ function onRender(event: Event): void {
         all_drawings: null,
         last_active_drawing: null,
         zoom: null,
-        drawn_items: [],
         last_circle_radius: null,
         last_circle_polygon: null,
       }
