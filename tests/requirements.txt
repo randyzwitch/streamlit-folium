@@ -1,4 +1,4 @@
-streamlit==1.8.1
+streamlit==1.11.1
 pytest==7.1.2
 seleniumbase==2.5.4
 opencv-python>=4.3
