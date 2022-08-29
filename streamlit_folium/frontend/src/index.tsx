@@ -104,9 +104,10 @@ function onRender(event: Event): void {
   // Get the RenderData from the event
   const data = (event as CustomEvent<RenderData>).detail
 
-  const fig: string = data.args["fig"]
+  const script: string = data.args["script"]
   const height: number = data.args["height"]
   const width: number = data.args["width"]
+  const html: string = data.args["html"]
 
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
@@ -121,7 +122,7 @@ function onRender(event: Event): void {
       div1.style.height = `${height}px`
       div1.style.width = `${width}px`
 
-      if (fig.indexOf("document.getElementById('export')") !== -1) {
+      if (script.indexOf("document.getElementById('export')") !== -1) {
         let a = document.createElement("a")
         a.href = "#"
         a.id = "export"
@@ -146,8 +147,11 @@ function onRender(event: Event): void {
       // The folium-generated script creates a variable called "map_div", which
       // is the actual Leaflet map.
       render_script.innerHTML =
-        fig + `window.map = map_div; window.initComponent(map_div);`
+        script + `window.map = map_div; window.initComponent(map_div);`
       document.body.appendChild(render_script)
+      const html_div = document.createElement("div")
+      html_div.innerHTML = html
+      document.body.appendChild(html_div)
     }
   }
 }

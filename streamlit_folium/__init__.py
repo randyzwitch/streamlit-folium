@@ -114,6 +114,16 @@ def st_folium(
 
     leaflet = generate_leaflet_string(fig)
 
+    children = list(fig.get_root()._children.values())
+
+    html = ""
+    if len(children) > 1:
+        for child in children[1:]:
+            try:
+                html += child._template.module.html() + "\n"
+            except Exception:
+                pass
+
     # Replace the folium generated map_{random characters} variables
     # with map_div and map_div2 (these end up being both the assumed)
     # div id where the maps are inserted into the DOM, and the names of
@@ -152,7 +162,8 @@ def st_folium(
         bounds = [[None, None], [None, None]]
 
     component_value = _component_func(
-        fig=leaflet,
+        script=leaflet,
+        html=html,
         id=m_id,
         key=generate_js_hash(leaflet, key),
         height=height,
