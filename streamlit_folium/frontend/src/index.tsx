@@ -10,6 +10,8 @@ type GlobalData = {
   zoom: any
   last_circle_radius: number | null
   last_circle_polygon: any
+  returned_objects: Array<string>
+  previous_data: any
 }
 
 declare global {
@@ -31,9 +33,10 @@ let debouncedUpdateComponentValue = debounce(updateComponentValue, 250)
 
 function updateComponentValue(map: any) {
   const global_data = window.__GLOBAL_DATA__
+  let previous_data = global_data.previous_data
   let bounds = map.getBounds()
   let zoom = map.getZoom()
-  Streamlit.setComponentValue({
+  let _data = {
     last_clicked: global_data.lat_lng_clicked,
     last_object_clicked: global_data.last_object_clicked,
     all_drawings: global_data.all_drawings,
@@ -43,7 +46,25 @@ function updateComponentValue(map: any) {
     last_circle_radius: global_data.last_circle_radius,
     last_circle_polygon: global_data.last_circle_polygon,
     center: map.getCenter(),
-  })
+  }
+
+  let to_return = global_data.returned_objects
+
+  // Filter down the data to only that data passed in the returned_objects list
+  let data: any = {}
+  if (to_return) {
+    data = Object.fromEntries(
+      Object.entries(_data).filter(([key]) =>
+        global_data.returned_objects.includes(key)
+      )
+    )
+  } else {
+    data = _data
+  }
+  if (JSON.stringify(previous_data) !== JSON.stringify(data)) {
+    global_data.previous_data = data
+    Streamlit.setComponentValue(data)
+  }
 }
 
 function onMapMove(e: any) {
@@ -108,6 +129,8 @@ function onRender(event: Event): void {
   const height: number = data.args["height"]
   const width: number = data.args["width"]
   const html: string = data.args["html"]
+  const returned_objects: Array<string> = data.args["returned_objects"]
+  const _default: any = data.args["default"]
 
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
@@ -143,6 +166,8 @@ function onRender(event: Event): void {
         zoom: null,
         last_circle_radius: null,
         last_circle_polygon: null,
+        returned_objects: returned_objects,
+        previous_data: _default,
       }
       // The folium-generated script creates a variable called "map_div", which
       // is the actual Leaflet map.
