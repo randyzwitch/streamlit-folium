@@ -3,6 +3,7 @@ import streamlit as st
 st.set_page_config(
     page_title="streamlit-folium documentation",
     page_icon=":world_map:️",
+    layout="wide",
 )
 
 "# streamlit-folium"
@@ -28,34 +29,40 @@ for building geospatial visualizations by adding a _bi-directional_ data transfe
 the web browser and Python, but also the use of larger datasets through intelligent querying.
 
 ### Bi-directional data model
-
-If we take a look at the example from the Home page, it might seem trivial. We define a single point with a marker and pop-up and display it:
 """
-with st.echo():
+left, right = st.columns(2)
 
-    import folium
-    import streamlit as st
 
-    from streamlit_folium import st_folium
+with left:
+    """
+    If we take a look at the example from the Home page, it might seem trivial. We define a single point with a marker and pop-up and display it:
+    """
+    with st.echo():
 
-    # center on Liberty Bell, add marker
-    m = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
-    folium.Marker(
-        [39.949610, -75.150282], popup="Liberty Bell", tooltip="Liberty Bell"
-    ).add_to(m)
+        import folium
+        import streamlit as st
 
-    # call to render Folium map in Streamlit
-    st_data = st_folium(m, width=725)
+        from streamlit_folium import st_folium
 
-"""
-But behind the scenes, a lot more is happening _by default_. The return value of `st_folium` is set to
-`st_data`, and within this Python variable is information about what is being displayed on the screen:
-"""
+        # center on Liberty Bell, add marker
+        m = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
+        folium.Marker(
+            [39.949610, -75.150282], popup="Liberty Bell", tooltip="Liberty Bell"
+        ).add_to(m)
 
-st_data
+        # call to render Folium map in Streamlit
+        st_data = st_folium(m, width=725)
 
-"""
-As the user interacts with the data visualization, the values for `bounds` are constantly updating, along
-with `zoom`. With these values available in Python, we can now limit queries based on bounding box, change
-the marker size based on the `zoom` value and much more!
-"""
+with right:
+    """
+    But behind the scenes, a lot more is happening _by default_. The return value of `st_folium` is set to
+    `st_data`, and within this Python variable is information about what is being displayed on the screen:
+    """
+
+    st_data
+
+    """
+    As the user interacts with the data visualization, the values for `bounds` are constantly updating, along
+    with `zoom`. With these values available in Python, we can now limit queries based on bounding box, change
+    the marker size based on the `zoom` value and much more!
+    """
