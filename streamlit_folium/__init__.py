@@ -1,14 +1,28 @@
 import hashlib
 import os
 import re
-from typing import Dict, List
+import warnings
+from textwrap import dedent
+from typing import Dict, Iterable, List, Optional, Union
 
 import branca
 import folium
 import folium.plugins
-import streamlit as st
 import streamlit.components.v1 as components
 from jinja2 import UndefinedError
+
+# Create a _RELEASE constant. We'll set this to False while we're developing
+# the component, and True when we're ready to package and distribute it.
+_RELEASE = True
+
+if not _RELEASE:
+    _component_func = components.declare_component(
+        "st_folium", url="http://localhost:3001"
+    )
+else:
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+    build_dir = os.path.join(parent_dir, "frontend/build")
+    _component_func = components.declare_component("st_folium", path=build_dir)
 
 
 def generate_js_hash(js_string: str, key: str = None) -> str:
@@ -28,8 +42,9 @@ def generate_js_hash(js_string: str, key: str = None) -> str:
     return s
 
 
-def folium_static(fig, width=700, height=500):
-
+def folium_static(
+    fig: Union[folium.Figure, folium.Map], width: int = 700, height: int = 500
+):
     """
     Renders `folium.Figure` or `folium.Map` in a Streamlit app. This method is
     a static Streamlit Component, meaning, no information is passed back from
@@ -46,12 +61,25 @@ def folium_static(fig, width=700, height=500):
     ----
     If `height` is set on a `folium.Map` or `folium.Figure` object,
     that value supersedes the values set with the keyword arguments of this function.
+
     Example
     -------
     >>> m = folium.Map(location=[45.5236, -122.6750])
     >>> folium_static(m)
     """
-
+    warnings.warn(
+        dedent(
+            """
+        folium_static is deprecated and will be removed in a future release, or
+        simply replaced with with st_folium which always passes
+        returned_objects=[] to the component.
+        Please try using st_folium instead, and
+        post an issue at https://github.com/randyzwitch/streamlit-folium/issues
+        if you experience issues with st_folium.
+        """
+        ),
+        DeprecationWarning,
+    )
     # if Map, wrap in Figure
     if isinstance(fig, folium.Map):
         fig = folium.Figure().add_child(fig)
@@ -64,24 +92,15 @@ def folium_static(fig, width=700, height=500):
         fig, branca.element.Figure
     ):
         return components.html(fig._repr_html_(), height=height + 10, width=width)
-
-
-# Create a _RELEASE constant. We'll set this to False while we're developing
-# the component, and True when we're ready to package and distribute it.
-_RELEASE = True
-
-if not _RELEASE:
-    _component_func = components.declare_component(
-        "st_folium", url="http://localhost:3001"
-    )
-else:
-    parent_dir = os.path.dirname(os.path.abspath(__file__))
-    build_dir = os.path.join(parent_dir, "frontend/build")
-    _component_func = components.declare_component("st_folium", path=build_dir)
+    return st_folium(fig, width=width, height=height, returned_objects=[])
 
 
 def st_folium(
-    fig: folium.MacroElement, key: str = None, height: int = 700, width: int = 500
+    fig: folium.MacroElement,
+    key: Optional[str] = None,
+    height: int = 700,
+    width: int = 500,
+    returned_objects: Optional[Iterable] = None,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -93,6 +112,13 @@ def st_folium(
         An optional key that uniquely identifies this component. If this is
         None, and the component's arguments are changed, the component will
         be re-mounted in the Streamlit frontend and lose its current state.
+    returned_objects: Iterable
+        A list of folium objects (as keys of the returned dictionart) that will be
+        returned to the user when they interact with the map. If None, all folium
+        objects will be returned. This is mainly useful for when you only want your
+        streamlit app to rerun under certain conditions, and not every time the user
+        interacts with the map. If an object not in returned_objects changes on the map,
+        the app will not rerun.
     Returns
     -------
     dict
@@ -161,6 +187,25 @@ def st_folium(
     except AttributeError:
         bounds = [[None, None], [None, None]]
 
+    _defaults = {
+        "last_clicked": None,
+        "last_object_clicked": None,
+        "all_drawings": None,
+        "last_active_drawing": None,
+        "bounds": bounds_to_dict(bounds),
+        "zoom": fig.options.get("zoom") if hasattr(fig, "options") else {},
+        "last_circle_radius": None,
+        "last_circle_polygon": None,
+    }
+
+    # If the user passes a custom list of returned objects, we'll only return those
+
+    defaults = {
+        k: v
+        for k, v in _defaults.items()
+        if returned_objects is None or k in returned_objects
+    }
+
     component_value = _component_func(
         script=leaflet,
         html=html,
@@ -168,16 +213,8 @@ def st_folium(
         key=generate_js_hash(leaflet, key),
         height=height,
         width=width,
-        default={
-            "last_clicked": None,
-            "last_object_clicked": None,
-            "all_drawings": None,
-            "last_active_drawing": None,
-            "bounds": bounds_to_dict(bounds),
-            "zoom": fig.options.get("zoom") if hasattr(fig, "options") else {},
-            "last_circle_radius": None,
-            "last_circle_polygon": None,
-        },
+        returned_objects=returned_objects,
+        default=defaults,
     )
 
     return component_value
