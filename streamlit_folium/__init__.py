@@ -1,8 +1,11 @@
 import hashlib
 import os
 import re
-from typing import Dict, Iterable, List, Optional
+import warnings
+from textwrap import dedent
+from typing import Dict, Iterable, List, Optional, Union
 
+import branca
 import folium
 import folium.plugins
 import streamlit.components.v1 as components
@@ -39,22 +42,62 @@ def generate_js_hash(js_string: str, key: str = None) -> str:
     return s
 
 
-def folium_static(fig, width=700, height=500):
+def folium_static(
+    fig: Union[folium.Figure, folium.Map], width: int = 700, height: int = 500
+):
     """
-    Static version of st_folium, which allows you to put a `folium.Figure` or
-    `folium.Map` into your streamlit app, but doesn't return any data back.
+    Renders `folium.Figure` or `folium.Map` in a Streamlit app. This method is
+    a static Streamlit Component, meaning, no information is passed back from
+    Leaflet on browser interaction.
+    Parameters
+    ----------
+    fig  : folium.Map or folium.Figure
+        Geospatial visualization to render
+    width : int
+        Width of result
+    Height : int
+        Height of result
+    Note
+    ----
+    If `height` is set on a `folium.Map` or `folium.Figure` object,
+    that value supersedes the values set with the keyword arguments of this function.
 
     Example
     -------
     >>> m = folium.Map(location=[45.5236, -122.6750])
     >>> folium_static(m)
     """
+    warnings.warn(
+        dedent(
+            """
+        folium_static is deprecated and will be removed in a future release, or
+        simply replaced with with st_folium which always passes
+        returned_objects=[] to the component.
+        Please try using st_folium instead, and
+        post an issue at https://github.com/randyzwitch/streamlit-folium/issues
+        if you experience issues with st_folium.
+        """
+        ),
+        DeprecationWarning,
+    )
+    # if Map, wrap in Figure
+    if isinstance(fig, folium.Map):
+        fig = folium.Figure().add_child(fig)
+        return components.html(
+            fig.render(), height=(fig.height or height) + 10, width=width
+        )
+
+    # if DualMap, get HTML representation
+    elif isinstance(fig, folium.plugins.DualMap) or isinstance(
+        fig, branca.element.Figure
+    ):
+        return components.html(fig._repr_html_(), height=height + 10, width=width)
     return st_folium(fig, width=width, height=height, returned_objects=[])
 
 
 def st_folium(
     fig: folium.MacroElement,
-    key: str = None,
+    key: Optional[str] = None,
     height: int = 700,
     width: int = 500,
     returned_objects: Optional[Iterable] = None,

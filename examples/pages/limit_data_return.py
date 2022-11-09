@@ -34,7 +34,7 @@ with st.echo():
         [39.949610, -75.150282], popup="Liberty Bell", tooltip="Liberty Bell"
     ).add_to(m)
     folium.Marker(
-        [39.94887, -75.150026],
+        [39.95887, -75.150026],
         popup="Independence Hall",
         tooltip="Independence Hall",
     ).add_to(m)
