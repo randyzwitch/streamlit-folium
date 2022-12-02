@@ -135,6 +135,7 @@ function onRender(event: Event): void {
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
     //data hasn't been initialized)
+    const parent_div = document.getElementById("parent")
     const div1 = document.getElementById("map_div")
     const div2 = document.getElementById("map_div2")
     if (div2) {
@@ -169,6 +170,11 @@ function onRender(event: Event): void {
         returned_objects: returned_objects,
         previous_data: _default,
       }
+      if (script.indexOf("map_div2") !== -1) {
+        parent_div?.classList.remove("single")
+        parent_div?.classList.add("double")
+      }
+
       // The folium-generated script creates a variable called "map_div", which
       // is the actual Leaflet map.
       render_script.innerHTML =
