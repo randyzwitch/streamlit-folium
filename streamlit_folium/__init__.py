@@ -104,10 +104,16 @@ def st_folium(
     key: str | None = None,
     height: int = 700,
     width: int = 500,
+<<<<<<< HEAD
     returned_objects: Iterable[str] | None = None,
     zoom: int | None = None,
     center: tuple[float, float] | None = None,
     feature_group_to_add: folium.FeatureGroup | None = None,
+=======
+    returned_objects: Optional[Iterable] = None,
+    zoom: int | None = None,
+    center: tuple[float, float] | None = None,
+>>>>>>> 4e38f74 (Dynamically update zoom and center)
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -250,7 +256,10 @@ def st_folium(
         default=defaults,
         zoom=zoom,
         center=center,
+<<<<<<< HEAD
         feature_group=feature_group_string,
+=======
+>>>>>>> 4e38f74 (Dynamically update zoom and center)
     )
 
     return component_value

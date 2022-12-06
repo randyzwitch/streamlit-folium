@@ -14,7 +14,6 @@ type GlobalData = {
   previous_data: any
   last_zoom: any
   last_center: any
-  last_feature_group: any
 }
 
 declare global {
@@ -137,7 +136,6 @@ function onRender(event: Event): void {
   const _default: any = data.args["default"]
   const zoom: any = data.args["zoom"]
   const center: any = data.args["center"]
-  const feature_group: string = data.args["feature_group"]
 
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
@@ -178,7 +176,6 @@ function onRender(event: Event): void {
         previous_data: _default,
         last_zoom: null,
         last_center: null,
-        last_feature_group: null,
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")
@@ -196,25 +193,12 @@ function onRender(event: Event): void {
     }
   }
 
-  if (
-    feature_group &&
-    feature_group !== window.__GLOBAL_DATA__.last_feature_group
-  ) {
-    if (window.feature_group) {
-      eval("window.map.removeLayer(window.feature_group)")
-    }
-    eval(feature_group)
-    window.__GLOBAL_DATA__.last_feature_group = feature_group
-    for (let key in window.map._layers) {
-      let layer = window.map._layers[key]
-      layer.on("click", onLayerClick)
-    }
-  }
-
   if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
     window.map.setZoom(zoom)
     window.__GLOBAL_DATA__.last_zoom = zoom
   }
+  console.log("center", center)
+  console.log("lastCenter", window.__GLOBAL_DATA__.last_center)
   if (
     center &&
     JSON.stringify(center) !==
