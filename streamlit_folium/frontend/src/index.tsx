@@ -12,6 +12,8 @@ type GlobalData = {
   last_circle_polygon: any
   returned_objects: Array<string>
   previous_data: any
+  last_zoom: any
+  last_center: any
 }
 
 declare global {
@@ -131,6 +133,8 @@ function onRender(event: Event): void {
   const html: string = data.args["html"]
   const returned_objects: Array<string> = data.args["returned_objects"]
   const _default: any = data.args["default"]
+  const zoom: any = data.args["zoom"]
+  const center: any = data.args["center"]
 
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
@@ -168,6 +172,8 @@ function onRender(event: Event): void {
         last_circle_polygon: null,
         returned_objects: returned_objects,
         previous_data: _default,
+        last_zoom: null,
+        last_center: null,
       }
       // The folium-generated script creates a variable called "map_div", which
       // is the actual Leaflet map.
@@ -178,6 +184,21 @@ function onRender(event: Event): void {
       html_div.innerHTML = html
       document.body.appendChild(html_div)
     }
+  }
+
+  if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
+    window.map.setZoom(zoom)
+    window.__GLOBAL_DATA__.last_zoom = zoom
+  }
+  console.log("center", center)
+  console.log("lastCenter", window.__GLOBAL_DATA__.last_center)
+  if (
+    center &&
+    JSON.stringify(center) !==
+      JSON.stringify(window.__GLOBAL_DATA__.last_center)
+  ) {
+    window.map.panTo(center)
+    window.__GLOBAL_DATA__.last_center = center
   }
 }
 

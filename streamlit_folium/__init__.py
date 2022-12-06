@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import hashlib
 import os
 import re
@@ -43,7 +45,9 @@ def generate_js_hash(js_string: str, key: str = None) -> str:
 
 
 def folium_static(
-    fig: Union[folium.Figure, folium.Map], width: int = 700, height: int = 500
+    fig: folium.Figure | folium.Map,
+    width: int = 700,
+    height: int = 500,
 ):
     """
     Renders `folium.Figure` or `folium.Map` in a Streamlit app. This method is
@@ -101,6 +105,8 @@ def st_folium(
     height: int = 700,
     width: int = 500,
     returned_objects: Optional[Iterable] = None,
+    zoom: int | None = None,
+    center: tuple[float, float] | None = None,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -215,6 +221,8 @@ def st_folium(
         width=width,
         returned_objects=returned_objects,
         default=defaults,
+        zoom=zoom,
+        center=center,
     )
 
     return component_value
