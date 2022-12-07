@@ -126,6 +126,18 @@ def st_folium(
         streamlit app to rerun under certain conditions, and not every time the user
         interacts with the map. If an object not in returned_objects changes on the map,
         the app will not rerun.
+    zoom: int or None
+        The zoom level of the map. If None, the zoom level will be set to the
+        default zoom level of the map. NOTE that if this zoom level is changed, it
+        will *not* reload the map, but simply dynamically change the zoom level.
+    center: tuple(float, float) or None
+        The center of the map. If None, the center will be set to the default
+        center of the map. NOTE that if this center is changed, it will *not* reload
+        the map, but simply dynamically change the center.
+    feature_group_to_add: folium.FeatureGroup or None
+        If you want to dynamically add features to a feature group, you can pass
+        the feature group here. NOTE that if you add a feature to the map, it
+        will *not* reload the map, but simply dynamically add the feature.
     Returns
     -------
     dict
@@ -213,6 +225,8 @@ def st_folium(
         if returned_objects is None or k in returned_objects
     }
 
+    # Convert the feature group to a javascript string which can be used to create it
+    # on the frontend.
     feature_group_string = None
     if feature_group_to_add is not None:
         feature_group_to_add._id = "feature_group"
