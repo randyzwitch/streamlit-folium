@@ -5,7 +5,7 @@ import os
 import re
 import warnings
 from textwrap import dedent
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Dict, Iterable, List
 
 import branca
 import folium
@@ -101,12 +101,13 @@ def folium_static(
 
 def st_folium(
     fig: folium.MacroElement,
-    key: Optional[str] = None,
+    key: str | None = None,
     height: int = 700,
     width: int = 500,
-    returned_objects: Optional[Iterable] = None,
+    returned_objects: Iterable[str] | None = None,
     zoom: int | None = None,
     center: tuple[float, float] | None = None,
+    feature_group_to_add: folium.FeatureGroup | None = None,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -212,6 +213,18 @@ def st_folium(
         if returned_objects is None or k in returned_objects
     }
 
+    feature_group_string = None
+    if feature_group_to_add is not None:
+        feature_group_to_add._id = "feature_group"
+        feature_group_to_add.add_to(fig)
+        feature_group_string = generate_leaflet_string(feature_group_to_add)
+        m_id = get_full_id(fig)
+        feature_group_string = feature_group_string.replace(m_id, "map_div")
+        feature_group_string += """
+        map_div.addLayer(feature_group_feature_group);
+        window.feature_group = feature_group_feature_group;
+        """
+
     component_value = _component_func(
         script=leaflet,
         html=html,
@@ -223,6 +236,7 @@ def st_folium(
         default=defaults,
         zoom=zoom,
         center=center,
+        feature_group=feature_group_string,
     )
 
     return component_value

@@ -14,6 +14,7 @@ type GlobalData = {
   previous_data: any
   last_zoom: any
   last_center: any
+  last_feature_group: any
 }
 
 declare global {
@@ -22,6 +23,7 @@ declare global {
     initComponent: any
     map: any
     drawnItems: any
+    feature_group: any
   }
 }
 
@@ -135,6 +137,7 @@ function onRender(event: Event): void {
   const _default: any = data.args["default"]
   const zoom: any = data.args["zoom"]
   const center: any = data.args["center"]
+  const feature_group: string = data.args["feature_group"]
 
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
@@ -174,6 +177,7 @@ function onRender(event: Event): void {
         previous_data: _default,
         last_zoom: null,
         last_center: null,
+        last_feature_group: null,
       }
       // The folium-generated script creates a variable called "map_div", which
       // is the actual Leaflet map.
@@ -184,6 +188,18 @@ function onRender(event: Event): void {
       html_div.innerHTML = html
       document.body.appendChild(html_div)
     }
+  }
+
+  if (
+    feature_group &&
+    feature_group !== window.__GLOBAL_DATA__.last_feature_group
+  ) {
+    console.log(feature_group)
+    if (window.feature_group) {
+      eval("window.map.removeLayer(window.feature_group)")
+    }
+    eval(feature_group)
+    window.__GLOBAL_DATA__.last_feature_group = feature_group
   }
 
   if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
