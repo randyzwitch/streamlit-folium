@@ -16,7 +16,7 @@ STATE_DATA = pd.read_csv(p)
 
 st.set_page_config(layout="wide")
 
-"# Dynamic Updates (Beta) -- Click on a marker"
+"# Dynamic Updates -- Click on a marker"
 
 st.subheader(
     "Use new arguments `center`, `zoom`, and `feature_group_to_add` to update the map without re-rendering it."
