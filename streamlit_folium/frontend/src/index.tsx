@@ -194,20 +194,21 @@ function onRender(event: Event): void {
     feature_group &&
     feature_group !== window.__GLOBAL_DATA__.last_feature_group
   ) {
-    console.log(feature_group)
     if (window.feature_group) {
       eval("window.map.removeLayer(window.feature_group)")
     }
     eval(feature_group)
     window.__GLOBAL_DATA__.last_feature_group = feature_group
+    for (let key in window.map._layers) {
+      let layer = window.map._layers[key]
+      layer.on("click", onLayerClick)
+    }
   }
 
   if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
     window.map.setZoom(zoom)
     window.__GLOBAL_DATA__.last_zoom = zoom
   }
-  console.log("center", center)
-  console.log("lastCenter", window.__GLOBAL_DATA__.last_center)
   if (
     center &&
     JSON.stringify(center) !==
