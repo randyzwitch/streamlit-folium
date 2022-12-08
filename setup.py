@@ -4,7 +4,7 @@ setuptools.setup(
     name="streamlit_folium",
     version="0.8.0",
     author="Randy Zwitch",
-    author_email="randy@streamlit.io",
+    author_email="rzwitch@gmail.com",
     description="Render Folium objects in Streamlit",
     long_description="",
     long_description_content_type="text/plain",
