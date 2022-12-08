@@ -201,9 +201,13 @@ function onRender(event: Event): void {
     feature_group !== window.__GLOBAL_DATA__.last_feature_group
   ) {
     if (window.feature_group) {
-      // eslint-disable-next-line
-      eval("window.map.removeLayer(window.feature_group)")
+      window.map.removeLayer(window.feature_group)
     }
+    // Though using `eval` is generally a bad idea, we're using it here
+    // because we're evaluating code that we've generated ourselves on the
+    // Python side. This is safe because we're not evaluating user input, so this
+    // couldn't be used to execute arbitrary code.
+
     // eslint-disable-next-line
     eval(feature_group)
     window.__GLOBAL_DATA__.last_feature_group = feature_group
