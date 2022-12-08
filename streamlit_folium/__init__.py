@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import hashlib
 import os
 import re
 import warnings
 from textwrap import dedent
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Dict, Iterable, List
 
 import branca
 import folium
@@ -43,7 +45,9 @@ def generate_js_hash(js_string: str, key: str = None) -> str:
 
 
 def folium_static(
-    fig: Union[folium.Figure, folium.Map], width: int = 700, height: int = 500
+    fig: folium.Figure | folium.Map,
+    width: int = 700,
+    height: int = 500,
 ):
     """
     Renders `folium.Figure` or `folium.Map` in a Streamlit app. This method is
@@ -97,10 +101,13 @@ def folium_static(
 
 def st_folium(
     fig: folium.MacroElement,
-    key: Optional[str] = None,
+    key: str | None = None,
     height: int = 700,
     width: int = 500,
-    returned_objects: Optional[Iterable] = None,
+    returned_objects: Iterable[str] | None = None,
+    zoom: int | None = None,
+    center: tuple[float, float] | None = None,
+    feature_group_to_add: folium.FeatureGroup | None = None,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -119,6 +126,18 @@ def st_folium(
         streamlit app to rerun under certain conditions, and not every time the user
         interacts with the map. If an object not in returned_objects changes on the map,
         the app will not rerun.
+    zoom: int or None
+        The zoom level of the map. If None, the zoom level will be set to the
+        default zoom level of the map. NOTE that if this zoom level is changed, it
+        will *not* reload the map, but simply dynamically change the zoom level.
+    center: tuple(float, float) or None
+        The center of the map. If None, the center will be set to the default
+        center of the map. NOTE that if this center is changed, it will *not* reload
+        the map, but simply dynamically change the center.
+    feature_group_to_add: folium.FeatureGroup or None
+        If you want to dynamically add features to a feature group, you can pass
+        the feature group here. NOTE that if you add a feature to the map, it
+        will *not* reload the map, but simply dynamically add the feature.
     Returns
     -------
     dict
@@ -206,6 +225,20 @@ def st_folium(
         if returned_objects is None or k in returned_objects
     }
 
+    # Convert the feature group to a javascript string which can be used to create it
+    # on the frontend.
+    feature_group_string = None
+    if feature_group_to_add is not None:
+        feature_group_to_add._id = "feature_group"
+        feature_group_to_add.add_to(fig)
+        feature_group_string = generate_leaflet_string(feature_group_to_add)
+        m_id = get_full_id(fig)
+        feature_group_string = feature_group_string.replace(m_id, "map_div")
+        feature_group_string += """
+        map_div.addLayer(feature_group_feature_group);
+        window.feature_group = feature_group_feature_group;
+        """
+
     component_value = _component_func(
         script=leaflet,
         html=html,
@@ -215,6 +248,9 @@ def st_folium(
         width=width,
         returned_objects=returned_objects,
         default=defaults,
+        zoom=zoom,
+        center=center,
+        feature_group=feature_group_string,
     )
 
     return component_value
