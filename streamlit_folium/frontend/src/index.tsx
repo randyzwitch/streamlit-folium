@@ -195,8 +195,10 @@ function onRender(event: Event): void {
     feature_group !== window.__GLOBAL_DATA__.last_feature_group
   ) {
     if (window.feature_group) {
+      // eslint-disable-next-line
       eval("window.map.removeLayer(window.feature_group)")
     }
+    // eslint-disable-next-line
     eval(feature_group)
     window.__GLOBAL_DATA__.last_feature_group = feature_group
     for (let key in window.map._layers) {
