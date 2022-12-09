@@ -157,7 +157,7 @@ def st_folium(
     if not (isinstance(fig, folium.Map) or isinstance(fig, folium.plugins.DualMap)):
         fig = list(fig._children.values())[0]
 
-    leaflet = generate_leaflet_string(fig)
+    leaflet = generate_leaflet_string(fig, base_id="map_div")
 
     children = list(fig.get_root()._children.values())
 
@@ -231,7 +231,9 @@ def st_folium(
     if feature_group_to_add is not None:
         feature_group_to_add._id = "feature_group"
         feature_group_to_add.add_to(fig)
-        feature_group_string = generate_leaflet_string(feature_group_to_add)
+        feature_group_string = generate_leaflet_string(
+            feature_group_to_add, base_id="feature_group"
+        )
         m_id = get_full_id(fig)
         feature_group_string = feature_group_string.replace(m_id, "map_div")
         feature_group_string += """
@@ -262,7 +264,11 @@ def get_full_id(m: folium.MacroElement) -> str:
     return f"{m._name.lower()}_{m._id}"
 
 
-def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
+def generate_leaflet_string(
+    m: folium.MacroElement, nested: bool = True, base_id: str = "0"
+) -> str:
+    m._id = base_id
+
     if isinstance(m, folium.plugins.DualMap):
         if not nested:
             return generate_leaflet_string(m.m1, nested=False)
@@ -284,9 +290,9 @@ def generate_leaflet_string(m: folium.MacroElement, nested: bool = True) -> str:
     if not nested:
         return leaflet
 
-    for _, child in m._children.items():
+    for idx, child in enumerate(m._children.values()):
         try:
-            leaflet += "\n" + generate_leaflet_string(child)
+            leaflet += "\n" + generate_leaflet_string(child, base_id=f"{base_id}_{idx}")
         except UndefinedError:
             pass
 

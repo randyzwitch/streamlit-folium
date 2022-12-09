@@ -213,6 +213,7 @@ function onRender(event: Event): void {
     window.__GLOBAL_DATA__.last_feature_group = feature_group
     for (let key in window.map._layers) {
       let layer = window.map._layers[key]
+      layer.off("click", onLayerClick)
       layer.on("click", onLayerClick)
     }
   }
