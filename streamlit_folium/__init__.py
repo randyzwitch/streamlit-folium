@@ -169,11 +169,6 @@ def st_folium(
             except Exception:
                 pass
 
-    import streamlit as st
-
-    st.code(leaflet, language="html")
-    st.code(html, language="html")
-
     # Replace the folium generated map_{random characters} variables
     # with map_div and map_div2 (these end up being both the assumed)
     # div id where the maps are inserted into the DOM, and the names of
@@ -320,6 +315,16 @@ def _generate_leaflet_string(
 def generate_leaflet_string(
     m: folium.MacroElement, nested: bool = True, base_id: str = "0"
 ) -> str:
+    """
+    Call the _generate_leaflet_string function, and then replace the
+    folium generated var {thing}_{random characters} variables with
+    standardized variables, in case any didn't already get replaced
+    (e.g. in the case of a LayerControl, it still has a reference
+    to the old variable for the tile_layer_{random_characters}).
+
+    This also allows the output to be more testable, since the
+    variable names are consistent.
+    """
     leaflet, mappings = _generate_leaflet_string(m, nested=nested, base_id=base_id)
 
     for k, v in mappings.items():

@@ -1,4 +1,11 @@
+from textwrap import dedent
+
 old = """
+from seleniumbase import BaseCase
+import cv2
+import time
+
+
 class ComponentsTest(BaseCase):
     def test_basic(self):
 
@@ -29,6 +36,31 @@ class ComponentsTest(BaseCase):
 """
 
 
+def test_map():
+    import folium
+
+    from streamlit_folium import generate_leaflet_string
+
+    map = folium.Map()
+    leaflet = generate_leaflet_string(map)
+    assert """var map_0 = L.map(
+    "map_0",
+    {
+        center: [0, 0],
+        crs: L.CRS.EPSG3857,
+        zoom: 1,
+        zoomControl: true,
+        preferCanvas: false,
+    }
+);""" in dedent(
+        leaflet
+    )
+
+    assert "var tile_layer_0_0 = L.tileLayer(" in leaflet
+
+    assert ").addTo(map_0);" in leaflet
+
+
 def test_layer_control():
     import folium
 
@@ -40,3 +72,31 @@ def test_layer_control():
     leaflet = generate_leaflet_string(map)
     assert "var tile_layer_0_0 = L.tileLayer(" in leaflet
     assert '"openstreetmap" : tile_layer_0_0,' in leaflet
+
+
+def test_draw_support():
+    import folium
+    from folium.plugins import Draw
+
+    from streamlit_folium import generate_leaflet_string
+
+    map = folium.Map()
+    Draw(export=True).add_to(map)
+    map.render()
+    leaflet = dedent(generate_leaflet_string(map))
+    assert "map_0.on(L.Draw.Event.CREATED, function(e) {" in leaflet
+    assert "drawnItems.addLayer(layer);" in leaflet
+
+    assert (
+        """map_0.on('draw:created', function(e) {
+    drawnItems.addLayer(e.layer);
+});"""
+        in leaflet
+    )
+
+    assert (
+        """var draw_control_0_1 = new L.Control.Draw(
+    options
+).addTo( map_0 );"""
+        in leaflet
+    )
