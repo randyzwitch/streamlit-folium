@@ -1,8 +1,4 @@
-from seleniumbase import BaseCase
-import cv2
-import time
-
-
+old = """
 class ComponentsTest(BaseCase):
     def test_basic(self):
 
@@ -30,3 +26,17 @@ class ComponentsTest(BaseCase):
         difference = cv2.subtract(original, duplicate)
         b, g, r = cv2.split(difference)
         assert cv2.countNonZero(b) == cv2.countNonZero(g) == cv2.countNonZero(r) == 0
+"""
+
+
+def test_layer_control():
+    import folium
+
+    from streamlit_folium import generate_leaflet_string
+
+    map = folium.Map()
+    folium.LayerControl().add_to(map)
+    map.render()
+    leaflet = generate_leaflet_string(map)
+    assert "var tile_layer_0_0 = L.tileLayer(" in leaflet
+    assert '"openstreetmap" : tile_layer_0_0,' in leaflet
