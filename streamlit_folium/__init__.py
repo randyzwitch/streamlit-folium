@@ -174,13 +174,11 @@ def st_folium(
     # div id where the maps are inserted into the DOM, and the names of
     # the variables themselves.
     if isinstance(fig, folium.plugins.DualMap):
-        m_id = m1_id = get_full_id(fig.m1)
-        leaflet = leaflet.replace(m1_id, "map_div")
+        m_id = get_full_id(fig.m1)
         m2_id = get_full_id(fig.m2)
         leaflet = leaflet.replace(m2_id, "map_div2")
     else:
         m_id = get_full_id(fig)
-        leaflet = leaflet.replace(m_id, "map_div")
 
     # Get rid of the annoying popup
     leaflet = leaflet.replace("alert(coords);", "")
@@ -264,21 +262,31 @@ def get_full_id(m: folium.MacroElement) -> str:
     return f"{m._name.lower()}_{m._id}"
 
 
-def generate_leaflet_string(
-    m: folium.MacroElement, nested: bool = True, base_id: str = "0"
-) -> str:
+def _generate_leaflet_string(
+    m: folium.MacroElement,
+    nested: bool = True,
+    base_id: str = "0",
+    mappings: dict[str, str] | None = None,
+) -> tuple[str, dict[str, str]]:
+    if mappings is None:
+        mappings = {}
+
+    mappings[m._id] = base_id
+
     m._id = base_id
 
     if isinstance(m, folium.plugins.DualMap):
         if not nested:
-            return generate_leaflet_string(m.m1, nested=False)
+            return _generate_leaflet_string(m.m1, nested=False, mappings=mappings)
         # Generate the script for map1
-        leaflet = generate_leaflet_string(m.m1, nested=nested)
+        leaflet, _ = _generate_leaflet_string(m.m1, nested=nested, mappings=mappings)
         # Add the script for map2
-        leaflet += "\n" + generate_leaflet_string(m.m2, nested=nested)
+        leaflet += (
+            "\n" + _generate_leaflet_string(m.m2, nested=nested, mappings=mappings)[0]
+        )
         # Add the script that syncs them together
         leaflet += m._template.module.script(m)
-        return leaflet
+        return leaflet, mappings
 
     try:
         leaflet = m._template.module.script(m)
@@ -288,12 +296,38 @@ def generate_leaflet_string(
         leaflet = m._template.render(this=m, kwargs={})
 
     if not nested:
-        return leaflet
+        return leaflet, mappings
 
     for idx, child in enumerate(m._children.values()):
         try:
-            leaflet += "\n" + generate_leaflet_string(child, base_id=f"{base_id}_{idx}")
-        except UndefinedError:
+            leaflet += (
+                "\n"
+                + _generate_leaflet_string(
+                    child, base_id=f"{base_id}_{idx}", mappings=mappings
+                )[0]
+            )
+        except (UndefinedError, AttributeError):
             pass
+
+    return leaflet, mappings
+
+
+def generate_leaflet_string(
+    m: folium.MacroElement, nested: bool = True, base_id: str = "0"
+) -> str:
+    """
+    Call the _generate_leaflet_string function, and then replace the
+    folium generated var {thing}_{random characters} variables with
+    standardized variables, in case any didn't already get replaced
+    (e.g. in the case of a LayerControl, it still has a reference
+    to the old variable for the tile_layer_{random_characters}).
+
+    This also allows the output to be more testable, since the
+    variable names are consistent.
+    """
+    leaflet, mappings = _generate_leaflet_string(m, nested=nested, base_id=base_id)
+
+    for k, v in mappings.items():
+        leaflet = leaflet.replace(k, v)
 
     return leaflet
