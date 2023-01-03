@@ -48,4 +48,4 @@ jobs:
           playwright install
       - name: Test with pytest
         run: |
-          pytest --headless --maximize
+          pytest --headless
