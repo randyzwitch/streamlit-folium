@@ -102,3 +102,16 @@ def test_dual_map():
 
     assert "var map_div = L.map(" in map_str
     assert "var map_div2 = L.map(" in map_str
+
+
+def test_vector_grid():
+    import folium
+    from folium.plugins import VectorGridProtobuf
+
+    from streamlit_folium import _get_map_string
+
+    m = folium.Map()
+    url = "https://free-{s}.tilehosting.com/data/v3/{z}/{x}/{y}.pbf?token={token}"
+    VectorGridProtobuf(url, "test").add_to(m)
+    leaflet = _get_map_string(m)
+    assert "var vector_grid_protobuf_div_1 = L.vectorGrid.protobuf(" in leaflet
