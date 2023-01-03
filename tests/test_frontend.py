@@ -107,3 +107,10 @@ def test_dual_map(page: Page):
     page.frame_locator('internal:attr=[title="streamlit_folium.st_folium"i]').locator(
         "#map_div2"
     ).get_by_role("img").click()
+
+
+def test_vector_grid(page: Page):
+    page.get_by_role("link", name="vector grid").click()
+    page.frame_locator(
+        'internal:attr=[title="streamlit_folium.st_folium"i]'
+    ).get_by_role("img").click()
