@@ -4,4 +4,4 @@ seleniumbase==2.5.4
 opencv-python>=4.3
 folium>=0.13
 streamlit-folium>=0.6
-playtest-playwright
+pytest-playwright
