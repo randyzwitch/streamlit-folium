@@ -34,7 +34,7 @@ jobs:
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest
+          pip install flake8 pytest pytest-playwright
           if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
           pip install -e .
       - name: Lint with flake8
@@ -43,9 +43,9 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Install chromedriver
+      - name: Install playwright dependencies
         run: |
-          seleniumbase install chromedriver 100
+          playwright install
       - name: Start Streamlit app
         run: |
           streamlit run examples/streamlit_app.py &

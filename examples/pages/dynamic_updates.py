@@ -95,6 +95,8 @@ def main():
             height=500,
         )
 
+    st.sidebar.write(out)
+
     if (
         out["last_object_clicked"]
         and out["last_object_clicked"] != st.session_state["last_object_clicked"]
@@ -102,6 +104,8 @@ def main():
         st.session_state["last_object_clicked"] = out["last_object_clicked"]
         state = get_state_from_lat_lon(*out["last_object_clicked"].values())
         st.session_state["selected_state"] = state
+
+        # st.sidebar.write(st.session_state)
         st.experimental_rerun()
 
 

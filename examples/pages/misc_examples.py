@@ -20,7 +20,7 @@ if page == "Single map":
 
 elif page == "Dual map":
     with st.echo():
-        m = folium.plugins.DualMap(location=[39.949610, -75.150282], zoom_start=16)
+        m = folium.plugins.DualMap(location=[39.949610, -75.13], zoom_start=16)
         tooltip = "Liberty Bell"
         folium.Marker(
             [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
