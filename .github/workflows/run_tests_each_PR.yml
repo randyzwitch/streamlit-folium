@@ -40,7 +40,7 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Install playwright dependencies
         run: |
-          playwright install
+          playwright install --with-deps
       - name: Test with pytest
         run: |
           pytest --browser chromium
