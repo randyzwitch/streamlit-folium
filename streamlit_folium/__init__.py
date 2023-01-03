@@ -27,7 +27,7 @@ else:
     _component_func = components.declare_component("st_folium", path=build_dir)
 
 
-def generate_js_hash(js_string: str, key: str = None) -> str:
+def generate_js_hash(js_string: str, key: str | None = None) -> str:
     """
     Generate a standard key from a javascript string representing a series
     of folium-generated leaflet objects by replacing the hash's at the end
@@ -99,6 +99,75 @@ def folium_static(
     return st_folium(fig, width=width, height=height, returned_objects=[])
 
 
+def _get_siblings(fig: folium.MacroElement) -> str:
+    """Get the html for any siblings of the map"""
+    fig.render()
+    children = list(fig.get_root()._children.values())
+
+    html = ""
+    if len(children) > 1:
+        for child in children[1:]:
+            try:
+                html += child._template.module.html() + "\n"
+            except Exception:
+                pass
+
+    return html
+
+
+def get_full_id(m: folium.MacroElement) -> str:
+    if isinstance(m, folium.plugins.DualMap):
+        m = m.m1
+
+    return f"{m._name.lower()}_{m._id}"
+
+
+def _get_map_string(fig: folium.Map) -> str:
+    fig.render()
+
+    leaflet = generate_leaflet_string(fig)
+
+    # Get rid of the annoying popup
+    leaflet = leaflet.replace("alert(coords);", "")
+
+    leaflet = dedent(leaflet)
+
+    if "drawnItems" not in leaflet:
+        leaflet += "\nvar drawnItems = [];"
+
+    # Replace the folium generated map_{random characters} variables
+    # with map_div and map_div2 (these end up being both the assumed)
+    # div id where the maps are inserted into the DOM, and the names of
+    # the variables themselves.
+    if isinstance(fig, folium.plugins.DualMap):
+        m2_id = get_full_id(fig.m2)
+        leaflet = leaflet.replace(m2_id, "map_div2")
+
+    return leaflet
+
+
+def _get_feature_group_string(
+    feature_group_to_add: folium.FeatureGroup,
+    map: folium.Map,
+) -> str:
+    feature_group_to_add._id = "feature_group"
+    feature_group_to_add.add_to(map)
+    feature_group_string = generate_leaflet_string(
+        feature_group_to_add, base_id="feature_group"
+    )
+    m_id = get_full_id(map)
+    feature_group_string = feature_group_string.replace(m_id, "map_div")
+    feature_group_string = dedent(feature_group_string)
+
+    feature_group_string += dedent(
+        """
+        map_div.addLayer(feature_group_feature_group);
+        window.feature_group = feature_group_feature_group;
+        """
+    )
+    return feature_group_string
+
+
 def st_folium(
     fig: folium.MacroElement,
     key: str | None = None,
@@ -150,41 +219,18 @@ def st_folium(
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
 
+    folium_map: folium.Map = fig  # type: ignore
+
     # handle the case where you pass in a figure rather than a map
     # this assumes that a map is the first child
-    fig.render()
-
     if not (isinstance(fig, folium.Map) or isinstance(fig, folium.plugins.DualMap)):
-        fig = list(fig._children.values())[0]
+        folium_map = list(fig._children.values())[0]
 
-    leaflet = generate_leaflet_string(fig, base_id="map_div")
+    leaflet = _get_map_string(folium_map)  # type: ignore
 
-    children = list(fig.get_root()._children.values())
+    html = _get_siblings(folium_map)
 
-    html = ""
-    if len(children) > 1:
-        for child in children[1:]:
-            try:
-                html += child._template.module.html() + "\n"
-            except Exception:
-                pass
-
-    # Replace the folium generated map_{random characters} variables
-    # with map_div and map_div2 (these end up being both the assumed)
-    # div id where the maps are inserted into the DOM, and the names of
-    # the variables themselves.
-    if isinstance(fig, folium.plugins.DualMap):
-        m_id = get_full_id(fig.m1)
-        m2_id = get_full_id(fig.m2)
-        leaflet = leaflet.replace(m2_id, "map_div2")
-    else:
-        m_id = get_full_id(fig)
-
-    # Get rid of the annoying popup
-    leaflet = leaflet.replace("alert(coords);", "")
-
-    if "drawnItems" not in leaflet:
-        leaflet += "\nvar drawnItems = [];"
+    m_id = get_full_id(folium_map)
 
     def bounds_to_dict(bounds_list: List[List[float]]) -> Dict[str, Dict[str, float]]:
         southwest, northeast = bounds_list
@@ -200,7 +246,7 @@ def st_folium(
         }
 
     try:
-        bounds = fig.get_bounds()
+        bounds = folium_map.get_bounds()
     except AttributeError:
         bounds = [[None, None], [None, None]]
 
@@ -210,7 +256,9 @@ def st_folium(
         "all_drawings": None,
         "last_active_drawing": None,
         "bounds": bounds_to_dict(bounds),
-        "zoom": fig.options.get("zoom") if hasattr(fig, "options") else {},
+        "zoom": folium_map.options.get("zoom")
+        if hasattr(folium_map, "options")
+        else {},
         "last_circle_radius": None,
         "last_circle_polygon": None,
     }
@@ -227,17 +275,10 @@ def st_folium(
     # on the frontend.
     feature_group_string = None
     if feature_group_to_add is not None:
-        feature_group_to_add._id = "feature_group"
-        feature_group_to_add.add_to(fig)
-        feature_group_string = generate_leaflet_string(
-            feature_group_to_add, base_id="feature_group"
+        feature_group_string = _get_feature_group_string(
+            feature_group_to_add,
+            map=folium_map,
         )
-        m_id = get_full_id(fig)
-        feature_group_string = feature_group_string.replace(m_id, "map_div")
-        feature_group_string += """
-        map_div.addLayer(feature_group_feature_group);
-        window.feature_group = feature_group_feature_group;
-        """
 
     component_value = _component_func(
         script=leaflet,
@@ -256,12 +297,6 @@ def st_folium(
     return component_value
 
 
-def get_full_id(m: folium.MacroElement) -> str:
-    if isinstance(m, folium.plugins.DualMap):
-        m = m.m1
-    return f"{m._name.lower()}_{m._id}"
-
-
 def _generate_leaflet_string(
     m: folium.MacroElement,
     nested: bool = True,
@@ -277,12 +312,19 @@ def _generate_leaflet_string(
 
     if isinstance(m, folium.plugins.DualMap):
         if not nested:
-            return _generate_leaflet_string(m.m1, nested=False, mappings=mappings)
+            return _generate_leaflet_string(
+                m.m1, nested=False, mappings=mappings, base_id=base_id
+            )
         # Generate the script for map1
-        leaflet, _ = _generate_leaflet_string(m.m1, nested=nested, mappings=mappings)
+        leaflet, _ = _generate_leaflet_string(
+            m.m1, nested=nested, mappings=mappings, base_id=base_id
+        )
         # Add the script for map2
         leaflet += (
-            "\n" + _generate_leaflet_string(m.m2, nested=nested, mappings=mappings)[0]
+            "\n"
+            + _generate_leaflet_string(
+                m.m2, nested=nested, mappings=mappings, base_id="div2"
+            )[0]
         )
         # Add the script that syncs them together
         leaflet += m._template.module.script(m)
@@ -313,7 +355,7 @@ def _generate_leaflet_string(
 
 
 def generate_leaflet_string(
-    m: folium.MacroElement, nested: bool = True, base_id: str = "0"
+    m: folium.MacroElement, nested: bool = True, base_id: str = "div"
 ) -> str:
     """
     Call the _generate_leaflet_string function, and then replace the
