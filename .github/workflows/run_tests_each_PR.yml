@@ -46,9 +46,6 @@ jobs:
       - name: Install playwright dependencies
         run: |
           playwright install
-      - name: Start Streamlit app
-        run: |
-          streamlit run examples/streamlit_app.py &
       - name: Test with pytest
         run: |
-          cd tests && pytest --headless --maximize
+          pytest --headless --maximize

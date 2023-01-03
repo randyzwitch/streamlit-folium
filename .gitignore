@@ -31,6 +31,7 @@ cffi_bin
 latest_logs
 archived_logs
 current-screenshot.png
+screenshot*.png
 
 ########################################################################
 # OSX - https://github.com/github/gitignore/blob/master/Global/macOS.gitignore
