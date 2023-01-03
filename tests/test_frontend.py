@@ -6,7 +6,7 @@ from playwright.sync_api import Page, expect
 
 LOCAL_TEST = False
 
-PORT = "8599" if LOCAL_TEST else "8503"
+PORT = "8503" if LOCAL_TEST else "8599"
 
 
 @pytest.fixture(scope="module", autouse=True)
