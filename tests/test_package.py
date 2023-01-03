@@ -1,50 +1,13 @@
-from textwrap import dedent
-
-old = """
-from seleniumbase import BaseCase
-import cv2
-import time
-
-
-class ComponentsTest(BaseCase):
-    def test_basic(self):
-
-        # open the app and take a screenshot
-        self.open("http://localhost:8501")
-        time.sleep(10)
-        self.save_screenshot("current-screenshot.png")
-
-        # automated visual regression testing
-        # tests page has identical structure to baseline
-        # https://github.com/seleniumbase/SeleniumBase/tree/master/examples/visual_testing
-        # level 2 chosen, as id values dynamically generated on each page run
-        self.check_window(name="first_test", level=2)
-
-        # check folium app-specific parts
-        # automated test level=2 only checks structure, not content
-        self.assert_text("streamlit-folium")
-
-        # test screenshots look exactly the same
-        original = cv2.imread("visual_baseline/test_basic/first_test/baseline.png")
-        duplicate = cv2.imread("current-screenshot.png")
-
-        assert original.shape == duplicate.shape
-
-        difference = cv2.subtract(original, duplicate)
-        b, g, r = cv2.split(difference)
-        assert cv2.countNonZero(b) == cv2.countNonZero(g) == cv2.countNonZero(r) == 0
-"""
-
-
 def test_map():
     import folium
 
-    from streamlit_folium import generate_leaflet_string
+    from streamlit_folium import _get_map_string
 
     map = folium.Map()
-    leaflet = generate_leaflet_string(map)
-    assert """var map_0 = L.map(
-    "map_0",
+    leaflet = _get_map_string(map)
+    assert (
+        """var map_div = L.map(
+    "map_div",
     {
         center: [0, 0],
         crs: L.CRS.EPSG3857,
@@ -52,13 +15,13 @@ def test_map():
         zoomControl: true,
         preferCanvas: false,
     }
-);""" in dedent(
-        leaflet
+);"""
+        in leaflet
     )
 
-    assert "var tile_layer_0_0 = L.tileLayer(" in leaflet
+    assert "var tile_layer_div_0 = L.tileLayer(" in leaflet
 
-    assert ").addTo(map_0);" in leaflet
+    assert ").addTo(map_div);" in leaflet
 
 
 def test_layer_control():
@@ -70,33 +33,72 @@ def test_layer_control():
     folium.LayerControl().add_to(map)
     map.render()
     leaflet = generate_leaflet_string(map)
-    assert "var tile_layer_0_0 = L.tileLayer(" in leaflet
-    assert '"openstreetmap" : tile_layer_0_0,' in leaflet
+    assert "var tile_layer_div_0 = L.tileLayer(" in leaflet
+    assert '"openstreetmap" : tile_layer_div_0,' in leaflet
 
 
 def test_draw_support():
     import folium
     from folium.plugins import Draw
 
-    from streamlit_folium import generate_leaflet_string
+    from streamlit_folium import _get_map_string
 
     map = folium.Map()
     Draw(export=True).add_to(map)
     map.render()
-    leaflet = dedent(generate_leaflet_string(map))
-    assert "map_0.on(L.Draw.Event.CREATED, function(e) {" in leaflet
+    leaflet = _get_map_string(map)
+    assert "map_div.on(L.Draw.Event.CREATED, function(e) {" in leaflet
     assert "drawnItems.addLayer(layer);" in leaflet
 
     assert (
-        """map_0.on('draw:created', function(e) {
+        """map_div.on('draw:created', function(e) {
     drawnItems.addLayer(e.layer);
 });"""
         in leaflet
     )
 
     assert (
-        """var draw_control_0_1 = new L.Control.Draw(
+        """var draw_control_div_1 = new L.Control.Draw(
     options
-).addTo( map_0 );"""
+).addTo( map_div );"""
         in leaflet
     )
+
+    assert "alert" not in leaflet
+
+
+def test_map_id():
+    import folium
+
+    from streamlit_folium import _get_map_string
+
+    map = folium.Map()
+    leaflet = _get_map_string(map)
+    assert "var map_div = L.map(" in leaflet
+
+
+def test_feature_group():
+    import folium
+
+    from streamlit_folium import _get_feature_group_string
+
+    fg = folium.FeatureGroup()
+    m = folium.Map()
+
+    fg_str = _get_feature_group_string(fg, m)
+
+    assert "var feature_group_feature_group = L.featureGroup(" in fg_str
+    assert ".addTo(map_div);" in fg_str
+
+
+def test_dual_map():
+    import folium.plugins
+
+    from streamlit_folium import _get_map_string
+
+    dual_map = folium.plugins.DualMap()
+    dual_map.render()
+    map_str = _get_map_string(dual_map)
+
+    assert "var map_div = L.map(" in map_str
+    assert "var map_div2 = L.map(" in map_str

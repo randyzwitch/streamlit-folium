@@ -18,8 +18,7 @@ the `all_drawings` and `last_active_drawing` data fields.
 Draw something below to see the return value back to Streamlit!
 """
 
-with st.echo():
-
+with st.echo(code_location="below"):
     import folium
     import streamlit as st
     from folium.plugins import Draw

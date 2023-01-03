@@ -22,7 +22,7 @@ or scrolling will not cause the app to rerun.
 
 """
 
-with st.echo():
+with st.echo(code_location="below"):
     import folium
     import streamlit as st
 
