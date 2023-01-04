@@ -69,6 +69,11 @@ def test_marker_click(page: Page):
 def test_draw(page: Page):
     # Test draw support
     page.get_by_role("link", name="draw support").click()
+    # Click again to see if it resolves timeout issues
+    page.get_by_role("link", name="draw support").click()
+
+    expect(page).to_have_title("streamlit-folium documentation: Draw Support")
+
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
     ).get_by_role("link", name="Draw a polygon").click()
@@ -77,6 +82,10 @@ def test_draw(page: Page):
 def test_limit_data(page: Page):
     # Test limit data support
     page.get_by_role("link", name="limit data return").click()
+    # Click again to see if it resolves timeout issues
+    page.get_by_role("link", name="limit data return").click()
+
+    expect(page).to_have_title("streamlit-folium documentation: Limit Data Return")
 
     expect(page.get_by_text('{"last_object_clicked":NULL}')).to_be_visible()
 
@@ -96,6 +105,11 @@ def test_limit_data(page: Page):
 
 def test_dual_map(page: Page):
     page.get_by_role("link", name="misc examples").click()
+    # Click again to see if it resolves timeout issues
+    page.get_by_role("link", name="misc examples").click()
+
+    expect(page).to_have_title("streamlit-folium documentation: Misc Examples")
+
     page.locator("label").filter(has_text="Dual map").click()
 
     # Click marker on left map
@@ -111,6 +125,10 @@ def test_dual_map(page: Page):
 
 def test_vector_grid(page: Page):
     page.get_by_role("link", name="vector grid").click()
+    page.get_by_role("link", name="vector grid").click()
+
+    expect(page).to_have_title("streamlit-folium documentation: Vector Grid")
+
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
     ).get_by_role("img").click()

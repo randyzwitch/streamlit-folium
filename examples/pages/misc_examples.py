@@ -5,7 +5,11 @@ import streamlit as st
 
 from streamlit_folium import st_folium
 
-st.set_page_config(layout="wide")
+st.set_page_config(
+    layout="wide",
+    page_title="streamlit-folium documentation: Misc Examples",
+    page_icon="random",
+)
 
 page = st.radio("Select map type", ["Single map", "Dual map", "Branca figure"], index=0)
 
