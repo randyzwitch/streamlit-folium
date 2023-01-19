@@ -5,6 +5,7 @@ import { circleToPolygon } from "./circle-to-polygon"
 type GlobalData = {
   lat_lng_clicked: any
   last_object_clicked: any
+  last_object_clicked_tooltip: string | null
   last_active_drawing: any
   all_drawings: any
   zoom: any
@@ -43,6 +44,7 @@ function updateComponentValue(map: any) {
   let _data = {
     last_clicked: global_data.lat_lng_clicked,
     last_object_clicked: global_data.last_object_clicked,
+    last_object_clicked_tooltip: global_data.last_object_clicked_tooltip,
     all_drawings: global_data.all_drawings,
     last_active_drawing: global_data.last_active_drawing,
     bounds: bounds,
@@ -75,6 +77,12 @@ function onMapMove(e: any) {
   debouncedUpdateComponentValue(window.map)
 }
 
+function extractContent(s: string) {
+  var span = document.createElement('span');
+  span.innerHTML = s;
+  return (span.textContent || span.innerText).trim();
+}
+
 function onDraw(e: any) {
   const global_data = window.__GLOBAL_DATA__
 
@@ -94,6 +102,12 @@ function onDraw(e: any) {
 function onLayerClick(e: any) {
   const global_data = window.__GLOBAL_DATA__
   global_data.last_object_clicked = e.latlng
+
+  if (e.sourceTarget._tooltip && e.sourceTarget._tooltip._content) {
+    let tooltip_text = extractContent(e.sourceTarget._tooltip._content);
+    global_data.last_object_clicked_tooltip = tooltip_text;
+  }
+
   let details: Array<any> = []
   if (e.layer && e.layer.toGeoJSON) {
     global_data.last_active_drawing = e.layer.toGeoJSON()
@@ -169,6 +183,7 @@ function onRender(event: Event): void {
       window.__GLOBAL_DATA__ = {
         lat_lng_clicked: null,
         last_object_clicked: null,
+        last_object_clicked_tooltip: null,
         all_drawings: null,
         last_active_drawing: null,
         zoom: null,

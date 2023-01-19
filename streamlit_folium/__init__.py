@@ -253,6 +253,7 @@ def st_folium(
     _defaults = {
         "last_clicked": None,
         "last_object_clicked": None,
+        "last_object_clicked_tooltip": None,
         "all_drawings": None,
         "last_active_drawing": None,
         "bounds": bounds_to_dict(bounds),

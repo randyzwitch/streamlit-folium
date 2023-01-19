@@ -6,7 +6,7 @@ from playwright.sync_api import Page, expect
 
 LOCAL_TEST = False
 
-PORT = "8503" if LOCAL_TEST else "8599"
+PORT = "8503" if LOCAL_TEST else "8699"
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -38,7 +38,7 @@ def run_streamlit():
                 "run",
                 "examples/streamlit_app.py",
                 "--server.port",
-                "8599",
+                PORT,
                 "--server.headless",
                 "true",
             ]
@@ -132,3 +132,16 @@ def test_vector_grid(page: Page):
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
     ).get_by_role("img").click()
+
+
+def test_tooltip_click(page: Page):
+    expect(page.get_by_text('"last_object_clicked_tooltip":NULL')).to_be_visible()
+
+    # Click marker on map
+    page.frame_locator(
+        'internal:attr=[title="streamlit_folium.st_folium"i]'
+    ).get_by_role("img").click()
+
+    expect(
+        page.get_by_text('"last_object_clicked_tooltip":"Liberty Bell"')
+    ).to_be_visible()
