@@ -91,8 +91,15 @@ function onDraw(e: any) {
 
   if (type === "circle") {
     var center: [number, number] = [layer._latlng.lng, layer._latlng.lat]
-    var radius = layer.options.radius // In km
+    var radius = layer.options.radius // In meters
     var polygon = circleToPolygon(center, radius)
+    
+    // Ensure that radius gets added to circle properties when converted to GeoJSON
+    var feature = e.layer.feature = e.layer.feature || {}
+    feature.type = "Feature"
+    feature.properties = feature.properties || {}
+    feature.properties["radius"] = radius
+    
     global_data.last_circle_radius = radius / 1000 // Convert to km to match what UI shows
     global_data.last_circle_polygon = polygon
   }
