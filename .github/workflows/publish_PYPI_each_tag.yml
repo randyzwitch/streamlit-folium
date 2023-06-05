@@ -18,8 +18,10 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
-        node-version: 16
-#     - name: install node
+    - name: install node
+      uses: actions/setup-node@v3
+      with:
+          node-version: 16
 #       run: |
 #         sudo apt install nodejs npm
 #         npm --version
