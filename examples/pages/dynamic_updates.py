@@ -19,18 +19,19 @@ st.set_page_config(layout="wide")
 "# Dynamic Updates -- Click on a marker"
 
 st.subheader(
-    "Use new arguments `center`, `zoom`, and `feature_group_to_add` to update the map without re-rendering it."
+    """Use new arguments `center`, `zoom`, and `feature_group_to_add` to update the map
+    without re-rendering it."""
 )
 
 
-@st.experimental_memo
+@st.cache_data
 def _get_all_state_bounds() -> dict:
     url = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
     data = requests.get(url).json()
     return data
 
 
-@st.experimental_memo
+@st.cache_data
 def get_state_bounds(state: str) -> dict:
     data = _get_all_state_bounds()
     state_entry = [f for f in data["features"] if f["properties"]["name"] == state][0]

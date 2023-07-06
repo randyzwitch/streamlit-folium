@@ -9,11 +9,14 @@ st.set_page_config(
 """
 # streamlit-folium: Draw Support
 
-Folium supports some of the [most popular leaflet plugins](https://python-visualization.github.io/folium/plugins.html). In this example,
-we can add the [`Draw`](https://python-visualization.github.io/folium/plugins.html#folium.plugins.Draw) plugin to our map, which allows for drawing geometric shapes on the map.
+Folium supports some of the [most popular leaflet
+plugins](https://python-visualization.github.io/folium/plugins.html). In this example,
+we can add the
+[`Draw`](https://python-visualization.github.io/folium/plugins.html#folium.plugins.Draw)
+plugin to our map, which allows for drawing geometric shapes on the map.
 
-When a shape is drawn on the map, the coordinates that represent that shape are passed back as a geojson feature via
-the `all_drawings` and `last_active_drawing` data fields.
+When a shape is drawn on the map, the coordinates that represent that shape are passed
+back as a geojson feature via the `all_drawings` and `last_active_drawing` data fields.
 
 Draw something below to see the return value back to Streamlit!
 """

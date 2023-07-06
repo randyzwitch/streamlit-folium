@@ -9,7 +9,8 @@ st.set_page_config(
 """
 # streamlit-folium: Limit Data Return
 
-By default, st_folium returns quite a few data fields (zoom, bounds, last active drawing,
+By default, st_folium returns quite a few data fields (zoom, bounds, last active
+drawing,
  all drawings, etc). If you only need a subset of these fields, you can pass a list of
  the fields you want returned to the `returned_objects` parameter.
 """

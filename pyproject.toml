@@ -1,0 +1,33 @@
+[tool.ruff]
+line-length = 88
+select = [
+    "E",
+    "F",
+    "I001",
+]
+
+[tool.black]
+exclude = '''
+(
+  /(
+      \.vscode
+    | \.git
+    | \.pytest_cache
+    | \.mypy_cache
+    | \.venv
+    | \.env
+    | \.direnv
+  )/
+)
+'''
+include = '\.pyi?$'
+line-length = 88
+
+[tool.mypy]
+files = [
+  "**/*.py",
+]
+follow_imports = "silent"
+ignore_missing_imports = true
+scripts_are_modules = true
+python_version = 3.9

@@ -19,7 +19,6 @@ when the user interacts with the map, and you will not get any data back from th
 "### Basic `returned_objects=[]` Example"
 
 with st.echo():
-
     import folium
     import streamlit as st
 
