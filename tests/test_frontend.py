@@ -145,3 +145,41 @@ def test_tooltip_click(page: Page):
     expect(
         page.get_by_text('"last_object_clicked_tooltip":"Liberty Bell"')
     ).to_be_visible()
+
+
+def test_popup_text(page: Page):
+    page.get_by_role("link", name="simple popup").click()
+
+    expect(page.get_by_text("Popup: None")).to_be_visible()
+    expect(page.get_by_text("Tooltip: None")).to_be_visible()
+
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
+        "img"
+    ).nth(0).click()
+
+    try:
+        expect(page.get_by_text("Popup: Popup!")).to_be_visible()
+        expect(page.get_by_text("Tooltip: Tooltip!")).to_be_visible()
+    except Exception as e:
+        page.screenshot(path="screenshot-popup.png")
+        raise e
+
+
+def test_return_on_hover(page: Page):
+    page.get_by_role("link", name="simple popup").click()
+
+    expect(page.get_by_text("Popup: None")).to_be_visible()
+    expect(page.get_by_text("Tooltip: None")).to_be_visible()
+
+    page.get_by_text("Return on hover?").click()
+
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
+        "img"
+    ).nth(1).hover()
+
+    try:
+        expect(page.get_by_text("Popup: Popup 2!")).to_be_visible()
+        expect(page.get_by_text("Tooltip: Tooltip 2!")).to_be_visible()
+    except Exception as e:
+        page.screenshot(path="screenshot-popup2.png")
+        raise e
