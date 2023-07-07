@@ -61,7 +61,7 @@ def test_marker_click(page: Page):
     # Click marker
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("img").click()
+    ).get_by_role("img").nth(0).click()
 
     expect(page.get_by_text('"last_object_clicked":NULL')).to_be_hidden()
 
@@ -115,12 +115,12 @@ def test_dual_map(page: Page):
     # Click marker on left map
     page.frame_locator('internal:attr=[title="streamlit_folium.st_folium"i]').locator(
         "#map_div"
-    ).get_by_role("img").click()
+    ).get_by_role("img").nth(0).click()
 
     # Click marker on right map
     page.frame_locator('internal:attr=[title="streamlit_folium.st_folium"i]').locator(
         "#map_div2"
-    ).get_by_role("img").click()
+    ).get_by_role("img").nth(0).click()
 
 
 def test_vector_grid(page: Page):
@@ -140,7 +140,7 @@ def test_tooltip_click(page: Page):
     # Click marker on map
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("img").click()
+    ).get_by_role("img").nth(0).click()
 
     expect(
         page.get_by_text('"last_object_clicked_tooltip":"Liberty Bell"')

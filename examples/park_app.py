@@ -4,11 +4,13 @@ from typing import Dict, List, Optional
 import folium
 import requests
 import streamlit as st
+
 from streamlit_folium import st_folium
 
 st.set_page_config(layout="wide")
 
-@st.experimental_singleton
+
+@st.cache_resource
 def get_data() -> List[Dict]:
     api_key = st.secrets["api_key"]
     url = f"https://developer.nps.gov/api/v1/parks?api_key={api_key}&limit=500"
@@ -20,6 +22,7 @@ def get_data() -> List[Dict]:
         park["_point"] = Point.from_dict(park)
 
     return parks
+
 
 @dataclass
 class Point:
@@ -58,16 +61,20 @@ class Bounds:
             Point.from_dict(data["_southWest"]), Point.from_dict(data["_northEast"])
         )
 
-############################# 
+
+#############################
 # Streamlit app
 #############################
 
 "## National Parks in the United States"
 
 """
-The National Parks Service provides an [API](https://www.nps.gov/subjects/digital/nps-data-api.htm) to programmatically explore NPS data. 
+The National Parks Service provides an
+[API](https://www.nps.gov/subjects/digital/nps-data-api.htm) to programmatically explore
+NPS data.
 
-We can take data about each park and display it on the map _conditionally_ based on whether it is in the viewport. 
+We can take data about each park and display it on the map _conditionally_ based on
+whether it is in the viewport.
 
 ---
 """
@@ -84,18 +91,17 @@ with c1:
     m = folium.Map(location=[39.949610, -75.150282], zoom_start=4)
 
     for park in parks:
-        popup = folium.Popup(f"""
+        popup = folium.Popup(
+            f"""
                   <a href="{park["url"]}" target="_blank">{park["fullName"]}</a><br>
                   <br>
                   {park["operatingHours"][0]["description"]}<br>
                   <br>
                   Phone: {park["contacts"]["phoneNumbers"][0]["phoneNumber"]}<br>
                   """,
-                  max_width = 250)
-        folium.Marker(
-            [park["latitude"], park["longitude"]], popup=popup
-        ).add_to(m)
-
+            max_width=250,
+        )
+        folium.Marker([park["latitude"], park["longitude"]], popup=popup).add_to(m)
 
     map_data = st_folium(m, key="fig1", width=700, height=700)
 
@@ -113,15 +119,17 @@ try:
                     with c2:
                         f"""### _{park["fullName"]}_"""
                         park["description"]
-                        st.image(park["images"][0]["url"], caption = park["images"][0]["caption"])
+                        st.image(
+                            park["images"][0]["url"],
+                            caption=park["images"][0]["caption"],
+                        )
                         st.expander("Show park full details").write(park)
 except TypeError:
     point_clicked = None
 
 # even though there is a c1 reference above, we can do it again
 # output will get appended after original content
-with c1: 
-
+with c1:
     parks_in_view: List[Dict] = []
     for park in parks:
         if map_bounds.contains_point(park["_point"]):

@@ -1,5 +1,4 @@
-streamlit==1.11.1
+streamlit>1.11.1
 pytest>=7.1.2
 folium>=0.13
-streamlit-folium>=0.6
 pytest-playwright

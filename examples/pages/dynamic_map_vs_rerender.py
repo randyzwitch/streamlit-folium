@@ -3,9 +3,10 @@ import random
 import folium
 import streamlit as st
 
+from streamlit_folium import st_folium
+
 st.set_page_config(layout="wide")
 
-from streamlit_folium import st_folium
 
 CENTER_START = [39.949610, -75.150282]
 ZOOM_START = 8
