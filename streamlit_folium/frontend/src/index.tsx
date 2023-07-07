@@ -141,7 +141,7 @@ function onLayerClick(e: any) {
   debouncedUpdateComponentValue(window.map)
 }
 
-window.initComponent = (map: any, return_on_hover: Boolean) => {
+window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("click", onMapClick)
   map.on("moveend", onMapMove)
   for (let key in map._layers) {
