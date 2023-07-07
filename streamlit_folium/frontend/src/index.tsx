@@ -6,6 +6,7 @@ type GlobalData = {
   lat_lng_clicked: any
   last_object_clicked: any
   last_object_clicked_tooltip: string | null
+  last_object_clicked_popup: string | null
   last_active_drawing: any
   all_drawings: any
   zoom: any
@@ -45,6 +46,7 @@ function updateComponentValue(map: any) {
     last_clicked: global_data.lat_lng_clicked,
     last_object_clicked: global_data.last_object_clicked,
     last_object_clicked_tooltip: global_data.last_object_clicked_tooltip,
+    last_object_clicked_popup: global_data.last_object_clicked_popup,
     all_drawings: global_data.all_drawings,
     last_active_drawing: global_data.last_active_drawing,
     bounds: bounds,
@@ -78,9 +80,9 @@ function onMapMove(e: any) {
 }
 
 function extractContent(s: string) {
-  var span = document.createElement('span');
-  span.innerHTML = s;
-  return (span.textContent || span.innerText).trim();
+  var span = document.createElement("span")
+  span.innerHTML = s
+  return (span.textContent || span.innerText).trim()
 }
 
 function onDraw(e: any) {
@@ -93,13 +95,13 @@ function onDraw(e: any) {
     var center: [number, number] = [layer._latlng.lng, layer._latlng.lat]
     var radius = layer.options.radius // In meters
     var polygon = circleToPolygon(center, radius)
-    
+
     // Ensure that radius gets added to circle properties when converted to GeoJSON
-    var feature = e.layer.feature = e.layer.feature || {}
+    var feature = (e.layer.feature = e.layer.feature || {})
     feature.type = "Feature"
     feature.properties = feature.properties || {}
     feature.properties["radius"] = radius
-    
+
     global_data.last_circle_radius = radius / 1000 // Convert to km to match what UI shows
     global_data.last_circle_polygon = polygon
   }
@@ -111,8 +113,21 @@ function onLayerClick(e: any) {
   global_data.last_object_clicked = e.latlng
 
   if (e.sourceTarget._tooltip && e.sourceTarget._tooltip._content) {
-    let tooltip_text = extractContent(e.sourceTarget._tooltip._content);
-    global_data.last_object_clicked_tooltip = tooltip_text;
+    let tooltip_text = extractContent(e.sourceTarget.getTooltip().getContent())
+    global_data.last_object_clicked_tooltip = tooltip_text
+  } else if (e.target._tooltip && e.target._tooltip._content) {
+    let tooltip_text = e.target.getTooltip().getContent()(
+      e.sourceTarget
+    ).innerText
+    global_data.last_object_clicked_tooltip = tooltip_text
+  }
+
+  if (e.sourceTarget._popup && e.sourceTarget._popup._content) {
+    let popup_text = e.sourceTarget.getPopup().getContent().innerText
+    global_data.last_object_clicked_popup = popup_text
+  } else if (e.target._popup && e.target._popup._content) {
+    let popup_text = e.target.getPopup().getContent()(e.sourceTarget).innerText
+    global_data.last_object_clicked_popup = popup_text
   }
 
   let details: Array<any> = []
@@ -126,12 +141,15 @@ function onLayerClick(e: any) {
   debouncedUpdateComponentValue(window.map)
 }
 
-window.initComponent = (map: any) => {
+window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("click", onMapClick)
   map.on("moveend", onMapMove)
   for (let key in map._layers) {
     let layer = map._layers[key]
     layer.on("click", onLayerClick)
+    if (return_on_hover) {
+      layer.on("mouseover", onLayerClick)
+    }
   }
   map.on("draw:created", onDraw)
   map.on("draw:edited", onDraw)
@@ -159,6 +177,7 @@ function onRender(event: Event): void {
   const zoom: any = data.args["zoom"]
   const center: any = data.args["center"]
   const feature_group: string = data.args["feature_group"]
+  const return_on_hover: boolean = data.args["return_on_hover"]
 
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
@@ -191,6 +210,7 @@ function onRender(event: Event): void {
         lat_lng_clicked: null,
         last_object_clicked: null,
         last_object_clicked_tooltip: null,
+        last_object_clicked_popup: null,
         all_drawings: null,
         last_active_drawing: null,
         zoom: null,
@@ -210,7 +230,8 @@ function onRender(event: Event): void {
       // The folium-generated script creates a variable called "map_div", which
       // is the actual Leaflet map.
       render_script.innerHTML =
-        script + `window.map = map_div; window.initComponent(map_div);`
+        script +
+        `window.map = map_div; window.initComponent(map_div, ${return_on_hover});`
       document.body.appendChild(render_script)
       const html_div = document.createElement("div")
       html_div.innerHTML = html
@@ -237,6 +258,10 @@ function onRender(event: Event): void {
       let layer = window.map._layers[key]
       layer.off("click", onLayerClick)
       layer.on("click", onLayerClick)
+      if (return_on_hover) {
+        layer.off("mouseover", onLayerClick)
+        layer.on("mouseover", onLayerClick)
+      }
     }
   }
 
