@@ -129,9 +129,9 @@ def test_vector_grid(page: Page):
 
     expect(page).to_have_title("streamlit-folium documentation: Vector Grid")
 
-    page.frame_locator(
-        'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("img").click()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+        ".leaflet-marker-icon"
+    ).click()
 
 
 def test_tooltip_click(page: Page):
