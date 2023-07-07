@@ -123,7 +123,7 @@ function onLayerClick(e: any) {
   }
 
   if (e.sourceTarget._popup && e.sourceTarget._popup._content) {
-    let popup_text = extractContent(e.sourceTarget.getPopup().getContent())
+    let popup_text = e.sourceTarget.getPopup().getContent().innerText
     global_data.last_object_clicked_popup = popup_text
   } else if (e.target._popup && e.target._popup._content) {
     let popup_text = e.target.getPopup().getContent()(e.sourceTarget).innerText
@@ -141,7 +141,7 @@ function onLayerClick(e: any) {
   debouncedUpdateComponentValue(window.map)
 }
 
-window.initComponent = (map: any, return_on_hover: Boolean) => {
+window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("click", onMapClick)
   map.on("moveend", onMapMove)
   for (let key in map._layers) {

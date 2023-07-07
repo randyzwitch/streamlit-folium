@@ -129,9 +129,9 @@ def test_vector_grid(page: Page):
 
     expect(page).to_have_title("streamlit-folium documentation: Vector Grid")
 
-    page.frame_locator(
-        'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("img").nth(0).click()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+        ".leaflet-marker-icon"
+    ).click()
 
 
 def test_tooltip_click(page: Page):
@@ -148,15 +148,43 @@ def test_tooltip_click(page: Page):
 
 
 def test_popup_text(page: Page):
-    page.get_by_role("link", name="geojson popup").click()
+    page.get_by_role("link", name="simple popup").click()
+    page.get_by_role("link", name="simple popup").click()
 
-    expect(page.get_by_text("State Texas % Change 16.023")).to_be_hidden()
+    expect(page.get_by_text("Popup: None")).to_be_visible()
+    expect(page.get_by_text("Tooltip: None")).to_be_visible()
 
-    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
-        "path:nth-child(43)"
-    ).click()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
+        "img"
+    ).nth(0).click()
 
-    expect(page.get_by_text("State Texas % Change 16.023")).to_be_visible()
+    try:
+        expect(page.get_by_text("Popup: Popup!")).to_be_visible()
+        expect(page.get_by_text("Tooltip: Tooltip!")).to_be_visible()
+    except Exception as e:
+        page.screenshot(path="screenshot-popup.png")
+        raise e
+
+
+def test_return_on_hover(page: Page):
+    page.get_by_role("link", name="simple popup").click()
+    page.get_by_role("link", name="simple popup").click()
+
+    expect(page.get_by_text("Popup: None")).to_be_visible()
+    expect(page.get_by_text("Tooltip: None")).to_be_visible()
+
+    page.get_by_text("Return on hover?").click()
+
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
+        "img"
+    ).nth(1).hover()
+
+    try:
+        expect(page.get_by_text("Popup: Popup 2!")).to_be_visible()
+        expect(page.get_by_text("Tooltip: Tooltip 2!")).to_be_visible()
+    except Exception as e:
+        page.screenshot(path="screenshot-popup2.png")
+        raise e
 
 
 def test_responsiveness(page: Page):
