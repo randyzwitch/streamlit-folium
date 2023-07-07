@@ -170,4 +170,6 @@ def test_popup_text(page: Page):
 
     texas.click()
 
+    texas.click()
+
     expect(page.get_by_text("State Texas % Change 16.023")).to_be_visible()
