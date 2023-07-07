@@ -129,9 +129,13 @@ def test_vector_grid(page: Page):
 
     expect(page).to_have_title("streamlit-folium documentation: Vector Grid")
 
-    page.frame_locator(
-        'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("img").nth(0).click()
+    try:
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+            ".leaflet-marker-icon"
+        ).click()
+    except Exception as e:
+        page.screenshot(path="screenshot-vector-grid.png")
+        raise e
 
 
 def test_tooltip_click(page: Page):
@@ -150,12 +154,20 @@ def test_tooltip_click(page: Page):
 def test_popup_text(page: Page):
     page.get_by_role("link", name="geojson popup").click()
 
-    sleep(10)
+    page.get_by_role("link", name="geojson popup").click()
 
     expect(page.get_by_text("State Texas % Change 16.023")).to_be_hidden()
 
-    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+    texas = page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
         "path:nth-child(43)"
-    ).click()
+    )
+
+    try:
+        expect(texas).to_be_visible(timeout=30_000)
+    except Exception as e:
+        page.screenshot(path="screenshot-popup-text.png")
+        raise e
+
+    texas.click()
 
     expect(page.get_by_text("State Texas % Change 16.023")).to_be_visible()
