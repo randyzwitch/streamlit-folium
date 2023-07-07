@@ -149,6 +149,7 @@ def test_tooltip_click(page: Page):
 
 def test_popup_text(page: Page):
     page.get_by_role("link", name="simple popup").click()
+    page.get_by_role("link", name="simple popup").click()
 
     expect(page.get_by_text("Popup: None")).to_be_visible()
     expect(page.get_by_text("Tooltip: None")).to_be_visible()
@@ -166,6 +167,7 @@ def test_popup_text(page: Page):
 
 
 def test_return_on_hover(page: Page):
+    page.get_by_role("link", name="simple popup").click()
     page.get_by_role("link", name="simple popup").click()
 
     expect(page.get_by_text("Popup: None")).to_be_visible()
