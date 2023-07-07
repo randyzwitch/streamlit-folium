@@ -152,29 +152,14 @@ def test_tooltip_click(page: Page):
 
 
 def test_popup_text(page: Page):
-    page.get_by_role("link", name="geojson popup").click()
+    page.get_by_role("link", name="simple popup").click()
 
-    page.get_by_role("link", name="geojson popup").click()
+    expect(page.get_by_text("Popup: None")).to_be_visible()
+    expect(page.get_by_text("Tooltip: None")).to_be_visible()
 
-    expect(page.get_by_text("State Texas % Change 16.023")).to_be_hidden()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
+        "img"
+    ).click()
 
-    texas = page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
-        "path:nth-child(43)"
-    )
-
-    try:
-        expect(texas).to_be_visible(timeout=30_000)
-    except Exception as e:
-        page.screenshot(path="screenshot-popup-text.png")
-        raise e
-
-    texas.click()
-
-    texas.click()
-
-    try:
-        expect(page.get_by_text("State Texas % Change 16.023")).to_be_visible()
-    except Exception as e:
-        page.screenshot(path="screenshot-popup-text2.png")
-        print(page.content())
-        raise e
+    expect(page.get_by_text("Popup: Popup!")).to_be_visible()
+    expect(page.get_by_text("Tooltip: Tooltip!")).to_be_visible()
