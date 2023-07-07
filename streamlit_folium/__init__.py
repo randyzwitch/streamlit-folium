@@ -177,6 +177,7 @@ def st_folium(
     zoom: int | None = None,
     center: tuple[float, float] | None = None,
     feature_group_to_add: folium.FeatureGroup | None = None,
+    return_on_hover: bool = False,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -207,6 +208,11 @@ def st_folium(
         If you want to dynamically add features to a feature group, you can pass
         the feature group here. NOTE that if you add a feature to the map, it
         will *not* reload the map, but simply dynamically add the feature.
+    return_on_hover: bool
+        If True, the app will rerun when the user hovers over the map, not
+        just when they click on it. This is useful if you want to dynamically
+        update your app based on where the user is hovering. NOTE: This may cause
+        performance issues if the app is rerunning too often.
     Returns
     -------
     dict
@@ -254,6 +260,7 @@ def st_folium(
         "last_clicked": None,
         "last_object_clicked": None,
         "last_object_clicked_tooltip": None,
+        "last_object_clicked_popup": None,
         "all_drawings": None,
         "last_active_drawing": None,
         "bounds": bounds_to_dict(bounds),
@@ -293,6 +300,7 @@ def st_folium(
         zoom=zoom,
         center=center,
         feature_group=feature_group_string,
+        return_on_hover=return_on_hover,
     )
 
     return component_value

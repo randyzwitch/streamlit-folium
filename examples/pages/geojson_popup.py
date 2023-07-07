@@ -104,6 +104,14 @@ folium.GeoJson(
 
 colormap.add_to(m)
 
-output = st_folium(m, width=700, height=500, returned_objects=None)
+return_on_hover = st.checkbox("Return on hover?", True)
 
-st.write(output)
+output = st_folium(m, width=700, height=500, return_on_hover=return_on_hover)
+
+left, right = st.columns(2)
+with left:
+    st.write("## Tooltip")
+    st.write(output["last_object_clicked_tooltip"])
+with right:
+    st.write("## Popup")
+    st.write(output["last_object_clicked_popup"])

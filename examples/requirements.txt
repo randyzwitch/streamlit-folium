@@ -1,4 +1,4 @@
 streamlit!=1.24.0
-streamlit-folium>=0.11.1
+-e ..
 requests
 geopandas
