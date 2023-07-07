@@ -42,4 +42,4 @@ jobs:
           playwright install --with-deps
       - name: Test with pytest
         run: |
-          pytest --browser chromium
+          pytest --browser chromium -s
