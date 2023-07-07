@@ -50,7 +50,7 @@ def generate_js_hash(
 
 def folium_static(
     fig: folium.Figure | folium.Map,
-    width: int = 700,
+    width: int | None = 700,
     height: int = 500,
 ):
     """
@@ -176,12 +176,13 @@ def st_folium(
     fig: folium.MacroElement,
     key: str | None = None,
     height: int = 700,
-    width: int = 500,
+    width: int | None = 500,
     returned_objects: Iterable[str] | None = None,
     zoom: int | None = None,
     center: tuple[float, float] | None = None,
     feature_group_to_add: folium.FeatureGroup | None = None,
     return_on_hover: bool = False,
+    use_container_width: bool = False,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -217,6 +218,9 @@ def st_folium(
         just when they click on it. This is useful if you want to dynamically
         update your app based on where the user is hovering. NOTE: This may cause
         performance issues if the app is rerunning too often.
+    use_container_width: bool
+        If True, set the width of the map to the width of the current container.
+        This overrides the `width` parameter.
     Returns
     -------
     dict
@@ -228,6 +232,9 @@ def st_folium(
     #
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
+
+    if use_container_width:
+        width = None
 
     folium_map: folium.Map = fig  # type: ignore
 

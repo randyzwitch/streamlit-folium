@@ -185,3 +185,32 @@ def test_return_on_hover(page: Page):
     except Exception as e:
         page.screenshot(path="screenshot-popup2.png")
         raise e
+
+
+def test_responsiveness(page: Page):
+    page.get_by_role("link", name="responsive").click()
+
+    page.set_viewport_size({"width": 500, "height": 1000})
+
+    initial_bbox = (
+        page.frame_locator("div:nth-child(2) > iframe")
+        .locator("#map_div")
+        .bounding_box()
+    )
+
+    page.set_viewport_size({"width": 1000, "height": 1000})
+
+    new_bbox = (
+        page.frame_locator("div:nth-child(2) > iframe")
+        .locator("#map_div")
+        .bounding_box()
+    )
+
+    print(initial_bbox)
+    print(new_bbox)
+
+    assert initial_bbox is not None
+
+    assert new_bbox is not None
+
+    assert new_bbox["width"] > initial_bbox["width"] + 300
