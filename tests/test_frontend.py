@@ -150,8 +150,6 @@ def test_tooltip_click(page: Page):
 def test_popup_text(page: Page):
     page.get_by_role("link", name="geojson popup").click()
 
-    sleep(5)  # Wait for data on map to load
-
     expect(page.get_by_text("State Texas % Change 16.023")).to_be_hidden()
 
     page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
