@@ -142,7 +142,6 @@ function onLayerClick(e: any) {
 }
 
 window.initComponent = (map: any, return_on_hover: boolean) => {
-  console.log("Return on hover: ", return_on_hover)
   map.on("click", onMapClick)
   map.on("moveend", onMapMove)
   for (let key in map._layers) {
@@ -179,8 +178,6 @@ function onRender(event: Event): void {
   const center: any = data.args["center"]
   const feature_group: string = data.args["feature_group"]
   const return_on_hover: boolean = data.args["return_on_hover"]
-
-  console.log(return_on_hover)
 
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
