@@ -172,4 +172,9 @@ def test_popup_text(page: Page):
 
     texas.click()
 
-    expect(page.get_by_text("State Texas % Change 16.023")).to_be_visible()
+    try:
+        expect(page.get_by_text("State Texas % Change 16.023")).to_be_visible()
+    except Exception as e:
+        page.screenshot(path="screenshot-popup-text2.png")
+        print(page.content())
+        raise e
