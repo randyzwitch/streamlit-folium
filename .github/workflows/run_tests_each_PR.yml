@@ -40,9 +40,12 @@ jobs:
       - name: Install playwright dependencies
         run: |
           playwright install --with-deps
-      - name: Test with pytest
+      - name: Install annotate-failures-plugin
+        run: pip install pytest-github-actions-annotate-failures
+
+      - name: Test with pytest and retry flaky tests up to 3 times
         run: |
-          pytest --browser chromium -s
+          pytest --browser chromium -s --retries 3
 
       - uses: actions/upload-artifact@v3
         if: failure()

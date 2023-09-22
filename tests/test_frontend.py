@@ -26,7 +26,7 @@ def before_test(page: Page):
 @pytest.fixture(scope="function", autouse=True)
 def after_test(page: Page, request):
     yield
-    if request.session.testsfailed:
+    if request.node.rep_call.failed:
         page.screenshot(path=f"screenshot-{request.node.name}.png", full_page=True)
 
 
