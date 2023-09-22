@@ -91,8 +91,6 @@ def test_draw(page: Page):
         'internal:attr=[title="streamlit_folium.st_folium"i]'
     ).get_by_role("link", name="Draw a polygon").click()
 
-    assert False
-
 
 def test_limit_data(page: Page):
     # Test limit data support
