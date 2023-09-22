@@ -43,3 +43,9 @@ jobs:
       - name: Test with pytest
         run: |
           pytest --browser chromium -s
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: screenshots
+          path: screenshot*.png
