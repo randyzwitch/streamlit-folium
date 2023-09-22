@@ -15,30 +15,58 @@ page = st.radio("Select map type", ["Single map", "Dual map", "Branca figure"], 
 
 # center on Liberty Bell, add marker
 if page == "Single map":
-    with st.echo():
-        m = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
-        tooltip = "Liberty Bell"
-        folium.Marker(
-            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
-        ).add_to(m)
+    m = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
+    tooltip = "Liberty Bell"
+    folium.Marker(
+        [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+    ).add_to(m)
+    st.code(
+        """
+m = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
+tooltip = "Liberty Bell"
+folium.Marker(
+    [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+).add_to(m)
+""",
+        language="python",
+    )
 
 elif page == "Dual map":
-    with st.echo():
-        m = folium.plugins.DualMap(location=[39.949610, -75.13], zoom_start=16)
-        tooltip = "Liberty Bell"
-        folium.Marker(
-            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
-        ).add_to(m)
-
+    m = folium.plugins.DualMap(location=[39.949610, -75.13], zoom_start=16)
+    tooltip = "Liberty Bell"
+    folium.Marker(
+        [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+    ).add_to(m)
+    st.code(
+        """
+m = folium.plugins.DualMap(location=[39.949610, -75.13], zoom_start=16)
+tooltip = "Liberty Bell"
+folium.Marker(
+    [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+).add_to(m)
+""",
+        language="python",
+    )
 else:
-    with st.echo():
-        m = branca.element.Figure()
-        fm = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
-        tooltip = "Liberty Bell"
-        folium.Marker(
-            [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
-        ).add_to(fm)
-        m.add_child(fm)
+    m = branca.element.Figure()
+    fm = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
+    tooltip = "Liberty Bell"
+    folium.Marker(
+        [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+    ).add_to(fm)
+    m.add_child(fm)
+    st.code(
+        """
+m = branca.element.Figure()
+fm = folium.Map(location=[39.949610, -75.150282], zoom_start=16)
+tooltip = "Liberty Bell"
+folium.Marker(
+    [39.949610, -75.150282], popup="Liberty Bell", tooltip=tooltip
+).add_to(fm)
+m.add_child(fm)
+""",
+        language="python",
+    )
 
 with st.echo():
     # call to render Folium map in Streamlit
