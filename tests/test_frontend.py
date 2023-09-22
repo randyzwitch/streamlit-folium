@@ -118,14 +118,16 @@ def test_dual_map(page: Page):
     page.locator("label").filter(has_text="Dual map").click()
 
     # Click marker on left map
-    page.frame_locator('internal:attr=[title="streamlit_folium.st_folium"i]').locator(
-        "#map_div"
-    ).get_by_role("img").nth(0).click()
-
-    # Click marker on right map
-    page.frame_locator('internal:attr=[title="streamlit_folium.st_folium"i]').locator(
-        "#map_div2"
-    ).get_by_role("img").nth(0).click()
+    try:
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+            "#map_div"
+        ).get_by_role("img").click()
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+            "#map_div2"
+        ).get_by_role("img").click()
+    except Exception as e:
+        page.screenshot(path="screenshot-dual-map.png", full_page=True)
+        raise e
 
 
 def test_vector_grid(page: Page):
@@ -195,7 +197,7 @@ def test_return_on_hover(page: Page):
 def test_responsiveness(page: Page):
     page.get_by_role("link", name="responsive").click()
 
-    page.set_viewport_size({"width": 500, "height": 1000})
+    page.set_viewport_size({"width": 500, "height": 3000})
 
     initial_bbox = (
         page.frame_locator("div:nth-child(2) > iframe")
@@ -203,7 +205,7 @@ def test_responsiveness(page: Page):
         .bounding_box()
     )
 
-    page.set_viewport_size({"width": 1000, "height": 1000})
+    page.set_viewport_size({"width": 1000, "height": 3000})
 
     new_bbox = (
         page.frame_locator("div:nth-child(2) > iframe")
@@ -219,3 +221,5 @@ def test_responsiveness(page: Page):
     assert new_bbox is not None
 
     assert new_bbox["width"] > initial_bbox["width"] + 300
+
+    page.set_viewport_size({"width": 2000, "height": 2000})
