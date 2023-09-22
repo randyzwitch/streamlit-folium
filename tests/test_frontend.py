@@ -19,6 +19,7 @@ def before_module():
 @pytest.fixture(scope="function", autouse=True)
 def before_test(page: Page):
     page.goto(f"localhost:{PORT}")
+    page.set_viewport_size({"width": 2000, "height": 2000})
 
 
 @contextmanager
@@ -59,9 +60,13 @@ def test_marker_click(page: Page):
     expect(page.get_by_text('"last_object_clicked":NULL')).to_be_visible()
 
     # Click marker
-    page.frame_locator(
-        'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("img").nth(0).click()
+    try:
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
+            "img"
+        ).click()
+    except Exception as e:
+        page.screenshot(path="screenshot-test-marker-click.png", full_page=True)
+        raise e
 
     expect(page.get_by_text('"last_object_clicked":NULL')).to_be_hidden()
 

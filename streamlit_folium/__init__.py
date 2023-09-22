@@ -373,17 +373,6 @@ def _generate_leaflet_string(
 
     return leaflet, mappings
 
-_FOLIUM_VAR_SUFFIX_PATTERN = re.compile('_[a-z0-9]+(?!_)')
-
-def _replace_folium_vars(leaflet: str, mappings: dict[str, str]) -> str:
-  def replace(match: re.Match):
-      match_str = match.group()
-      leaflet_id = match_str.strip("_")
-      replacement = mappings.get(leaflet_id)
-      if replacement:
-          match_str = match_str.replace(leaflet_id, replacement)
-      return match_str
-  return _FOLIUM_VAR_SUFFIX_PATTERN.sub(replace, leaflet)
 
 _FOLIUM_VAR_SUFFIX_PATTERN = re.compile("_[a-z0-9]+(?!_)")
 
