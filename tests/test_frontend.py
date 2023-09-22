@@ -116,6 +116,7 @@ def test_dual_map(page: Page):
     expect(page).to_have_title("streamlit-folium documentation: Misc Examples")
 
     page.locator("label").filter(has_text="Dual map").click()
+    page.locator("label").filter(has_text="Dual map").click()
 
     # Click marker on left map
     try:
