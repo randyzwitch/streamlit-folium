@@ -19,6 +19,15 @@ def before_module():
 @pytest.fixture(scope="function", autouse=True)
 def before_test(page: Page):
     page.goto(f"localhost:{PORT}")
+    page.set_viewport_size({"width": 2000, "height": 2000})
+
+
+# Take screenshot of each page if there are failures for this session
+@pytest.fixture(scope="function", autouse=True)
+def after_test(page: Page, request):
+    yield
+    if request.node.rep_call.failed:
+        page.screenshot(path=f"screenshot-{request.node.name}.png", full_page=True)
 
 
 @contextmanager
@@ -59,9 +68,13 @@ def test_marker_click(page: Page):
     expect(page.get_by_text('"last_object_clicked":NULL')).to_be_visible()
 
     # Click marker
-    page.frame_locator(
-        'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("img").nth(0).click()
+    try:
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
+            "img"
+        ).click()
+    except Exception as e:
+        page.screenshot(path="screenshot-test-marker-click.png", full_page=True)
+        raise e
 
     expect(page.get_by_text('"last_object_clicked":NULL')).to_be_hidden()
 
@@ -111,16 +124,19 @@ def test_dual_map(page: Page):
     expect(page).to_have_title("streamlit-folium documentation: Misc Examples")
 
     page.locator("label").filter(has_text="Dual map").click()
+    page.locator("label").filter(has_text="Dual map").click()
 
     # Click marker on left map
-    page.frame_locator('internal:attr=[title="streamlit_folium.st_folium"i]').locator(
-        "#map_div"
-    ).get_by_role("img").nth(0).click()
-
-    # Click marker on right map
-    page.frame_locator('internal:attr=[title="streamlit_folium.st_folium"i]').locator(
-        "#map_div2"
-    ).get_by_role("img").nth(0).click()
+    try:
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+            "#map_div"
+        ).get_by_role("img").click()
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+            "#map_div2"
+        ).get_by_role("img").click()
+    except Exception as e:
+        page.screenshot(path="screenshot-dual-map.png", full_page=True)
+        raise e
 
 
 def test_vector_grid(page: Page):
@@ -190,7 +206,7 @@ def test_return_on_hover(page: Page):
 def test_responsiveness(page: Page):
     page.get_by_role("link", name="responsive").click()
 
-    page.set_viewport_size({"width": 500, "height": 1000})
+    page.set_viewport_size({"width": 500, "height": 3000})
 
     initial_bbox = (
         page.frame_locator("div:nth-child(2) > iframe")
@@ -198,7 +214,9 @@ def test_responsiveness(page: Page):
         .bounding_box()
     )
 
-    page.set_viewport_size({"width": 1000, "height": 1000})
+    page.set_viewport_size({"width": 1000, "height": 3000})
+
+    sleep(1)
 
     new_bbox = (
         page.frame_locator("div:nth-child(2) > iframe")
@@ -214,3 +232,5 @@ def test_responsiveness(page: Page):
     assert new_bbox is not None
 
     assert new_bbox["width"] > initial_bbox["width"] + 300
+
+    page.set_viewport_size({"width": 2000, "height": 2000})
