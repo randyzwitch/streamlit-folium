@@ -105,7 +105,6 @@ def folium_static(
 
 def _get_siblings(fig: folium.MacroElement) -> str:
     """Get the html for any siblings of the map"""
-    fig.render()
     children = list(fig.get_root()._children.values())
 
     html = ""
@@ -127,8 +126,6 @@ def get_full_id(m: folium.MacroElement) -> str:
 
 
 def _get_map_string(fig: folium.Map) -> str:
-    fig.render()
-
     leaflet = generate_leaflet_string(fig)
 
     # Get rid of the annoying popup
@@ -242,6 +239,8 @@ def st_folium(
     # this assumes that a map is the first child
     if not (isinstance(fig, folium.Map) or isinstance(fig, folium.plugins.DualMap)):
         folium_map = list(fig._children.values())[0]
+
+    folium_map.render()
 
     leaflet = _get_map_string(folium_map)  # type: ignore
 
