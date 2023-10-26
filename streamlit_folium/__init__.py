@@ -10,6 +10,7 @@ from typing import Dict, Iterable, List
 import branca
 import folium
 import folium.plugins
+import streamlit as st
 import streamlit.components.v1 as components
 from jinja2 import UndefinedError
 
@@ -153,6 +154,7 @@ def _get_feature_group_string(
 ) -> str:
     feature_group_to_add._id = "feature_group"
     feature_group_to_add.add_to(map)
+    feature_group_to_add.render()
     feature_group_string = generate_leaflet_string(
         feature_group_to_add, base_id="feature_group"
     )
@@ -180,6 +182,7 @@ def st_folium(
     feature_group_to_add: folium.FeatureGroup | None = None,
     return_on_hover: bool = False,
     use_container_width: bool = False,
+    debug: bool = False,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -218,6 +221,9 @@ def st_folium(
     use_container_width: bool
         If True, set the width of the map to the width of the current container.
         This overrides the `width` parameter.
+    debug: bool
+        If True, print out the html and javascript code used to render the map with
+        st.code
     Returns
     -------
     dict
@@ -297,6 +303,17 @@ def st_folium(
             feature_group_to_add,
             map=folium_map,
         )
+
+    if debug:
+        with st.expander("Show generated code"):
+            st.info("HTML:")
+            st.code(html)
+            st.info("Main Map Leaflet js:")
+            st.code(leaflet)
+
+            if feature_group_string is not None:
+                st.info("Feature group js:")
+                st.code(feature_group_string)
 
     component_value = _component_func(
         script=leaflet,
