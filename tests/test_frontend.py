@@ -240,5 +240,5 @@ def test_geojson_styles(page: Page):
     page.get_by_role("link", name="geojson styles").click()
     page.get_by_role("link", name="geojson styles").click()
 
-    page.get_by_role("button", name="Show generated code").click()
+    page.get_by_text("Show generated code").click()
     expect(page.get_by_text('"fillOpacity"')).to_be_visible()
