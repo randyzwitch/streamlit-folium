@@ -24,7 +24,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
       - name: build streamlit-folium JS
         run: |
           cd streamlit_folium/frontend/
