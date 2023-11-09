@@ -1,5 +1,5 @@
 streamlit>=1.13.0
-folium>=0.13
+folium>=0.13,<0.15
 jinja2
 branca
 geopandas
