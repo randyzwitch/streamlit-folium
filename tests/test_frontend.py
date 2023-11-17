@@ -242,3 +242,13 @@ def test_geojson_styles(page: Page):
 
     page.get_by_text("Show generated code").click()
     expect(page.get_by_text('"fillOpacity"')).to_be_visible()
+
+
+def test_grouped_layer_control(page: Page):
+    page.get_by_role("link", name="grouped layer control").click()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+        "label"
+    ).filter(has_text="g2").click()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_label(
+        "g2"
+    ).check()
