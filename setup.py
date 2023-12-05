@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="streamlit_folium",
-    version="0.16.0",
+    version="0.16.1",
     author="Randy Zwitch",
     author_email="rzwitch@gmail.com",
     description="Render Folium objects in Streamlit",
@@ -13,5 +13,5 @@ setuptools.setup(
     include_package_data=True,
     classifiers=[],
     python_requires=">=3.8",
-    install_requires=["streamlit>=1.13.0", "folium>=0.13,<0.15", "jinja2", "branca"],
+    install_requires=["streamlit>=1.13.0", "folium>=0.13,!=0.15.0", "jinja2", "branca"],
 )
