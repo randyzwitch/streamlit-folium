@@ -4,12 +4,14 @@ def test_map():
     from streamlit_folium import _get_map_string
 
     map = folium.Map()
+    map.render()
+
     leaflet = _get_map_string(map)
     assert (
         """var map_div = L.map(
     "map_div",
     {
-        center: [0, 0],
+        center: [0.0, 0.0],
         crs: L.CRS.EPSG3857,
         zoom: 1,
         zoomControl: true,
@@ -21,7 +23,7 @@ def test_map():
 
     assert "var tile_layer_div_0 = L.tileLayer(" in leaflet
 
-    assert ").addTo(map_div);" in leaflet
+    assert ".addTo(map_div);" in leaflet
 
 
 def test_layer_control():
@@ -48,11 +50,11 @@ def test_draw_support():
     map.render()
     leaflet = _get_map_string(map)
     assert "map_div.on(L.Draw.Event.CREATED, function(e) {" in leaflet
-    assert "drawnItems.addLayer(layer);" in leaflet
+    assert "drawnItems_draw_control_div_1.addLayer(layer);" in leaflet
 
     assert (
         """map_div.on('draw:created', function(e) {
-    drawnItems.addLayer(e.layer);
+    drawnItems_draw_control_div_1.addLayer(e.layer);
 });"""
         in leaflet
     )
