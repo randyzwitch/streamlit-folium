@@ -1,4 +1,4 @@
-streamlit>=1.13.0
+streamlit>=1.13.0,!=0.15.0
 folium>=0.13
 jinja2
 branca
