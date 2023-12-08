@@ -132,6 +132,9 @@ def _get_map_string(fig: folium.Map) -> str:
     # Get rid of the annoying popup
     leaflet = leaflet.replace("alert(coords);", "")
 
+    # Rename drawnItems
+    leaflet = leaflet.replace("drawnItems_draw_control_div_1", "drawnItems")
+
     leaflet = dedent(leaflet)
 
     if "drawnItems" not in leaflet:

@@ -91,6 +91,22 @@ def test_draw(page: Page):
         'internal:attr=[title="streamlit_folium.st_folium"i]'
     ).get_by_role("link", name="Draw a polygon").click()
 
+    # Should be no drawings
+    expect(page.get_by_text('"all_drawings":NULL')).to_be_visible()
+
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
+        "link", name="Draw a marker"
+    ).click()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+        ".leaflet-marker-icon"
+    ).first.click()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+        "#map_div"
+    ).click()
+
+    # Should be one item in drawings after having placed a marker
+    expect(page.get_by_text('"all_drawings":NULL')).to_be_hidden()
+
 
 def test_limit_data(page: Page):
     # Test limit data support

@@ -50,11 +50,11 @@ def test_draw_support():
     map.render()
     leaflet = _get_map_string(map)
     assert "map_div.on(L.Draw.Event.CREATED, function(e) {" in leaflet
-    assert "drawnItems_draw_control_div_1.addLayer(layer);" in leaflet
+    assert "drawnItems.addLayer(layer);" in leaflet
 
     assert (
         """map_div.on('draw:created', function(e) {
-    drawnItems_draw_control_div_1.addLayer(e.layer);
+    drawnItems.addLayer(e.layer);
 });"""
         in leaflet
     )
