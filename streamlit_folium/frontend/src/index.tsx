@@ -1,4 +1,4 @@
-import { Streamlit, RenderData } from "streamlit-component-lib"
+import { RenderData, Streamlit } from "streamlit-component-lib"
 import { debounce } from "underscore"
 import { circleToPolygon } from "./circle-to-polygon"
 
