@@ -5,7 +5,7 @@ import os
 import re
 import warnings
 from textwrap import dedent
-from typing import Dict, Iterable, List
+from typing import Iterable
 
 import branca
 import folium
@@ -185,7 +185,7 @@ def st_folium(
     returned_objects: Iterable[str] | None = None,
     zoom: int | None = None,
     center: tuple[float, float] | None = None,
-    feature_group_to_add: List[folium.FeatureGroup] | folium.FeatureGroup | None = None,
+    feature_group_to_add: list[folium.FeatureGroup] | folium.FeatureGroup | None = None,
     return_on_hover: bool = False,
     use_container_width: bool = False,
     debug: bool = False,
@@ -260,7 +260,7 @@ def st_folium(
 
     m_id = get_full_id(folium_map)
 
-    def bounds_to_dict(bounds_list: List[List[float]]) -> Dict[str, Dict[str, float]]:
+    def bounds_to_dict(bounds_list: list[list[float]]) -> dict[str, dict[str, float]]:
         southwest, northeast = bounds_list
         return {
             "_southWest": {
