@@ -1,7 +1,7 @@
+import { Layer } from "leaflet"
 import { RenderData, Streamlit } from "streamlit-component-lib"
 import { debounce } from "underscore"
 import { circleToPolygon } from "./circle-to-polygon"
-import { Layer } from "leaflet"
 
 type GlobalData = {
   lat_lng_clicked: any
@@ -240,18 +240,16 @@ function onRender(event: Event): void {
     }
   }
 
-  if (
-    feature_group !== window.__GLOBAL_DATA__.last_feature_group
-  ) {    
+  if (feature_group !== window.__GLOBAL_DATA__.last_feature_group) {
     if (window.feature_group && window.feature_group.length > 0) {
       window.feature_group.forEach((layer: Layer) => {
-        window.map.removeLayer(layer);
-      });
+        window.map.removeLayer(layer)
+      })
     }
-    
+
     window.__GLOBAL_DATA__.last_feature_group = feature_group
 
-    if (feature_group){
+    if (feature_group) {
       // Though using `eval` is generally a bad idea, we're using it here
       // because we're evaluating code that we've generated ourselves on the
       // Python side. This is safe because we're not evaluating user input, so this
@@ -269,7 +267,7 @@ function onRender(event: Event): void {
         }
       }
     }
-  } 
+  }
 
   if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
     window.map.setZoom(zoom)
