@@ -19,7 +19,7 @@ st.set_page_config(layout="wide")
 "# Dynamic Updates -- Click on a marker"
 
 st.subheader(
-    """Use new arguments `center`, `zoom`, and `feature_group_to_add` to update the map
+    """Use new arguments `center`, `zoom`, and `feature_group_to_add` to update the map \
     without re-rendering it."""
 )
 
