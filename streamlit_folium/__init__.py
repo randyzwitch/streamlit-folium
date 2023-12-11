@@ -185,7 +185,7 @@ def st_folium(
     returned_objects: Iterable[str] | None = None,
     zoom: int | None = None,
     center: tuple[float, float] | None = None,
-    feature_group_to_add: folium.FeatureGroup | None = None,
+    feature_group_to_add: List[folium.FeatureGroup] | folium.FeatureGroup | None = None,
     return_on_hover: bool = False,
     use_container_width: bool = False,
     debug: bool = False,
@@ -215,7 +215,7 @@ def st_folium(
         The center of the map. If None, the center will be set to the default
         center of the map. NOTE that if this center is changed, it will *not* reload
         the map, but simply dynamically change the center.
-    feature_group_to_add: folium.FeatureGroup or None
+    feature_group_to_add: List[folium.FeatureGroup] or folium.FeatureGroup or None
         If you want to dynamically add features to a feature group, you can pass
         the feature group here. NOTE that if you add a feature to the map, it
         will *not* reload the map, but simply dynamically add the feature.
@@ -305,7 +305,7 @@ def st_folium(
     # on the frontend.
     feature_group_string = None
     if feature_group_to_add is not None:
-        if not isinstance(feature_group_to_add, list):
+        if isinstance(feature_group_to_add, folium.FeatureGroup):
             feature_group_to_add = [feature_group_to_add]
         feature_group_string = ""
         for idx, feature_group in enumerate(feature_group_to_add):
