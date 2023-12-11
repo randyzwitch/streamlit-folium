@@ -263,6 +263,11 @@ function onRender(event: Event): void {
         layer.on("mouseover", onLayerClick)
       }
     }
+  } else if (feature_group !== window.__GLOBAL_DATA__.last_feature_group) {
+    if (window.feature_group) {
+      window.map.removeLayer(window.feature_group)
+    }
+    window.__GLOBAL_DATA__.last_feature_group = feature_group
   }
 
   if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
