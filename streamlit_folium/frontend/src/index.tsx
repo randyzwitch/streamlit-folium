@@ -1,6 +1,7 @@
 import { RenderData, Streamlit } from "streamlit-component-lib"
 import { debounce } from "underscore"
 import { circleToPolygon } from "./circle-to-polygon"
+import { Layer } from "leaflet"
 
 type GlobalData = {
   lat_lng_clicked: any
@@ -240,35 +241,35 @@ function onRender(event: Event): void {
   }
 
   if (
-    feature_group &&
     feature_group !== window.__GLOBAL_DATA__.last_feature_group
-  ) {
-    if (window.feature_group) {
-      window.map.removeLayer(window.feature_group)
+  ) {    
+    if (window.feature_group && window.feature_group.length > 0) {
+      window.feature_group.forEach((layer: Layer) => {
+        window.map.removeLayer(layer);
+      });
     }
-    // Though using `eval` is generally a bad idea, we're using it here
-    // because we're evaluating code that we've generated ourselves on the
-    // Python side. This is safe because we're not evaluating user input, so this
-    // couldn't be used to execute arbitrary code.
-
-    // eslint-disable-next-line
-    eval(feature_group)
+    
     window.__GLOBAL_DATA__.last_feature_group = feature_group
-    for (let key in window.map._layers) {
-      let layer = window.map._layers[key]
-      layer.off("click", onLayerClick)
-      layer.on("click", onLayerClick)
-      if (return_on_hover) {
-        layer.off("mouseover", onLayerClick)
-        layer.on("mouseover", onLayerClick)
+
+    if (feature_group){
+      // Though using `eval` is generally a bad idea, we're using it here
+      // because we're evaluating code that we've generated ourselves on the
+      // Python side. This is safe because we're not evaluating user input, so this
+      // couldn't be used to execute arbitrary code.
+
+      // eslint-disable-next-line
+      eval(feature_group)
+      for (let key in window.map._layers) {
+        let layer = window.map._layers[key]
+        layer.off("click", onLayerClick)
+        layer.on("click", onLayerClick)
+        if (return_on_hover) {
+          layer.off("mouseover", onLayerClick)
+          layer.on("mouseover", onLayerClick)
+        }
       }
     }
-  } else if (feature_group !== window.__GLOBAL_DATA__.last_feature_group) {
-    if (window.feature_group) {
-      window.map.removeLayer(window.feature_group)
-    }
-    window.__GLOBAL_DATA__.last_feature_group = feature_group
-  }
+  } 
 
   if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
     window.map.setZoom(zoom)

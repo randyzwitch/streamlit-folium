@@ -16,7 +16,7 @@ from jinja2 import UndefinedError
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
-_RELEASE = True
+_RELEASE = False
 
 if not _RELEASE:
     _component_func = components.declare_component(
@@ -154,23 +154,26 @@ def _get_map_string(fig: folium.Map) -> str:
 def _get_feature_group_string(
     feature_group_to_add: folium.FeatureGroup,
     map: folium.Map,
+    idx: int = 0,
 ) -> str:
-    feature_group_to_add._id = "feature_group"
+    feature_group_to_add._id = f"feature_group_{idx}"
     feature_group_to_add.add_to(map)
     feature_group_to_add.render()
     feature_group_string = generate_leaflet_string(
-        feature_group_to_add, base_id="feature_group"
+        feature_group_to_add, base_id=f"feature_group_{idx}"
     )
     m_id = get_full_id(map)
     feature_group_string = feature_group_string.replace(m_id, "map_div")
     feature_group_string = dedent(feature_group_string)
 
     feature_group_string += dedent(
-        """
-        map_div.addLayer(feature_group_feature_group);
-        window.feature_group = feature_group_feature_group;
+        f"""
+        map_div.addLayer(feature_group_feature_group_{idx});
+        window.feature_group = window.feature_group || [];
+        window.feature_group.push(feature_group_feature_group_{idx});
         """
     )
+
     return feature_group_string
 
 
@@ -302,10 +305,15 @@ def st_folium(
     # on the frontend.
     feature_group_string = None
     if feature_group_to_add is not None:
-        feature_group_string = _get_feature_group_string(
-            feature_group_to_add,
-            map=folium_map,
-        )
+        if not isinstance(feature_group_to_add, list):
+            feature_group_to_add = [feature_group_to_add]
+        feature_group_string = ""
+        for idx, feature_group in enumerate(feature_group_to_add):
+            feature_group_string += _get_feature_group_string(
+                feature_group,
+                map=folium_map,
+                idx=idx,
+            )
 
     if debug:
         with st.expander("Show generated code"):
