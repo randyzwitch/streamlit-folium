@@ -334,18 +334,44 @@ def test_dynamic_feature_group_update(page: Page):
     expect(page.get_by_text("dashArray")).to_be_visible()
 
 
-
 def test_layer_control_dynamic_update(page: Page):
     page.get_by_role("link", name="dynamic layer control").click()
     page.get_by_text("Show generated code").click()
 
-    page.frame_locator("iframe[title=\"streamlit_folium\\.st_folium\"]").locator("label").filter(has_text="Parcels").locator("div").click()
-    expect(page.frame_locator("iframe[title=\"streamlit_folium\\.st_folium\"]").locator("label").filter(has_text="Parcels").locator("div")).not_to_be_checked()
-    expect(page.frame_locator("iframe[title=\"streamlit_folium\\.st_folium\"]").locator("path").first).to_be_hidden()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+        "label"
+    ).filter(has_text="Parcels").locator("div").click()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
+        .locator("label")
+        .filter(has_text="Parcels")
+        .locator("div")
+    ).not_to_be_checked()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
+        .locator("path")
+        .first
+    ).to_be_hidden()
     expect(page.get_by_text("dashArray")).to_be_hidden()
 
     page.get_by_test_id("stRadio").get_by_text("Both").click()
-    page.frame_locator("iframe[title=\"streamlit_folium\\.st_folium\"]").get_by_label("Parcels").uncheck()
-    expect(page.frame_locator("iframe[title=\"streamlit_folium\\.st_folium\"]").locator("label").filter(has_text="Parcels").locator("div")).not_to_be_checked()
-    expect(page.frame_locator("iframe[title=\"streamlit_folium\\.st_folium\"]").locator("label").filter(has_text="Buildings").locator("div")).to_be_checked()
-    expect(page.frame_locator("iframe[title=\"streamlit_folium\\.st_folium\"]").locator("path").first).to_be_visible()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_label(
+        "Parcels"
+    ).uncheck()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
+        .locator("label")
+        .filter(has_text="Parcels")
+        .locator("div")
+    ).not_to_be_checked()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
+        .locator("label")
+        .filter(has_text="Buildings")
+        .locator("div")
+    ).to_be_checked()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
+        .locator("path")
+        .first
+    ).to_be_visible()

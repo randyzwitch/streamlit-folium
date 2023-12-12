@@ -247,7 +247,7 @@ function onRender(event: Event): void {
   if (
     feature_group !== window.__GLOBAL_DATA__.last_feature_group ||
     layer_control !== window.__GLOBAL_DATA__.last_layer_control
-  ) {    
+  ) {
     if (window.feature_group && window.feature_group.length > 0) {
       window.feature_group.forEach((layer: Layer) => {
         window.map.removeLayer(layer);
@@ -257,7 +257,7 @@ function onRender(event: Event): void {
     if (window.layer_control) {
       window.map.removeControl(window.layer_control)
     }
-    
+
     window.__GLOBAL_DATA__.last_feature_group = feature_group
     window.__GLOBAL_DATA__.last_layer_control = layer_control
 
@@ -282,7 +282,7 @@ function onRender(event: Event): void {
       // eslint-disable-next-line
       eval(layer_control)
     }
-  } 
+  }
 
   if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
     window.map.setZoom(zoom)

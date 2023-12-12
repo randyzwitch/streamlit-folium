@@ -178,8 +178,8 @@ def _get_feature_group_string(
 
 
 def _get_layer_control_string(
-        control: folium.LayerControl,
-        map: folium.Map,
+    control: folium.LayerControl,
+    map: folium.Map,
 ) -> str:
     control._id = "layer_control"
     control.add_to(map)
@@ -193,7 +193,7 @@ def _get_layer_control_string(
         window.layer_control = layer_control_layer_control;
         """
     )
-    
+
     return control_string
 
 
