@@ -5,7 +5,7 @@ import os
 import re
 import warnings
 from textwrap import dedent
-from typing import Dict, Iterable, List
+from typing import Iterable
 
 import branca
 import folium
@@ -154,23 +154,26 @@ def _get_map_string(fig: folium.Map) -> str:
 def _get_feature_group_string(
     feature_group_to_add: folium.FeatureGroup,
     map: folium.Map,
+    idx: int = 0,
 ) -> str:
-    feature_group_to_add._id = "feature_group"
+    feature_group_to_add._id = f"feature_group_{idx}"
     feature_group_to_add.add_to(map)
     feature_group_to_add.render()
     feature_group_string = generate_leaflet_string(
-        feature_group_to_add, base_id="feature_group"
+        feature_group_to_add, base_id=f"feature_group_{idx}"
     )
     m_id = get_full_id(map)
     feature_group_string = feature_group_string.replace(m_id, "map_div")
     feature_group_string = dedent(feature_group_string)
 
     feature_group_string += dedent(
-        """
-        map_div.addLayer(feature_group_feature_group);
-        window.feature_group = feature_group_feature_group;
+        f"""
+        map_div.addLayer(feature_group_feature_group_{idx});
+        window.feature_group = window.feature_group || [];
+        window.feature_group.push(feature_group_feature_group_{idx});
         """
     )
+
     return feature_group_string
 
 
@@ -182,7 +185,7 @@ def st_folium(
     returned_objects: Iterable[str] | None = None,
     zoom: int | None = None,
     center: tuple[float, float] | None = None,
-    feature_group_to_add: folium.FeatureGroup | None = None,
+    feature_group_to_add: list[folium.FeatureGroup] | folium.FeatureGroup | None = None,
     return_on_hover: bool = False,
     use_container_width: bool = False,
     debug: bool = False,
@@ -212,7 +215,7 @@ def st_folium(
         The center of the map. If None, the center will be set to the default
         center of the map. NOTE that if this center is changed, it will *not* reload
         the map, but simply dynamically change the center.
-    feature_group_to_add: folium.FeatureGroup or None
+    feature_group_to_add: List[folium.FeatureGroup] or folium.FeatureGroup or None
         If you want to dynamically add features to a feature group, you can pass
         the feature group here. NOTE that if you add a feature to the map, it
         will *not* reload the map, but simply dynamically add the feature.
@@ -257,7 +260,7 @@ def st_folium(
 
     m_id = get_full_id(folium_map)
 
-    def bounds_to_dict(bounds_list: List[List[float]]) -> Dict[str, Dict[str, float]]:
+    def bounds_to_dict(bounds_list: list[list[float]]) -> dict[str, dict[str, float]]:
         southwest, northeast = bounds_list
         return {
             "_southWest": {
@@ -302,10 +305,15 @@ def st_folium(
     # on the frontend.
     feature_group_string = None
     if feature_group_to_add is not None:
-        feature_group_string = _get_feature_group_string(
-            feature_group_to_add,
-            map=folium_map,
-        )
+        if isinstance(feature_group_to_add, folium.FeatureGroup):
+            feature_group_to_add = [feature_group_to_add]
+        feature_group_string = ""
+        for idx, feature_group in enumerate(feature_group_to_add):
+            feature_group_string += _get_feature_group_string(
+                feature_group,
+                map=folium_map,
+                idx=idx,
+            )
 
     if debug:
         with st.expander("Show generated code"):

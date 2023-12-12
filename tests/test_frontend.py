@@ -268,3 +268,67 @@ def test_grouped_layer_control(page: Page):
     page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_label(
         "g2"
     ).check()
+
+
+def test_dynamic_feature_group_update(page: Page):
+    page.get_by_role("link", name="dynamic updates").click()
+    page.get_by_text("Show generated code").click()
+
+    # Test showing only Parcel layer
+    page.get_by_test_id("stRadio").get_by_text("Parcels").click()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        .locator("path")
+        .first
+    ).to_be_visible()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        .locator("path")
+        .nth(1)
+    ).to_be_hidden()
+    expect(
+        page.get_by_text('"fillColor"')
+    ).to_be_visible()  # fillColor only present in parcel style
+    expect(
+        page.get_by_text('"dashArray"')
+    ).to_be_hidden()  # dashArray only present in building style
+
+    # Test showing only Building layer
+    page.get_by_test_id("stRadio").get_by_text("Buildings").click()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        .locator("path")
+        .first
+    ).to_be_visible()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        .locator("path")
+        .nth(1)
+    ).to_be_hidden()
+    expect(page.get_by_text("fillColor")).to_be_hidden()
+    expect(page.get_by_text("dashArray")).to_be_visible()
+
+    # Test showing no layers
+    page.get_by_test_id("stRadio").get_by_text("None").click()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        .locator("path")
+        .first
+    ).to_be_hidden()
+    expect(page.get_by_text("fillColor")).to_be_hidden()
+    expect(page.get_by_text("dashArray")).to_be_hidden()
+
+    # Test showing both layers
+    page.get_by_test_id("stRadio").get_by_text("Both").click()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        .locator("path")
+        .first
+    ).to_be_visible()
+    expect(
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        .locator("path")
+        .nth(1)
+    ).to_be_visible()
+    expect(page.get_by_text("fillColor")).to_be_visible()
+    expect(page.get_by_text("dashArray")).to_be_visible()

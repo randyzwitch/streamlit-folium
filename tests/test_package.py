@@ -89,7 +89,7 @@ def test_feature_group():
 
     fg_str = _get_feature_group_string(fg, m)
 
-    assert "var feature_group_feature_group = L.featureGroup(" in fg_str
+    assert "var feature_group_feature_group_0 = L.featureGroup(" in fg_str
     assert ".addTo(map_div);" in fg_str
 
 
