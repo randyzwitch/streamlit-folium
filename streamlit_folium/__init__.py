@@ -177,6 +177,26 @@ def _get_feature_group_string(
     return feature_group_string
 
 
+def _get_layer_control_string(
+        control: folium.LayerControl,
+        map: folium.Map,
+) -> str:
+    control._id = "layer_control"
+    control.add_to(map)
+    control.render()
+    control_string = generate_leaflet_string(control, base_id="layer_control")
+    m_id = get_full_id(map)
+    control_string = control_string.replace(m_id, "map_div")
+    control_string = dedent(control_string)
+    control_string += dedent(
+        """
+        window.layer_control = layer_control_layer_control;
+        """
+    )
+    
+    return control_string
+
+
 def st_folium(
     fig: folium.MacroElement,
     key: str | None = None,
@@ -188,6 +208,7 @@ def st_folium(
     feature_group_to_add: List[folium.FeatureGroup] | folium.FeatureGroup | None = None,
     return_on_hover: bool = False,
     use_container_width: bool = False,
+    layer_control: folium.LayerControl | None = None,
     debug: bool = False,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
@@ -227,6 +248,9 @@ def st_folium(
     use_container_width: bool
         If True, set the width of the map to the width of the current container.
         This overrides the `width` parameter.
+    layer_control: folium.LayerControl or None
+        If you want to have layer control for dynamically added layers, you can
+        pass the layer control here.
     debug: bool
         If True, print out the html and javascript code used to render the map with
         st.code
@@ -315,6 +339,10 @@ def st_folium(
                 idx=idx,
             )
 
+    layer_control_string = None
+    if layer_control is not None:
+        layer_control_string = _get_layer_control_string(layer_control, folium_map)
+
     if debug:
         with st.expander("Show generated code"):
             st.info("HTML:")
@@ -339,6 +367,7 @@ def st_folium(
         center=center,
         feature_group=feature_group_string,
         return_on_hover=return_on_hover,
+        layer_control=layer_control_string,
     )
 
     return component_value
