@@ -269,17 +269,27 @@ function onRender(event: Event): void {
     }
   }
 
+  var view_changed = false
+  var new_zoom = window.map.getZoom()
   if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
-    window.map.setZoom(zoom)
+    new_zoom = zoom
     window.__GLOBAL_DATA__.last_zoom = zoom
+    view_changed = true
   }
+
+  var new_center = window.map.getCenter()
   if (
     center &&
     JSON.stringify(center) !==
       JSON.stringify(window.__GLOBAL_DATA__.last_center)
   ) {
-    window.map.panTo(center)
+    new_center = center
     window.__GLOBAL_DATA__.last_center = center
+    view_changed = true
+  }
+
+  if (view_changed) {
+    window.map.setView(new_center, new_zoom)
   }
 }
 
