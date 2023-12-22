@@ -354,6 +354,10 @@ def st_folium(
                 st.info("Feature group js:")
                 st.code(feature_group_string)
 
+            if layer_control_string is not None:
+                st.info("Layer control js:")
+                st.code(layer_control_string)
+
     component_value = _component_func(
         script=leaflet,
         html=html,
