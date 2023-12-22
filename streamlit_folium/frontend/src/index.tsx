@@ -1,7 +1,7 @@
-import { Layer } from "leaflet"
 import { RenderData, Streamlit } from "streamlit-component-lib"
 import { debounce } from "underscore"
 import { circleToPolygon } from "./circle-to-polygon"
+import { Layer } from "leaflet"
 
 type GlobalData = {
   lat_lng_clicked: any
@@ -18,6 +18,7 @@ type GlobalData = {
   last_zoom: any
   last_center: any
   last_feature_group: any
+  last_layer_control: any
 }
 
 declare global {
@@ -27,6 +28,7 @@ declare global {
     map: any
     drawnItems: any
     feature_group: any
+    layer_control: any
   }
 }
 
@@ -179,6 +181,7 @@ function onRender(event: Event): void {
   const center: any = data.args["center"]
   const feature_group: string = data.args["feature_group"]
   const return_on_hover: boolean = data.args["return_on_hover"]
+  const layer_control: string = data.args["layer_control"]
 
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
@@ -222,6 +225,7 @@ function onRender(event: Event): void {
         last_zoom: null,
         last_center: null,
         last_feature_group: null,
+        last_layer_control: null,
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")
@@ -240,23 +244,31 @@ function onRender(event: Event): void {
     }
   }
 
-  if (feature_group !== window.__GLOBAL_DATA__.last_feature_group) {
+  if (
+    feature_group !== window.__GLOBAL_DATA__.last_feature_group ||
+    layer_control !== window.__GLOBAL_DATA__.last_layer_control
+  ) {
     if (window.feature_group && window.feature_group.length > 0) {
       window.feature_group.forEach((layer: Layer) => {
-        window.map.removeLayer(layer)
-      })
+        window.map.removeLayer(layer);
+      });
+    }
+
+    if (window.layer_control) {
+      window.map.removeControl(window.layer_control)
     }
 
     window.__GLOBAL_DATA__.last_feature_group = feature_group
+    window.__GLOBAL_DATA__.last_layer_control = layer_control
 
-    if (feature_group) {
+    if (feature_group){
       // Though using `eval` is generally a bad idea, we're using it here
       // because we're evaluating code that we've generated ourselves on the
       // Python side. This is safe because we're not evaluating user input, so this
       // couldn't be used to execute arbitrary code.
 
       // eslint-disable-next-line
-      eval(feature_group)
+      eval(feature_group + layer_control)
       for (let key in window.map._layers) {
         let layer = window.map._layers[key]
         layer.off("click", onLayerClick)
@@ -266,6 +278,9 @@ function onRender(event: Event): void {
           layer.on("mouseover", onLayerClick)
         }
       }
+    } else {
+      // eslint-disable-next-line
+      eval(layer_control)
     }
   }
 
