@@ -387,6 +387,15 @@ def _generate_leaflet_string(
         mappings = {}
 
     mappings[m._id] = base_id
+    try:
+        element_id = m.element_name.replace("map_", "").replace("tile_layer_", "")
+        parent_id = m.element_parent_name.replace("map_", "").replace("tile_layer_", "")
+        if element_id not in mappings:
+            mappings[element_id] = m._parent._id
+        if parent_id not in mappings:
+            mappings[parent_id] = m._parent._parent._id
+    except AttributeError:
+        pass
 
     m._id = base_id
 

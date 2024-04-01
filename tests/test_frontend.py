@@ -221,24 +221,23 @@ def test_return_on_hover(page: Page):
 
 def test_responsiveness(page: Page):
     page.get_by_role("link", name="responsive").click()
+    page.get_by_role("link", name="responsive").click()
 
     page.set_viewport_size({"width": 500, "height": 3000})
 
-    initial_bbox = (
-        page.frame_locator("div:nth-child(2) > iframe")
-        .locator("#map_div")
-        .bounding_box()
-    )
+    try:
+        initial_bbox = (
+            page.frame_locator("iframe").nth(2).locator("#map_div").bounding_box()
+        )
+    except Exception as e:
+        page.screenshot(path="screenshot-responsive.png", full_page=True)
+        raise e
 
     page.set_viewport_size({"width": 1000, "height": 3000})
 
     sleep(1)
 
-    new_bbox = (
-        page.frame_locator("div:nth-child(2) > iframe")
-        .locator("#map_div")
-        .bounding_box()
-    )
+    new_bbox = page.query_selector_all("iframe")[2].bounding_box()
 
     print(initial_bbox)
     print(new_bbox)
@@ -248,6 +247,10 @@ def test_responsiveness(page: Page):
     assert new_bbox is not None
 
     assert new_bbox["width"] > initial_bbox["width"] + 300
+
+    # Check that the iframe is reasonably tall, which makes sure it hasn't failed to
+    # render at all
+    assert new_bbox["height"] > 100
 
     page.set_viewport_size({"width": 2000, "height": 2000})
 
