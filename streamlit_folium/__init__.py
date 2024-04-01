@@ -271,6 +271,8 @@ def st_folium(
 
     folium_map: folium.Map = fig  # type: ignore
 
+    folium_map.render()
+
     # handle the case where you pass in a figure rather than a map
     # this assumes that a map is the first child
     if not (isinstance(fig, folium.Map) or isinstance(fig, folium.plugins.DualMap)):
@@ -345,8 +347,10 @@ def st_folium(
 
     if debug:
         with st.expander("Show generated code"):
-            st.info("HTML:")
-            st.code(html)
+            if html:
+                st.info("HTML:")
+                st.code(html)
+
             st.info("Main Map Leaflet js:")
             st.code(leaflet)
 
@@ -400,6 +404,9 @@ def _generate_leaflet_string(
     m._id = base_id
 
     if isinstance(m, folium.plugins.DualMap):
+        m.render()
+        m.m1.render()
+        m.m2.render()
         if not nested:
             return _generate_leaflet_string(
                 m.m1, nested=False, mappings=mappings, base_id=base_id
