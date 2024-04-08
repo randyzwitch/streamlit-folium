@@ -144,6 +144,29 @@ function onLayerClick(e: any) {
   debouncedUpdateComponentValue(window.map)
 }
 
+function getPixelatedStyles(pixelated: boolean)  {
+  if (pixelated) {
+    const styles = `
+    .leaflet-image-layer {
+      /* old android/safari*/
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges; /* safari */
+      image-rendering: pixelated; /* chrome */
+      image-rendering: -moz-crisp-edges; /* firefox */
+      image-rendering: -o-crisp-edges; /* opera */
+      -ms-interpolation-mode: nearest-neighbor; /* ie */
+    }
+    `
+    return styles
+  }
+  const styles = `
+  .leaflet-image-layer {
+  }
+  `
+  return styles
+
+}
+
 window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("click", onMapClick)
   map.on("moveend", onMapMove)
@@ -182,6 +205,7 @@ function onRender(event: Event): void {
   const feature_group: string = data.args["feature_group"]
   const return_on_hover: boolean = data.args["return_on_hover"]
   const layer_control: string = data.args["layer_control"]
+  const pixelated: boolean = data.args["pixelated"]
 
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
@@ -241,6 +265,11 @@ function onRender(event: Event): void {
       const html_div = document.createElement("div")
       html_div.innerHTML = html
       document.body.appendChild(html_div)
+      const styles = getPixelatedStyles(pixelated)
+      var styleSheet = document.createElement("style")
+      styleSheet.innerText = styles
+      document.head.appendChild(styleSheet)
+
     }
   }
 
