@@ -12,11 +12,11 @@ st.set_page_config(
 # streamlit-folium: Image Overlay
 
 By default, st_folium renders images using browser image rendering mechanism.
-Use st_folium(map, pixelated=True) in order to see pixels in image without resample in browser.
+Use st_folium(map, pixelated=True) in order to see image pixels without resample.
 """
 
 url_image = "https://i.postimg.cc/kG2FSxSR/image.png"
-image_bounds = [[-20.664910,-46.538223],[-20.660001, -46.532977]]
+image_bounds = [[-20.664910, -46.538223], [-20.660001, -46.532977]]
 
 m = folium.Map()
 m1 = folium.Map()
