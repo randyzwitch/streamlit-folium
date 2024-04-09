@@ -209,6 +209,7 @@ def st_folium(
     return_on_hover: bool = False,
     use_container_width: bool = False,
     layer_control: folium.LayerControl | None = None,
+    pixelated: bool = False,
     debug: bool = False,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
@@ -251,6 +252,9 @@ def st_folium(
     layer_control: folium.LayerControl or None
         If you want to have layer control for dynamically added layers, you can
         pass the layer control here.
+    pixelated: bool
+        If True, add CSS rules to render image crisp pixels which gives a pixelated
+        result instead of a blurred image.
     debug: bool
         If True, print out the html and javascript code used to render the map with
         st.code
@@ -376,6 +380,7 @@ def st_folium(
         feature_group=feature_group_string,
         return_on_hover=return_on_hover,
         layer_control=layer_control_string,
+        pixelated=pixelated,
     )
 
     return component_value
