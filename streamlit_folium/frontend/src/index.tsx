@@ -198,6 +198,8 @@ function onRender(event: Event): void {
   const height: number = data.args["height"]
   const width: number = data.args["width"]
   const html: string = data.args["html"]
+  const js_links: Array<string> = data.args["js_links"]
+  const css_links: Array<string> = data.args["css_links"]
   const returned_objects: Array<string> = data.args["returned_objects"]
   const _default: any = data.args["default"]
   const zoom: any = data.args["zoom"]
@@ -206,6 +208,71 @@ function onRender(event: Event): void {
   const return_on_hover: boolean = data.args["return_on_hover"]
   const layer_control: string = data.args["layer_control"]
   const pixelated: boolean = data.args["pixelated"]
+
+  var finalizeOnRender = () => {
+    if (
+      feature_group !== window.__GLOBAL_DATA__.last_feature_group ||
+      layer_control !== window.__GLOBAL_DATA__.last_layer_control
+    ) {
+      if (window.feature_group && window.feature_group.length > 0) {
+        window.feature_group.forEach((layer: Layer) => {
+          window.map.removeLayer(layer);
+        });
+      }
+
+      if (window.layer_control) {
+        window.map.removeControl(window.layer_control)
+      }
+
+      window.__GLOBAL_DATA__.last_feature_group = feature_group
+      window.__GLOBAL_DATA__.last_layer_control = layer_control
+
+      if (feature_group){
+        // Though using `eval` is generally a bad idea, we're using it here
+        // because we're evaluating code that we've generated ourselves on the
+        // Python side. This is safe because we're not evaluating user input, so this
+        // couldn't be used to execute arbitrary code.
+
+        // eslint-disable-next-line
+        eval(feature_group + layer_control)
+        for (let key in window.map._layers) {
+          let layer = window.map._layers[key]
+          layer.off("click", onLayerClick)
+          layer.on("click", onLayerClick)
+          if (return_on_hover) {
+            layer.off("mouseover", onLayerClick)
+            layer.on("mouseover", onLayerClick)
+          }
+        }
+      } else {
+        // eslint-disable-next-line
+        eval(layer_control)
+      }
+    }
+
+    var view_changed = false
+    var new_zoom = window.map.getZoom()
+    if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
+      new_zoom = zoom
+      window.__GLOBAL_DATA__.last_zoom = zoom
+      view_changed = true
+    }
+
+    var new_center = window.map.getCenter()
+    if (
+      center &&
+      JSON.stringify(center) !==
+        JSON.stringify(window.__GLOBAL_DATA__.last_center)
+    ) {
+      new_center = center
+      window.__GLOBAL_DATA__.last_center = center
+      view_changed = true
+    }
+
+    if (view_changed) {
+      window.map.setView(new_center, new_zoom)
+    }
+  }
 
   if (!window.map) {
     // Only run this if the map hasn't already been created (and thus the global
@@ -256,85 +323,51 @@ function onRender(event: Event): void {
         parent_div?.classList.add("double")
       }
 
-      // The folium-generated script creates a variable called "map_div", which
-      // is the actual Leaflet map.
-      render_script.innerHTML =
+      // This is only loaded once, from the onload callback
+      var postLoad = () => {
+        render_script.innerHTML =
         script +
-        `window.map = map_div; window.initComponent(map_div, ${return_on_hover});`
-      document.body.appendChild(render_script)
-      const html_div = document.createElement("div")
-      html_div.innerHTML = html
-      document.body.appendChild(html_div)
-      const styles = getPixelatedStyles(pixelated)
-      var styleSheet = document.createElement("style")
-      styleSheet.innerText = styles
-      document.head.appendChild(styleSheet)
-
-    }
-  }
-
-  if (
-    feature_group !== window.__GLOBAL_DATA__.last_feature_group ||
-    layer_control !== window.__GLOBAL_DATA__.last_layer_control
-  ) {
-    if (window.feature_group && window.feature_group.length > 0) {
-      window.feature_group.forEach((layer: Layer) => {
-        window.map.removeLayer(layer);
-      });
-    }
-
-    if (window.layer_control) {
-      window.map.removeControl(window.layer_control)
-    }
-
-    window.__GLOBAL_DATA__.last_feature_group = feature_group
-    window.__GLOBAL_DATA__.last_layer_control = layer_control
-
-    if (feature_group){
-      // Though using `eval` is generally a bad idea, we're using it here
-      // because we're evaluating code that we've generated ourselves on the
-      // Python side. This is safe because we're not evaluating user input, so this
-      // couldn't be used to execute arbitrary code.
-
-      // eslint-disable-next-line
-      eval(feature_group + layer_control)
-      for (let key in window.map._layers) {
-        let layer = window.map._layers[key]
-        layer.off("click", onLayerClick)
-        layer.on("click", onLayerClick)
-        if (return_on_hover) {
-          layer.off("mouseover", onLayerClick)
-          layer.on("mouseover", onLayerClick)
-        }
+          `window.map = map_div; window.initComponent(map_div, ${return_on_hover});`
+        document.body.appendChild(render_script)
+        const html_div = document.createElement("div")
+        html_div.innerHTML = html
+        document.body.appendChild(html_div)
+        const styles = getPixelatedStyles(pixelated)
+        var styleSheet = document.createElement("style")
+        styleSheet.innerText = styles
+        document.head.appendChild(styleSheet)
+        finalizeOnRender();
       }
-    } else {
-      // eslint-disable-next-line
-      eval(layer_control)
+
+      // make sure dependent files are loaded
+      // before we initialize the component
+      var count = 0;
+      js_links.forEach((elem) => {
+         var scr = document.createElement('script');
+         scr.src = elem;
+         scr.onload = () => {
+             count -= 1;
+             if(count === 0) {
+               setTimeout(postLoad, 0);
+             }
+	 };
+         document.head.appendChild(scr);
+	 count += 1;
+      });
+
+      css_links.forEach((elem) => {
+         var link = document.createElement('link');
+	 link.rel = "stylesheet";
+	 link.type = "text/css";
+         link.href = elem;
+         document.head.appendChild(link);
+      });
+      Streamlit.setFrameHeight()
     }
+  } else {
+    finalizeOnRender();
   }
 
-  var view_changed = false
-  var new_zoom = window.map.getZoom()
-  if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
-    new_zoom = zoom
-    window.__GLOBAL_DATA__.last_zoom = zoom
-    view_changed = true
-  }
-
-  var new_center = window.map.getCenter()
-  if (
-    center &&
-    JSON.stringify(center) !==
-      JSON.stringify(window.__GLOBAL_DATA__.last_center)
-  ) {
-    new_center = center
-    window.__GLOBAL_DATA__.last_center = center
-    view_changed = true
-  }
-
-  if (view_changed) {
-    window.map.setView(new_center, new_zoom)
-  }
 }
 
 // Attach our `onRender` handler to Streamlit's render event.
