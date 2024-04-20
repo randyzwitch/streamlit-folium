@@ -339,12 +339,15 @@ def test_dynamic_feature_group_update(page: Page):
 
 def test_layer_control_dynamic_update(page: Page):
     page.get_by_role("link", name="dynamic layer control").click()
-    #page.get_by_text("Show generated code").click()
+    # page.get_by_text("Show generated code").click()
 
-    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text("Parcels").click()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
+        "Parcels"
+    ).click()
     expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
-        .get_by_text("Parcels")
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
+            "Parcels"
+        )
     ).not_to_be_checked()
     expect(
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
@@ -358,12 +361,14 @@ def test_layer_control_dynamic_update(page: Page):
         "Parcels"
     ).click()
     expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
-        .get_by_text("Parcels")
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
+            "Parcels"
+        )
     ).not_to_be_checked()
     expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
-        .get_by_text("Buildings")
+        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
+            "Buildings"
+        )
     ).to_be_checked()
     expect(
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
