@@ -70,7 +70,7 @@ def test_marker_click(page: Page):
     # Click marker
     try:
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
-            "img"
+            "button", name="Marker"
         ).click()
     except Exception as e:
         page.screenshot(path="screenshot-test-marker-click.png", full_page=True)
@@ -121,13 +121,13 @@ def test_limit_data(page: Page):
     # Click marker
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("img").nth(2).click()
+    ).get_by_role("button").nth(2).click()
 
     # Have to click a second time for some reason, maybe because it doesn't load right
     # away
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("img").nth(2).click()
+    ).get_by_role("button").nth(2).click()
 
     expect(page.get_by_text('{"last_object_clicked":{"lat":39.96')).to_be_visible()
 
@@ -146,10 +146,10 @@ def test_dual_map(page: Page):
     try:
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
             "#map_div"
-        ).get_by_role("img").click()
+        ).get_by_role("button").click()
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
             "#map_div2"
-        ).get_by_role("img").click()
+        ).get_by_role("button").click()
     except Exception as e:
         page.screenshot(path="screenshot-dual-map.png", full_page=True)
         raise e
@@ -172,7 +172,7 @@ def test_tooltip_click(page: Page):
     # Click marker on map
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("img").nth(0).click()
+    ).get_by_role("button").nth(0).click()
 
     expect(
         page.get_by_text('"last_object_clicked_tooltip":"Liberty Bell"')
@@ -187,7 +187,7 @@ def test_popup_text(page: Page):
     expect(page.get_by_text("Tooltip: None")).to_be_visible()
 
     page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
-        "img"
+        "button"
     ).nth(0).click()
 
     try:
@@ -208,7 +208,7 @@ def test_return_on_hover(page: Page):
     page.get_by_text("Return on hover?").click()
 
     page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
-        "img"
+        "button"
     ).nth(1).hover()
 
     try:
@@ -286,8 +286,8 @@ def test_dynamic_feature_group_update(page: Page):
     ).to_be_visible()
     expect(
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
-        .locator("path")
-        .nth(1)
+        .get_by_role("img")
+        .locator("svg")
     ).to_be_hidden()
     expect(
         page.get_by_text('"fillColor"')
@@ -305,8 +305,8 @@ def test_dynamic_feature_group_update(page: Page):
     ).to_be_visible()
     expect(
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
-        .locator("path")
-        .nth(1)
+        .get_by_role("img")
+        .locator("svg")
     ).to_be_hidden()
     expect(page.get_by_text("fillColor")).to_be_hidden()
     expect(page.get_by_text("dashArray")).to_be_visible()
@@ -315,8 +315,8 @@ def test_dynamic_feature_group_update(page: Page):
     page.get_by_test_id("stRadio").get_by_text("None").click()
     expect(
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
-        .locator("path")
-        .first
+        .get_by_role("img")
+        .locator("svg")
     ).to_be_hidden()
     expect(page.get_by_text("fillColor")).to_be_hidden()
     expect(page.get_by_text("dashArray")).to_be_hidden()
@@ -339,42 +339,34 @@ def test_dynamic_feature_group_update(page: Page):
 
 def test_layer_control_dynamic_update(page: Page):
     page.get_by_role("link", name="dynamic layer control").click()
-    page.get_by_text("Show generated code").click()
+    #page.get_by_text("Show generated code").click()
 
-    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
-        "label"
-    ).filter(has_text="Parcels").locator("div").click()
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text("Parcels").click()
     expect(
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
-        .locator("label")
-        .filter(has_text="Parcels")
-        .locator("div")
+        .get_by_text("Parcels")
     ).not_to_be_checked()
     expect(
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
-        .locator("path")
-        .first
+        .get_by_role("img")
+        .locator("svg")
     ).to_be_hidden()
     expect(page.get_by_text("dashArray")).to_be_hidden()
 
     page.get_by_test_id("stRadio").get_by_text("Both").click()
-    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_label(
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
         "Parcels"
-    ).uncheck()
+    ).click()
     expect(
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
-        .locator("label")
-        .filter(has_text="Parcels")
-        .locator("div")
+        .get_by_text("Parcels")
     ).not_to_be_checked()
     expect(
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
-        .locator("label")
-        .filter(has_text="Buildings")
-        .locator("div")
+        .get_by_text("Buildings")
     ).to_be_checked()
     expect(
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
+        .get_by_role("img")
         .locator("path")
-        .first
     ).to_be_visible()

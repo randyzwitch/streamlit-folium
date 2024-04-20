@@ -325,36 +325,45 @@ function onRender(event: Event): void {
 
       // This is only loaded once, from the onload callback
       var postLoad = () => {
-        render_script.innerHTML =
-        script +
-          `window.map = map_div; window.initComponent(map_div, ${return_on_hover});`
-        document.body.appendChild(render_script)
-        const html_div = document.createElement("div")
-        html_div.innerHTML = html
-        document.body.appendChild(html_div)
-        const styles = getPixelatedStyles(pixelated)
-        var styleSheet = document.createElement("style")
-        styleSheet.innerText = styles
-        document.head.appendChild(styleSheet)
+        if (!window.map) {
+          render_script.innerHTML =
+          script +
+            `window.map = map_div; window.initComponent(map_div, ${return_on_hover});`
+          document.body.appendChild(render_script)
+          const html_div = document.createElement("div")
+          html_div.innerHTML = html
+          document.body.appendChild(html_div)
+          const styles = getPixelatedStyles(pixelated)
+          var styleSheet = document.createElement("style")
+          styleSheet.innerText = styles
+          document.head.appendChild(styleSheet)
+        }
         finalizeOnRender();
       }
 
-      // make sure dependent files are loaded
-      // before we initialize the component
-      var count = 0;
-      js_links.forEach((elem) => {
-         var scr = document.createElement('script');
-         scr.src = elem;
-         scr.onload = () => {
-             count -= 1;
-             if(count === 0) {
-               setTimeout(postLoad, 0);
-             }
-	 };
-         document.head.appendChild(scr);
-	 count += 1;
-      });
+      if (js_links.length === 0) {
+        postLoad();
+      } else {
+        // make sure dependent js files are loaded
+        // before we initialize the component
+        var count = 0;
+        js_links.forEach((elem) => {
+          var scr = document.createElement('script');
+          console.log(elem);
+          scr.src = elem;
+          scr.async = false;
+          scr.onload = () => {
+            count -= 1;
+            if(count === 0) {
+              setTimeout(postLoad, 0);
+            }
+	  };
+          document.head.appendChild(scr);
+	  count += 1;
+        });
+      }
 
+      // css is okay regardless loading order
       css_links.forEach((elem) => {
          var link = document.createElement('link');
 	 link.rel = "stylesheet";
