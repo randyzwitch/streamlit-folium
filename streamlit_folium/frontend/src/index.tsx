@@ -349,7 +349,6 @@ function onRender(event: Event): void {
         var count = 0;
         js_links.forEach((elem) => {
           var scr = document.createElement('script');
-          console.log(elem);
           scr.src = elem;
           scr.async = false;
           scr.onload = () => {

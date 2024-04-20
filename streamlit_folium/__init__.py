@@ -367,6 +367,9 @@ def st_folium(
                 st.code(layer_control_string)
 
     def walk(fig):
+        if isinstance(fig, folium.plugins.DualMap):
+            yield from walk(fig.m1)
+            yield from walk(fig.m2)
         if isinstance(fig, folium.elements.JSCSSMixin):
             yield fig
         if hasattr(fig, "_children"):

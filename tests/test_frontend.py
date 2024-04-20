@@ -146,10 +146,10 @@ def test_dual_map(page: Page):
     try:
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
             "#map_div"
-        ).get_by_role("button").click()
+        ).get_by_role("button", name="Marker").click()
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
             "#map_div2"
-        ).get_by_role("button").click()
+        ).get_by_role("button", name="Marker").click()
     except Exception as e:
         page.screenshot(path="screenshot-dual-map.png", full_page=True)
         raise e
