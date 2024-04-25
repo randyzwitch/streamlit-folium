@@ -366,6 +366,23 @@ def st_folium(
                 st.info("Layer control js:")
                 st.code(layer_control_string)
 
+    def walk(fig):
+        if isinstance(fig, folium.plugins.DualMap):
+            yield from walk(fig.m1)
+            yield from walk(fig.m2)
+        if isinstance(fig, folium.elements.JSCSSMixin):
+            yield fig
+        if hasattr(fig, "_children"):
+            for child in fig._children.values():
+                yield from walk(child)
+
+    css_links = []
+    js_links = []
+
+    for elem in walk(folium_map):
+        css_links.extend([href for _, href in elem.default_css])
+        js_links.extend([src for _, src in elem.default_js])
+
     component_value = _component_func(
         script=leaflet,
         html=html,
@@ -381,6 +398,8 @@ def st_folium(
         return_on_hover=return_on_hover,
         layer_control=layer_control_string,
         pixelated=pixelated,
+        css_links=css_links,
+        js_links=js_links,
     )
 
     return component_value
