@@ -20,7 +20,8 @@ which allows you to set a return value for your Streamlit app.
 """
 
 m = folium.Map()
-source = folium.JsCode("""
+source = folium.JsCode(
+    """
     function(responseHandler, errorHandler) {
         var url = 'https://api.wheretheiss.at/v1/satellites/25544';
 
@@ -48,9 +49,11 @@ source = folium.JsCode("""
         .then(responseHandler)
         .catch(errorHandler);
     }
-""")
+"""
+)
 
-on_each_feature = folium.JsCode("""
+on_each_feature = folium.JsCode(
+    """
     (feature, layer) => {
         layer.bindTooltip(`${feature.properties.timestamp}`);
         layer.on("click", (event) => {
@@ -64,9 +67,11 @@ on_each_feature = folium.JsCode("""
         });
 
     }
-""")
+"""
+)
 
-update_feature = folium.JsCode("""
+update_feature = folium.JsCode(
+    """
     (feature, layer) => {
         L.Realtime.prototype.options.updateFeature(feature, layer);
         if(layer) {
@@ -74,19 +79,16 @@ update_feature = folium.JsCode("""
             layer.bindTooltip(`${feature.properties.timestamp}`);
         }
     }
-""")
+"""
+)
 
 Realtime(
     source,
     on_each_feature=on_each_feature,
     update_feature=update_feature,
-    interval=10000
+    interval=10000,
 ).add_to(m)
 
-data = st_folium(
-    m,
-    returned_objects=[],
-    debug=False
-)
+data = st_folium(m, returned_objects=[], debug=False)
 
 st.write(data)
