@@ -1,5 +1,6 @@
 # streamlit-folium: geospatial made easy in Streamlit!
 
+
 ![Run tests each PR](https://github.com/randyzwitch/streamlit-folium/workflows/Run%20tests%20each%20PR/badge.svg)
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/randyzwitch/streamlit-folium/examples/streamlit_app.py)
@@ -30,6 +31,5 @@ Currently, there are two functions defined:
 ## Example
 
 ![streamlit_folium example](https://raw.githubusercontent.com/randyzwitch/streamlit-folium/master/tests/visual_baseline/test_basic/first_test/baseline.png)
-
 
 
