@@ -26,12 +26,12 @@ with st.echo():
         """
         function(responseHandler, errorHandler) {
             var url = 'https://api.wheretheiss.at/v1/satellites/25544';
-    
+
             fetch(url)
             .then((response) => {
                 return response.json().then((data) => {
                     var { id, timestamp, longitude, latitude } = data;
-    
+
                     return {
                         'type': 'FeatureCollection',
                         'features': [{
@@ -53,7 +53,7 @@ with st.echo():
         }
     """
     )
-    
+
     on_each_feature = folium.JsCode(
         """
         (feature, layer) => {
@@ -67,11 +67,11 @@ with st.echo():
                     location: event.sourceTarget.feature.geometry
                 });
             });
-    
+
         }
     """
     )
-    
+
     update_feature = folium.JsCode(
         """
         (feature, layer) => {
@@ -83,14 +83,14 @@ with st.echo():
         }
     """
     )
-    
+
     Realtime(
         source,
         on_each_feature=on_each_feature,
         update_feature=update_feature,
         interval=10000,
     ).add_to(m)
-    
+
     data = st_folium(m, returned_objects=[], debug=False)
-    
+
     st.write(data)
