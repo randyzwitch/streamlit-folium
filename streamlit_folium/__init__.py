@@ -9,6 +9,7 @@ from typing import Iterable
 
 import branca
 import folium
+import folium.elements
 import folium.plugins
 import streamlit as st
 import streamlit.components.v1 as components
@@ -22,6 +23,7 @@ if not _RELEASE:
     _component_func = components.declare_component(
         "st_folium", url="http://localhost:3001"
     )
+    
 else:
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(parent_dir, "frontend/build")
@@ -367,6 +369,8 @@ def st_folium(
                 st.code(layer_control_string)
 
     def walk(fig):
+        if isinstance(fig, branca.colormap.ColorMap):
+            yield fig
         if isinstance(fig, folium.plugins.DualMap):
             yield from walk(fig.m1)
             yield from walk(fig.m2)
@@ -380,9 +384,13 @@ def st_folium(
     js_links = []
 
     for elem in walk(folium_map):
+        if isinstance(elem, branca.colormap.ColorMap):
+            # manually add d3.js
+            js_links.insert(0, "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js")
+            js_links.insert(0, "https://d3js.org/d3.v4.min.js")
         css_links.extend([href for _, href in elem.default_css])
         js_links.extend([src for _, src in elem.default_js])
-
+    
     component_value = _component_func(
         script=leaflet,
         html=html,

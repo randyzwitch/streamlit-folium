@@ -144,7 +144,7 @@ function onLayerClick(e: any) {
   debouncedUpdateComponentValue(window.map)
 }
 
-function getPixelatedStyles(pixelated: boolean)  {
+function getPixelatedStyles(pixelated: boolean) {
   if (pixelated) {
     const styles = `
     .leaflet-image-layer {
@@ -164,7 +164,6 @@ function getPixelatedStyles(pixelated: boolean)  {
   }
   `
   return styles
-
 }
 
 window.initComponent = (map: any, return_on_hover: boolean) => {
@@ -190,7 +189,7 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
  * the component is initially loaded, and then again every time the
  * component gets new data from Python.
  */
-function onRender(event: Event): void {
+async function onRender(event: Event) {
   // Get the RenderData from the event
   const data = (event as CustomEvent<RenderData>).detail
 
@@ -209,68 +208,58 @@ function onRender(event: Event): void {
   const layer_control: string = data.args["layer_control"]
   const pixelated: boolean = data.args["pixelated"]
 
-  var finalizeOnRender = () => {
+  // load scripts
+  const loadScripts = async () => {
+    for (const link of js_links) {
+      // use promise to load scripts synchronously
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script")
+        script.src = link
+        script.async = false
+        script.onload = resolve
+        script.onerror = reject
+        window.document.body.appendChild(script)
+      })
+    }
+
+    css_links.forEach((link) => {
+      const linkTag = document.createElement("link")
+      linkTag.rel = "stylesheet"
+      linkTag.href = link
+      window.document.head.appendChild(linkTag)
+    })
+
+    const style = document.createElement("style")
+    style.innerHTML = getPixelatedStyles(pixelated)
+    window.document.head.appendChild(style)
+  }
+
+  // finalize rendering
+  const finalizeOnRender = () => {
     if (
       feature_group !== window.__GLOBAL_DATA__.last_feature_group ||
       layer_control !== window.__GLOBAL_DATA__.last_layer_control
     ) {
+      // remove previous feature group and layer control
       if (window.feature_group && window.feature_group.length > 0) {
         window.feature_group.forEach((layer: Layer) => {
-          window.map.removeLayer(layer);
-        });
+          window.map.removeLayer(layer)
+        })
       }
 
       if (window.layer_control) {
         window.map.removeControl(window.layer_control)
       }
 
+      // update feature group and layer control cache
       window.__GLOBAL_DATA__.last_feature_group = feature_group
       window.__GLOBAL_DATA__.last_layer_control = layer_control
 
-      if (feature_group){
-        // Though using `eval` is generally a bad idea, we're using it here
-        // because we're evaluating code that we've generated ourselves on the
-        // Python side. This is safe because we're not evaluating user input, so this
-        // couldn't be used to execute arbitrary code.
-
-        // eslint-disable-next-line
-        eval(feature_group + layer_control)
-        for (let key in window.map._layers) {
-          let layer = window.map._layers[key]
-          layer.off("click", onLayerClick)
-          layer.on("click", onLayerClick)
-          if (return_on_hover) {
-            layer.off("mouseover", onLayerClick)
-            layer.on("mouseover", onLayerClick)
-          }
-        }
-      } else {
-        // eslint-disable-next-line
-        eval(layer_control)
+      if (feature_group) {
+        // render feature group
+        console.log("Rendering feature group...")
+        eval(feature_group)
       }
-    }
-
-    var view_changed = false
-    var new_zoom = window.map.getZoom()
-    if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
-      new_zoom = zoom
-      window.__GLOBAL_DATA__.last_zoom = zoom
-      view_changed = true
-    }
-
-    var new_center = window.map.getCenter()
-    if (
-      center &&
-      JSON.stringify(center) !==
-        JSON.stringify(window.__GLOBAL_DATA__.last_center)
-    ) {
-      new_center = center
-      window.__GLOBAL_DATA__.last_center = center
-      view_changed = true
-    }
-
-    if (view_changed) {
-      window.map.setView(new_center, new_zoom)
     }
   }
 
@@ -296,7 +285,6 @@ function onRender(event: Event): void {
         document.body.appendChild(a)
       }
 
-      const render_script = document.createElement("script")
       // HACK -- update the folium-generated JS to add, most importantly,
       // the map to this global variable so that it can be used elsewhere
       // in the script.
@@ -322,60 +310,27 @@ function onRender(event: Event): void {
         parent_div?.classList.remove("single")
         parent_div?.classList.add("double")
       }
-
-      // This is only loaded once, from the onload callback
-      var postLoad = () => {
-        if (!window.map) {
-          render_script.innerHTML =
-          script +
-            `window.map = map_div; window.initComponent(map_div, ${return_on_hover});`
-          document.body.appendChild(render_script)
-          const html_div = document.createElement("div")
-          html_div.innerHTML = html
-          document.body.appendChild(html_div)
-          const styles = getPixelatedStyles(pixelated)
-          var styleSheet = document.createElement("style")
-          styleSheet.innerText = styles
-          document.head.appendChild(styleSheet)
-        }
-        finalizeOnRender();
-      }
-
-      if (js_links.length === 0) {
-        postLoad();
-      } else {
-        // make sure dependent js files are loaded
-        // before we initialize the component
-        var count = 0;
-        js_links.forEach((elem) => {
-          var scr = document.createElement('script');
-          scr.src = elem;
-          scr.async = false;
-          scr.onload = () => {
-            count -= 1;
-            if(count === 0) {
-              setTimeout(postLoad, 0);
-            }
-	  };
-          document.head.appendChild(scr);
-	  count += 1;
-        });
-      }
-
-      // css is okay regardless loading order
-      css_links.forEach((elem) => {
-         var link = document.createElement('link');
-	 link.rel = "stylesheet";
-	 link.type = "text/css";
-         link.href = elem;
-         document.head.appendChild(link);
-      });
-      Streamlit.setFrameHeight()
     }
-  } else {
-    finalizeOnRender();
-  }
+    await loadScripts().then(() => {
+      const render_script = document.createElement("script")
 
+      if (!window.map) {
+        render_script.innerHTML =
+          script +
+          `window.map = map_div; window.initComponent(map_div, ${return_on_hover});`
+        document.body.appendChild(render_script)
+        const html_div = document.createElement("div")
+        html_div.innerHTML = html
+        document.body.appendChild(html_div)
+        const styles = getPixelatedStyles(pixelated)
+        var styleSheet = document.createElement("style")
+        styleSheet.innerText = styles
+        document.head.appendChild(styleSheet)
+      }
+      finalizeOnRender()
+    })
+  }
+  finalizeOnRender()
 }
 
 // Attach our `onRender` handler to Streamlit's render event.
