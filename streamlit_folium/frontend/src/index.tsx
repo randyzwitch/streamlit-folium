@@ -256,10 +256,44 @@ async function onRender(event: Event) {
       window.__GLOBAL_DATA__.last_layer_control = layer_control
 
       if (feature_group) {
-        // render feature group
-        console.log("Rendering feature group...")
-        eval(feature_group)
+        // eslint-disable-next-line
+        eval(feature_group + layer_control)
+        for (let key in window.map._layers) {
+          let layer = window.map._layers[key]
+          layer.off("click", onLayerClick)
+          layer.on("click", onLayerClick)
+          if (return_on_hover) {
+            layer.off("mouseover", onLayerClick)
+            layer.on("mouseover", onLayerClick)
+          }
+        }
+      } else {
+        // eslint-disable-next-line
+        eval(layer_control)
       }
+    }
+
+    var view_changed = false
+    var new_zoom = window.map.getZoom()
+    if (zoom && zoom !== window.__GLOBAL_DATA__.last_zoom) {
+      new_zoom = zoom
+      window.__GLOBAL_DATA__.last_zoom = zoom
+      view_changed = true
+    }
+
+    var new_center = window.map.getCenter()
+    if (
+      center &&
+      JSON.stringify(center) !==
+        JSON.stringify(window.__GLOBAL_DATA__.last_center)
+    ) {
+      new_center = center
+      window.__GLOBAL_DATA__.last_center = center
+      view_changed = true
+    }
+
+    if (view_changed) {
+      window.map.setView(new_center, new_zoom)
     }
   }
 
