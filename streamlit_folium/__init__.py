@@ -5,7 +5,7 @@ import os
 import re
 import warnings
 from textwrap import dedent
-from typing import Iterable
+from typing import Iterable, List
 
 import branca
 import folium
@@ -23,7 +23,7 @@ if not _RELEASE:
     _component_func = components.declare_component(
         "st_folium", url="http://localhost:3001"
     )
-    
+
 else:
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(parent_dir, "frontend/build")
@@ -380,17 +380,19 @@ def st_folium(
             for child in fig._children.values():
                 yield from walk(child)
 
-    css_links = []
-    js_links = []
+    css_links: List[str] = []
+    js_links: List[str] = []
 
     for elem in walk(folium_map):
         if isinstance(elem, branca.colormap.ColorMap):
             # manually add d3.js
-            js_links.insert(0, "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js")
+            js_links.insert(
+                0, "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"
+            )
             js_links.insert(0, "https://d3js.org/d3.v4.min.js")
         css_links.extend([href for _, href in elem.default_css])
         js_links.extend([src for _, src in elem.default_js])
-    
+
     component_value = _component_func(
         script=leaflet,
         html=html,
