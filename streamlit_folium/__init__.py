@@ -5,7 +5,7 @@ import os
 import re
 import warnings
 from textwrap import dedent
-from typing import Iterable, List
+from typing import Iterable
 
 import branca
 import folium
@@ -380,8 +380,8 @@ def st_folium(
             for child in fig._children.values():
                 yield from walk(child)
 
-    css_links: List[str] = []
-    js_links: List[str] = []
+    css_links: list[str] = []
+    js_links: list[str] = []
 
     for elem in walk(folium_map):
         if isinstance(elem, branca.colormap.ColorMap):
