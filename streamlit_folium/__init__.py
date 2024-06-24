@@ -213,6 +213,7 @@ def st_folium(
     layer_control: folium.LayerControl | None = None,
     pixelated: bool = False,
     debug: bool = False,
+    render: bool = True,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -260,6 +261,11 @@ def st_folium(
     debug: bool
         If True, print out the html and javascript code used to render the map with
         st.code
+    render: bool
+        If True, the map will be rendered as html, this must be done at least once.
+        Disabling this may improve performance as you can cache the rendering step.
+        *Note* if this is disabled and the map is not rendered elsewhere the map
+        will be missing attributes
     Returns
     -------
     dict
@@ -276,8 +282,8 @@ def st_folium(
         width = None
 
     folium_map: folium.Map = fig  # type: ignore
-
-    folium_map.render()
+    if render:
+        folium_map.render()
 
     # handle the case where you pass in a figure rather than a map
     # this assumes that a map is the first child
