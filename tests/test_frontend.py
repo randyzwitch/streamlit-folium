@@ -70,7 +70,7 @@ def test_marker_click(page: Page):
     # Click marker
     try:
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
-            "button", name="Marker"
+            "img"
         ).click()
     except Exception as e:
         page.screenshot(path="screenshot-test-marker-click.png", full_page=True)
@@ -121,13 +121,13 @@ def test_limit_data(page: Page):
     # Click marker
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("button").nth(2).click()
+    ).get_by_role("img").nth(2).click()
 
     # Have to click a second time for some reason, maybe because it doesn't load right
     # away
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("button").nth(2).click()
+    ).get_by_role("img").nth(2).click()
 
     expect(page.get_by_text('{"last_object_clicked":{"lat":39.96')).to_be_visible()
 
@@ -146,10 +146,10 @@ def test_dual_map(page: Page):
     try:
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
             "#map_div"
-        ).get_by_role("button", name="Marker").click()
+        ).get_by_role("img").click()
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
             "#map_div2"
-        ).get_by_role("button", name="Marker").click()
+        ).get_by_role("img").click()
     except Exception as e:
         page.screenshot(path="screenshot-dual-map.png", full_page=True)
         raise e
@@ -172,7 +172,7 @@ def test_tooltip_click(page: Page):
     # Click marker on map
     page.frame_locator(
         'internal:attr=[title="streamlit_folium.st_folium"i]'
-    ).get_by_role("button").nth(0).click()
+    ).get_by_role("img").nth(0).click()
 
     expect(
         page.get_by_text('"last_object_clicked_tooltip":"Liberty Bell"')
@@ -208,7 +208,7 @@ def test_return_on_hover(page: Page):
     page.get_by_text("Return on hover?").click()
 
     page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
-        "button"
+        "img"
     ).nth(1).hover()
 
     try:
