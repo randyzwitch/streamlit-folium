@@ -187,8 +187,8 @@ def test_popup_text(page: Page):
     expect(page.get_by_text("Tooltip: None")).to_be_visible()
 
     page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
-        "button"
-    ).nth(0).click()
+        "img"
+    ).first.click()
 
     try:
         expect(page.get_by_text("Popup: Popup!")).to_be_visible()
@@ -271,6 +271,12 @@ def test_grouped_layer_control(page: Page):
     page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_label(
         "g2"
     ).check()
+
+
+def test_geojson_popup(page: Page):
+    page.get_by_role("link", name="geojson popup").click()
+
+    expect(page.get_by_text("AttributeError")).to_be_hidden()
 
 
 def test_dynamic_feature_group_update(page: Page):
