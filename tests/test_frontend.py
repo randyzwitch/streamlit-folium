@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from time import sleep
 
 import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page, Response, expect
 
 LOCAL_TEST = False
 
@@ -62,6 +62,16 @@ def run_streamlit():
 
 
 def test_marker_click(page: Page):
+    def check_for_404(response: Response):
+        if not response.ok:
+            print(response)
+            print(response.text())
+            print(response.url)
+            print(response.status)
+            raise Exception("404")
+
+    page.on("response", check_for_404)
+
     # Check page title
     expect(page).to_have_title("streamlit-folium documentation")
 
