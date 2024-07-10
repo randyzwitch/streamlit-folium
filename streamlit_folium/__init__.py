@@ -396,8 +396,8 @@ def st_folium(
                 0, "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"
             )
             js_links.insert(0, "https://d3js.org/d3.v4.min.js")
-        css_links.extend([href for _, href in elem.default_css])
-        js_links.extend([src for _, src in elem.default_js])
+        css_links.extend([href for _, href in getattr(elem, "default_css", [])])
+        js_links.extend([src for _, src in getattr(elem, "default_js", [])])
 
     component_value = _component_func(
         script=leaflet,
