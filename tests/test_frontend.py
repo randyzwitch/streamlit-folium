@@ -80,7 +80,7 @@ def test_marker_click(page: Page):
     # Click marker
     try:
         page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_role(
-            "img"
+            "button", name="Marker"
         ).click()
     except Exception as e:
         page.screenshot(path="screenshot-test-marker-click.png", full_page=True)
