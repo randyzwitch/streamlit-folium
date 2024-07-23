@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="streamlit_folium",
-    version="0.21.1",
+    version="0.22.0",
     author="Randy Zwitch",
     author_email="rzwitch@gmail.com",
     description="Render Folium objects in Streamlit",
