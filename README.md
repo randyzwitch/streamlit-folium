@@ -30,6 +30,9 @@ Currently, there are two functions defined:
 
 ## Example
 
+
+[<img src="https://py.cafe/logos/pycafe_logo.png" alt="PyCafe logo" width="24" height="24"> Run and edit this example in Py.Cafe](https://py.cafe/maartenbreddels/streamlit-folium-geospatial-visualizations)
+
 ![streamlit_folium example](https://raw.githubusercontent.com/randyzwitch/streamlit-folium/master/tests/visual_baseline/test_basic/first_test/baseline.png)
 
 
