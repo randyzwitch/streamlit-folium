@@ -135,7 +135,7 @@ def _get_map_string(fig: folium.Map) -> str:
     leaflet = leaflet.replace("alert(coords);", "")
 
     # Rename drawnItems
-    leaflet = leaflet.replace("drawnItems_draw_control_div_1", "drawnItems")
+    leaflet = re.sub(r"drawnItems_draw_control_div_\d+", "drawnItems", leaflet)
 
     leaflet = dedent(leaflet)
 
