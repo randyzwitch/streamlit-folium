@@ -1,24 +1,23 @@
 repos:
-- repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: v0.0.275
-  hooks:
-  - id: ruff
-    args:
-    - --fix
-- repo: https://github.com/psf/black
-  rev: 23.3.0
-  hooks:
-  - id: black
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.4.1
-  hooks:
-  - id: mypy
-    args:
-    - --ignore-missing-imports
-    - --follow-imports=silent
-    additional_dependencies:
-    - types-all
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.1.0 # Use the ref you want to point at
-  hooks:
-  - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.6.5
+    hooks:
+      # Run the linter.
+      - id: ruff
+        args: [--fix]
+      # Run the formatter.
+      - id: ruff-format
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        args:
+          - --ignore-missing-imports
+          - --follow-imports=silent
+        additional_dependencies:
+          - types-requests
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0 # Use the ref you want to point at
+    hooks:
+      - id: trailing-whitespace
