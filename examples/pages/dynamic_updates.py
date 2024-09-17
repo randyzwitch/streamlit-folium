@@ -105,7 +105,7 @@ def main():
         st.session_state["last_object_clicked"] = out["last_object_clicked"]
         state = get_state_from_lat_lon(*out["last_object_clicked"].values())
         st.session_state["selected_state"] = state
-        st.experimental_rerun()
+        st.rerun()
 
     st.write("## Dynamic feature group updates")
 
