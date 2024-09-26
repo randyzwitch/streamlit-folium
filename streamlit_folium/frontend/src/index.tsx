@@ -19,6 +19,7 @@ type GlobalData = {
   last_center: any
   last_feature_group: any
   last_layer_control: any
+  selected_layers: Set<any>
 }
 
 declare global {
@@ -57,6 +58,7 @@ function updateComponentValue(map: any) {
     last_circle_radius: global_data.last_circle_radius,
     last_circle_polygon: global_data.last_circle_polygon,
     center: map.getCenter(),
+    selected_layer: Array.from(global_data.selected_layers).join(", ")
   }
 
   let to_return = global_data.returned_objects
@@ -109,6 +111,18 @@ function onDraw(e: any) {
     global_data.last_circle_polygon = polygon
   }
   return onLayerClick(e)
+}
+
+function removeLayer(e: any) {
+  const global_data = window.__GLOBAL_DATA__
+  global_data.selected_layers.delete(e.layer["wmsParams"]["layers"]);
+  debouncedUpdateComponentValue(window.map)
+}
+
+function addLayer(e: any) {
+  const global_data = window.__GLOBAL_DATA__
+  global_data.selected_layers.add(e.layer["wmsParams"]["layers"]);
+  debouncedUpdateComponentValue(window.map)
 }
 
 function onLayerClick(e: any) {
@@ -167,10 +181,15 @@ function getPixelatedStyles(pixelated: boolean) {
 }
 
 window.initComponent = (map: any, return_on_hover: boolean) => {
+  const global_data = window.__GLOBAL_DATA__
   map.on("click", onMapClick)
   map.on("moveend", onMapMove)
   for (let key in map._layers) {
     let layer = map._layers[key]
+    let layer_url = layer["_url"]
+    if (typeof layer_url !== "undefined") {
+      global_data.selected_layers.add(layer_url);
+    }
     layer.on("click", onLayerClick)
     if (return_on_hover) {
       layer.on("mouseover", onLayerClick)
@@ -180,6 +199,10 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("draw:edited", onDraw)
   map.on("draw:deleted", onDraw)
 
+  // Adding functionality for tracking layer changes
+  map.on("overlayadd", addLayer);
+  map.on("overlayremove", removeLayer);
+  
   Streamlit.setFrameHeight()
   updateComponentValue(map)
 }
@@ -228,7 +251,6 @@ async function onRender(event: Event) {
       linkTag.href = link
       window.document.head.appendChild(linkTag)
     })
-
     const style = document.createElement("style")
     style.innerHTML = getPixelatedStyles(pixelated)
     window.document.head.appendChild(style)
@@ -339,6 +361,7 @@ async function onRender(event: Event) {
         last_center: null,
         last_feature_group: null,
         last_layer_control: null,
+        selected_layers: new Set()
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")
