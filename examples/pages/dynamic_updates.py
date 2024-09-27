@@ -29,14 +29,13 @@ st.subheader(
 @st.cache_data
 def _get_all_state_bounds() -> dict:
     url = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
-    data = requests.get(url).json()
-    return data
+    return requests.get(url).json()
 
 
 @st.cache_data
 def get_state_bounds(state: str) -> dict:
     data = _get_all_state_bounds()
-    state_entry = [f for f in data["features"] if f["properties"]["name"] == state][0]
+    state_entry = next(f for f in data["features"] if f["properties"]["name"] == state)
     return {"type": "FeatureCollection", "features": [state_entry]}
 
 
@@ -109,8 +108,8 @@ def main():
 
     st.write("## Dynamic feature group updates")
 
-    START_LOCATION = [37.7944347109497, -122.398077892527]
-    START_ZOOM = 17
+    start_location = [37.7944347109497, -122.398077892527]
+    start_zoom = 17
 
     if "feature_group" not in st.session_state:
         st.session_state["feature_group"] = None
@@ -146,14 +145,12 @@ def main():
         "dashArray": "5, 5",
     }
 
-    polygon_folium1 = folium.GeoJson(data=gdf1, style_function=lambda x: style_parcels)
-    polygon_folium2 = folium.GeoJson(
-        data=gdf2, style_function=lambda x: style_buildings
-    )
+    polygon_folium1 = folium.GeoJson(data=gdf1, style_function=lambda: style_parcels)
+    polygon_folium2 = folium.GeoJson(data=gdf2, style_function=lambda: style_buildings)
 
     map = folium.Map(
-        location=START_LOCATION,
-        zoom_start=START_ZOOM,
+        location=start_location,
+        zoom_start=start_zoom,
         tiles="OpenStreetMap",
         max_zoom=21,
     )
