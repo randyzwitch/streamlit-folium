@@ -37,7 +37,11 @@ tasks:
       - install-package
       - install-test-deps
     cmds:
-      - pytest -x
+      - pytest
+
+  test-frontend:
+    cmds:
+      - task --parallel run-frontend test
 
   run-frontend:
     desc: Run the frontend for testing purposes

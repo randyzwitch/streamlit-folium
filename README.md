@@ -77,4 +77,6 @@ folium to use your local frontend code. This can be done by:
 
 1. Edit `streamlit_folium/__init__.py` to set `_RELEASE = False`
 2. Run `task generate-tests-frontend`
-
+3. Add tests as appropriate in `tests/frontend.py`
+4. Run `task test-frontend` to run the tests
+5. Set `_RELEASE = True` in `streamlit_folium/__init__.py` before opening a PR
