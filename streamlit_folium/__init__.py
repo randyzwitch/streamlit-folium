@@ -279,7 +279,6 @@ def st_folium(
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
     
-    # Define WMTS layers
     if use_container_width:
         width = None
 

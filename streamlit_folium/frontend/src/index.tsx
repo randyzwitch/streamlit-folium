@@ -115,13 +115,21 @@ function onDraw(e: any) {
 
 function removeLayer(e: any) {
   const global_data = window.__GLOBAL_DATA__
-  global_data.selected_layers.delete(e.layer["wmsParams"]["layers"]);
+  let layer = e.layer
+  if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
+    let url_layer = `${layer["_url"]};${layer["wmsParams"]["layers"]}`;
+    global_data.selected_layers.delete(url_layer);
+}
   debouncedUpdateComponentValue(window.map)
 }
 
 function addLayer(e: any) {
   const global_data = window.__GLOBAL_DATA__
-  global_data.selected_layers.add(e.layer["wmsParams"]["layers"]);
+  let layer = e.layer
+  if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
+    let url_layer = `${layer["_url"]};${layer["wmsParams"]["layers"]}`;
+    global_data.selected_layers.add(url_layer);
+  }
   debouncedUpdateComponentValue(window.map)
 }
 
@@ -186,9 +194,9 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("moveend", onMapMove)
   for (let key in map._layers) {
     let layer = map._layers[key]
-    let layer_url = layer["_url"]
-    if (typeof layer_url !== "undefined") {
-      global_data.selected_layers.add(layer_url);
+    if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
+      let url_layer = `${layer["_url"]};${layer["wmsParams"]["layers"]}`;
+      global_data.selected_layers.add(url_layer);
     }
     layer.on("click", onLayerClick)
     if (return_on_hover) {
