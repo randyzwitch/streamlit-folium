@@ -19,7 +19,7 @@ type GlobalData = {
   last_center: any
   last_feature_group: any
   last_layer_control: any
-  selected_layers: Set<any>
+  selected_layers: Record<string, { name: string; url: string }>
 }
 
 declare global {
@@ -58,7 +58,7 @@ function updateComponentValue(map: any) {
     last_circle_radius: global_data.last_circle_radius,
     last_circle_polygon: global_data.last_circle_polygon,
     center: map.getCenter(),
-    selected_layer: Array.from(global_data.selected_layers).join(", ")
+    selected_layers: Object.values(global_data.selected_layers)
   }
 
   let to_return = global_data.returned_objects
@@ -116,20 +116,37 @@ function onDraw(e: any) {
 function removeLayer(e: any) {
   const global_data = window.__GLOBAL_DATA__
   let layer = e.layer
+
   if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
-    let url_layer = `${layer["_url"]};${layer["wmsParams"]["layers"]}`;
-    global_data.selected_layers.delete(url_layer);
-}
+    const layerName = layer["wmsParams"]["layers"];
+    const layerUrl = layer["_url"];
+
+    const layerKey = `${layerUrl},${layerName}`;
+
+    // Remove the layer object if it exists
+    if (global_data.selected_layers[layerKey]) {
+      delete global_data.selected_layers[layerKey];
+    }
+  }
+
   debouncedUpdateComponentValue(window.map)
 }
 
 function addLayer(e: any) {
   const global_data = window.__GLOBAL_DATA__
   let layer = e.layer
+
   if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
-    let url_layer = `${layer["_url"]};${layer["wmsParams"]["layers"]}`;
-    global_data.selected_layers.add(url_layer);
+    const layerName = layer["wmsParams"]["layers"];
+    const layerUrl = layer["_url"];
+
+    const layerKey = `${layerUrl},${layerName}`;
+
+    if (!global_data.selected_layers[layerKey]) {
+      global_data.selected_layers[layerKey] = { name: layerName, url: layerUrl };
+    }
   }
+
   debouncedUpdateComponentValue(window.map)
 }
 
@@ -195,12 +212,14 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   for (let key in map._layers) {
     let layer = map._layers[key]
     if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
-      let url_layer = `${layer["_url"]};${layer["wmsParams"]["layers"]}`;
-      global_data.selected_layers.add(url_layer);
-    }
-    layer.on("click", onLayerClick)
-    if (return_on_hover) {
-      layer.on("mouseover", onLayerClick)
+      const layerName = layer["wmsParams"]["layers"];
+      const layerUrl = layer["_url"];
+
+      const layerKey = `${layerUrl},${layerName}`;
+
+      if (!global_data.selected_layers[layerKey]) {
+        global_data.selected_layers[layerKey] = { name: layerName, url: layerUrl };
+      }
     }
   }
   map.on("draw:created", onDraw)
@@ -210,7 +229,7 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   // Adding functionality for tracking layer changes
   map.on("overlayadd", addLayer);
   map.on("overlayremove", removeLayer);
-  
+
   Streamlit.setFrameHeight()
   updateComponentValue(map)
 }
@@ -369,7 +388,7 @@ async function onRender(event: Event) {
         last_center: null,
         last_feature_group: null,
         last_layer_control: null,
-        selected_layers: new Set()
+        selected_layers: {}
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")

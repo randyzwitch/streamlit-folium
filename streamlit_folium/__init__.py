@@ -278,7 +278,7 @@ def st_folium(
     #
     # "default" is a special argument that specifies the initial return
     # value of the component before the user has interacted with it.
-    
+
     if use_container_width:
         width = None
 
@@ -330,7 +330,7 @@ def st_folium(
         else {},
         "last_circle_radius": None,
         "last_circle_polygon": None,
-        "selected_layers": None
+        "selected_layers": None,
     }
 
     # If the user passes a custom list of returned objects, we'll only return those
