@@ -5,9 +5,10 @@ All of the necessary commands to get the project running are in the
 
 ### Linting and formatting
 
-We use [Ruff](https://github.com/astral-sh/ruff) for linting and formatting.
+We use [Ruff](https://github.com/astral-sh/ruff) for linting and formatting, and
+[mypy](https://github.com/python/mypy) for type checking.
 
-To run ruff, you can use the following command:
+To run ruff and mypy, you can use the following command:
 
 ```bash
 task lint
