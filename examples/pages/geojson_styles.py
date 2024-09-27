@@ -20,7 +20,7 @@ gdf = gpd.GeoDataFrame(geometry=[polygon_]).set_crs(epsg=4326)
 
 style_parcels = {"fillColor": "red", "fillOpacity": 0.2}
 
-polygon_folium = folium.GeoJson(data=gdf, style_function=lambda: style_parcels)
+polygon_folium = folium.GeoJson(data=gdf, style_function=lambda _x: style_parcels)
 
 map = folium.Map(
     location=START_LOCATION, zoom_start=START_ZOOM, tiles="OpenStreetMap", max_zoom=21

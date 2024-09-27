@@ -38,8 +38,43 @@ Currently, there are two functions defined:
 
 ## Contributing
 
-* Linting
+All of the necessary commands to get the project running are in the [Taskfile](https://taskfile.dev/).
 
-* Running tests
+### Linting and formatting
 
-* Adding tests
+We use [Ruff](https://github.com/astral-sh/ruff) for linting and formatting.
+
+To run ruff, you can use the following command:
+
+```bash
+task lint
+```
+
+### Running tests
+
+To run the tests, you can use the following command:
+
+```bash
+task test
+```
+
+### Adding tests
+
+If you add a new feature, or fix a bug, please add a test to ensure that the feature works as expected.
+
+The pattern for creating tests is to use the example streamlit app, and use
+[playwright](https://playwright.dev/python/docs/intro) to create and
+run tests on the app.
+
+These tests are primarily located in the `tests/frontend.py` file.
+
+If you are making a change that only affects the python code, you can
+run the playwright [codegen](https://playwright.dev/python/docs/codegen) tool to
+help generate the tests by running `task generate-tests`.
+
+If you are making a change that affects the javascript code, you need to set up
+folium to use your local frontend code. This can be done by:
+
+1. Edit `streamlit_folium/__init__.py` to set `_RELEASE = False`
+2. Run `task generate-tests-frontend`
+

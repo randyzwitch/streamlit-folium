@@ -145,8 +145,10 @@ def main():
         "dashArray": "5, 5",
     }
 
-    polygon_folium1 = folium.GeoJson(data=gdf1, style_function=lambda: style_parcels)
-    polygon_folium2 = folium.GeoJson(data=gdf2, style_function=lambda: style_buildings)
+    polygon_folium1 = folium.GeoJson(data=gdf1, style_function=lambda _x: style_parcels)
+    polygon_folium2 = folium.GeoJson(
+        data=gdf2, style_function=lambda _x: style_buildings
+    )
 
     map = folium.Map(
         location=start_location,

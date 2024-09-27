@@ -1,0 +1,61 @@
+version: "3"
+
+tasks:
+  install-pre-commit:
+    desc: Install pre-commit hooks
+    cmds:
+      - pip install pre-commit
+      - pre-commit install
+    sources:
+      - .pre-commit-config.yaml
+
+  install-package:
+    desc: Install the package
+    cmds:
+      - pip install -e .
+    sources:
+      - requirements.txt
+      - setup.py
+
+  install-test-deps:
+    desc: Install the dependencies for testing
+    cmds:
+      - pip install -r tests/requirements.txt
+    sources:
+      - tests/requirements.txt
+
+  lint:
+    desc: Run linting checks
+    deps:
+      - install-pre-commit
+    cmds:
+      - pre-commit run --all-files
+
+  test:
+    desc: Run all tests
+    deps:
+      - install-package
+      - install-test-deps
+    cmds:
+      - pytest -x
+
+  run-frontend:
+    desc: Run the frontend for testing purposes
+    dir: streamlit_folium/frontend/
+    cmds:
+      - npm install
+      - npm run start
+
+  _run-streamlit: streamlit run examples/streamlit_app.py --server.port 8599 --server.headless true
+
+  _run-playwright: playwright codegen localhost:8599 --target=python-pytest
+
+  generate-tests:
+    desc: Generate tests for the frontend
+    cmds:
+      - task --parallel _run-streamlit _run-playwright
+
+  generate-tests-frontend:
+    desc: Generate tests for the frontend
+    cmds:
+      - task --parallel run-frontend _run-streamlit _run-playwright

@@ -33,8 +33,7 @@ jobs:
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest pytest-playwright
-          if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
+          pip install -r tests/requirements.txt
           pip install -e .
       - name: Install playwright dependencies
         run: |
