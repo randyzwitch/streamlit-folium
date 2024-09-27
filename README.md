@@ -36,3 +36,10 @@ Currently, there are two functions defined:
 ![streamlit_folium example](https://raw.githubusercontent.com/randyzwitch/streamlit-folium/master/tests/visual_baseline/test_basic/first_test/baseline.png)
 
 
+## Contributing
+
+* Linting
+
+* Running tests
+
+* Adding tests

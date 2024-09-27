@@ -1,4 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# This workflow will install Python dependencies and run tests with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Run tests each PR
@@ -36,7 +36,6 @@ jobs:
           pip install flake8 pytest pytest-playwright
           if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
           pip install -e .
-      - uses: pre-commit/action@v2.0.3
       - name: Install playwright dependencies
         run: |
           playwright install --with-deps

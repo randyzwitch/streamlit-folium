@@ -1,0 +1,19 @@
+# This workflow is used to run the pre-commit checks on the codebase, particularly
+# linting and formatting.
+
+name: Run tests each PR
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - uses: pre-commit/action@v3.0.1
