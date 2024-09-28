@@ -22,11 +22,7 @@ conda install -c conda-forge streamlit-folium
 Currently, there are two functions defined:
 
 - `st_folium()`: a bi-directional Component, taking a Folium/Branca object and plotting to the Streamlit app. Upon mount/interaction with the Streamlit app, `st_folium()` returns a Dict with selected information including the bounding box and items clicked on
--  `folium_static()`: takes a `folium.Map`, `folium.Figure`, or `branca.element.Figure` object and displays it in a Streamlit app.
-
-    Note: `folium_static()` is based on the `_repr_html()` representation created in Folium. This function should be a strict subset the of functionality of the newer `st_folium()` function. It is recommended that users switch to `st_folium()` as soon as possible, as `folium_static()` will likely be deprecated.
-
-    If there is a reason why `folium_static()` needs to remain, please leave a GitHub issue describing your use case.
+-  `folium_static()`: takes a `folium.Map`, `folium.Figure`, or `branca.element.Figure` object and displays it in a Streamlit app using the `_repr_html()` representation created in Folium. This function should be a strict subset the of functionality of the newer `st_folium()` function, but is great for testing to ensure you have the correct Folium syntax.
 
 ## Example
 
