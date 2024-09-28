@@ -3,7 +3,7 @@ def test_map():
 
     from streamlit_folium import _get_map_string
 
-    map = folium.Map()
+    map = folium.Map(location=[0, 0], zoom_start=1, crs='EPSG3857', timezone=datetime.timezone.utc)
     map.render()
 
     leaflet = _get_map_string(map)
