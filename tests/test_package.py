@@ -1,12 +1,20 @@
+import datetime
+import folium
+from folium.plugins import Draw
+
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="google.protobuf")
+
+_EPOCH_DATETIME_NAIVE = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
+
+from streamlit_folium import _get_map_string, _get_feature_group_string, generate_leaflet_string
+
 def test_map():
-    import folium
-
-    from streamlit_folium import _get_map_string
-
     map = folium.Map(location=[0, 0], zoom_start=1, crs='EPSG3857', timezone=datetime.timezone.utc)
     map.render()
 
     leaflet = _get_map_string(map)
+
     assert (
         """var map_div = L.map(
     "map_div",
@@ -27,11 +35,7 @@ def test_map():
 
 
 def test_layer_control():
-    import folium
-
-    from streamlit_folium import generate_leaflet_string
-
-    map = folium.Map()
+    map = folium.Map(location=[0, 0], zoom_start=1, crs='EPSG3857', timezone=datetime.timezone.utc)
     folium.LayerControl().add_to(map)
     map.render()
     leaflet = generate_leaflet_string(map)
@@ -40,13 +44,9 @@ def test_layer_control():
 
 
 def test_draw_support():
-    import folium
-    from folium.plugins import Draw
-
-    from streamlit_folium import _get_map_string
-
-    map = folium.Map()
-    Draw(export=True).add_to(map)
+    map = folium.Map(location=[0, 0], zoom_start=1, crs='EPSG3857', timezone=datetime.timezone.utc)
+    draw = Draw(export=True, timezone=datetime.timezone.utc)
+    draw.add_to(map)
     map.render()
     leaflet = _get_map_string(map)
     assert "map_div.on(L.Draw.Event.CREATED, function(e) {" in leaflet
@@ -70,22 +70,14 @@ def test_draw_support():
 
 
 def test_map_id():
-    import folium
-
-    from streamlit_folium import _get_map_string
-
-    map = folium.Map()
+    map = folium.Map(location=[0, 0], zoom_start=1, crs='EPSG3857', timezone=datetime.timezone.utc)
     leaflet = _get_map_string(map)
     assert "var map_div = L.map(" in leaflet
 
 
 def test_feature_group():
-    import folium
-
-    from streamlit_folium import _get_feature_group_string
-
     fg = folium.FeatureGroup()
-    m = folium.Map()
+    m = folium.Map(location=[0, 0], zoom_start=1, crs='EPSG3857', timezone=datetime.timezone.utc)
 
     fg_str = _get_feature_group_string(fg, m)
 
@@ -94,10 +86,6 @@ def test_feature_group():
 
 
 def test_dual_map():
-    import folium.plugins
-
-    from streamlit_folium import _get_map_string
-
     dual_map = folium.plugins.DualMap()
     dual_map.render()
     map_str = _get_map_string(dual_map)
@@ -107,12 +95,7 @@ def test_dual_map():
 
 
 def test_vector_grid():
-    import folium
-    from folium.plugins import VectorGridProtobuf
-
-    from streamlit_folium import _get_map_string
-
-    m = folium.Map()
+    m = folium.Map(location=[0, 0], zoom_start=1, crs='EPSG3857', timezone=datetime.timezone.utc)
     url = "https://free-{s}.tilehosting.com/data/v3/{z}/{x}/{y}.pbf?token={token}"
     VectorGridProtobuf(url, "test").add_to(m)
     leaflet = _get_map_string(m)
