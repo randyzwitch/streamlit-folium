@@ -12,22 +12,22 @@ PORT = "8503" if LOCAL_TEST else "8699"
 
 
 @pytest.fixture(scope="module", autouse=True)
-def before_module():
+def _before_module():
     # Run the streamlit app before each module
     with run_streamlit():
         yield
 
 
-@pytest.fixture(scope="function", autouse=True)
-def before_test(page: Page):
+@pytest.fixture(autouse=True)
+def _before_test(page: Page):
     page.goto(f"localhost:{PORT}")
     page.set_viewport_size({"width": 2000, "height": 2000})
     expect.set_options(timeout=5_000)
 
 
 # Take screenshot of each page if there are failures for this session
-@pytest.fixture(scope="function", autouse=True)
-def after_test(page: Page, request):
+@pytest.fixture(autouse=True)
+def _after_test(page: Page, request):
     yield
     if request.node.rep_call.failed:
         page.screenshot(path=f"screenshot-{request.node.name}.png", full_page=True)
@@ -356,7 +356,6 @@ def test_dynamic_feature_group_update(page: Page):
 
 def test_layer_control_dynamic_update(page: Page):
     page.get_by_role("link", name="dynamic layer control").click()
-    # page.get_by_text("Show generated code").click()
 
     page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
         "Parcels"

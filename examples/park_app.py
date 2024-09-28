@@ -33,10 +33,9 @@ class Point:
     def from_dict(cls, data: Dict) -> "Point":
         if "lat" in data:
             return cls(float(data["lat"]), float(data["lng"]))
-        elif "latitude" in data:
+        if "latitude" in data:
             return cls(float(data["latitude"]), float(data["longitude"]))
-        else:
-            raise NotImplementedError(data.keys())
+        raise NotImplementedError(data.keys())
 
     def is_close_to(self, other: "Point") -> bool:
         close_lat = self.lat - 0.0001 <= other.lat <= self.lat + 0.0001
