@@ -79,3 +79,5 @@ package-lock.json
 .streamlit/
 .venv/
 test-results.xml
+
+.task/
