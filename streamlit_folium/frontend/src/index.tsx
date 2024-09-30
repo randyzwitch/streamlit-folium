@@ -221,6 +221,10 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
         global_data.selected_layers[layerKey] = { name: layerName, url: layerUrl };
       }
     }
+    layer.on("click", onLayerClick)
+    if (return_on_hover) {
+      layer.on("mouseover", onLayerClick)
+    }
   }
   map.on("draw:created", onDraw)
   map.on("draw:edited", onDraw)
