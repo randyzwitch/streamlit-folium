@@ -20,6 +20,7 @@ from jinja2 import UndefinedError
 # the component, and True when we're ready to package and distribute it.
 _RELEASE = True
 
+
 if not _RELEASE:
     _component_func = components.declare_component(
         "st_folium", url="http://localhost:3001"
@@ -326,6 +327,7 @@ def st_folium(
         else {},
         "last_circle_radius": None,
         "last_circle_polygon": None,
+        "selected_layers": None,
     }
 
     # If the user passes a custom list of returned objects, we'll only return those

@@ -19,6 +19,7 @@ type GlobalData = {
   last_center: any
   last_feature_group: any
   last_layer_control: any
+  selected_layers: Record<string, { name: string; url: string }>
 }
 
 declare global {
@@ -57,6 +58,7 @@ function updateComponentValue(map: any) {
     last_circle_radius: global_data.last_circle_radius,
     last_circle_polygon: global_data.last_circle_polygon,
     center: map.getCenter(),
+    selected_layers: Object.values(global_data.selected_layers)
   }
 
   let to_return = global_data.returned_objects
@@ -109,6 +111,43 @@ function onDraw(e: any) {
     global_data.last_circle_polygon = polygon
   }
   return onLayerClick(e)
+}
+
+function removeLayer(e: any) {
+  const global_data = window.__GLOBAL_DATA__
+  let layer = e.layer
+
+  if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
+    const layerName = layer["wmsParams"]["layers"];
+    const layerUrl = layer["_url"];
+
+    const layerKey = `${layerUrl},${layerName}`;
+
+    // Remove the layer object if it exists
+    if (global_data.selected_layers[layerKey]) {
+      delete global_data.selected_layers[layerKey];
+    }
+  }
+
+  debouncedUpdateComponentValue(window.map)
+}
+
+function addLayer(e: any) {
+  const global_data = window.__GLOBAL_DATA__
+  let layer = e.layer
+
+  if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
+    const layerName = layer["wmsParams"]["layers"];
+    const layerUrl = layer["_url"];
+
+    const layerKey = `${layerUrl},${layerName}`;
+
+    if (!global_data.selected_layers[layerKey]) {
+      global_data.selected_layers[layerKey] = { name: layerName, url: layerUrl };
+    }
+  }
+
+  debouncedUpdateComponentValue(window.map)
 }
 
 function onLayerClick(e: any) {
@@ -167,10 +206,21 @@ function getPixelatedStyles(pixelated: boolean) {
 }
 
 window.initComponent = (map: any, return_on_hover: boolean) => {
+  const global_data = window.__GLOBAL_DATA__
   map.on("click", onMapClick)
   map.on("moveend", onMapMove)
   for (let key in map._layers) {
     let layer = map._layers[key]
+    if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
+      const layerName = layer["wmsParams"]["layers"];
+      const layerUrl = layer["_url"];
+
+      const layerKey = `${layerUrl},${layerName}`;
+
+      if (!global_data.selected_layers[layerKey]) {
+        global_data.selected_layers[layerKey] = { name: layerName, url: layerUrl };
+      }
+    }
     layer.on("click", onLayerClick)
     if (return_on_hover) {
       layer.on("mouseover", onLayerClick)
@@ -179,6 +229,10 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("draw:created", onDraw)
   map.on("draw:edited", onDraw)
   map.on("draw:deleted", onDraw)
+
+  // Adding functionality for tracking layer changes
+  map.on("overlayadd", addLayer);
+  map.on("overlayremove", removeLayer);
 
   Streamlit.setFrameHeight()
   updateComponentValue(map)
@@ -228,7 +282,6 @@ async function onRender(event: Event) {
       linkTag.href = link
       window.document.head.appendChild(linkTag)
     })
-
     const style = document.createElement("style")
     style.innerHTML = getPixelatedStyles(pixelated)
     window.document.head.appendChild(style)
@@ -339,6 +392,7 @@ async function onRender(event: Event) {
         last_center: null,
         last_feature_group: null,
         last_layer_control: null,
+        selected_layers: {}
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")
