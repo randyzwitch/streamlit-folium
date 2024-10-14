@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import os
 import re
@@ -18,6 +19,7 @@ from jinja2 import UndefinedError
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
 _RELEASE = True
+
 
 if not _RELEASE:
     _component_func = components.declare_component(
@@ -47,8 +49,7 @@ def generate_js_hash(
     standardized_js = (
         re.sub(url_pattern, "", standardized_js) + str(key) + str(return_on_hover)
     )
-    s = hashlib.sha256(standardized_js.encode()).hexdigest()
-    return s
+    return hashlib.sha256(standardized_js.encode()).hexdigest()
 
 
 def folium_static(
@@ -90,6 +91,7 @@ def folium_static(
         """
         ),
         DeprecationWarning,
+        stacklevel=2,
     )
     # if Map, wrap in Figure
     if isinstance(fig, folium.Map):
@@ -99,9 +101,7 @@ def folium_static(
         )
 
     # if DualMap, get HTML representation
-    elif isinstance(fig, folium.plugins.DualMap) or isinstance(
-        fig, branca.element.Figure
-    ):
+    if isinstance(fig, (folium.plugins.DualMap, branca.element.Figure)):
         return components.html(fig._repr_html_(), height=height + 10, width=width)
     return st_folium(fig, width=width, height=height, returned_objects=[])
 
@@ -113,10 +113,8 @@ def _get_siblings(fig: folium.MacroElement) -> str:
     html = ""
     if len(children) > 1:
         for child in children[1:]:
-            try:
+            with contextlib.suppress(Exception):
                 html += child._template.module.html() + "\n"
-            except Exception:
-                pass
 
     return html
 
@@ -287,8 +285,8 @@ def st_folium(
 
     # handle the case where you pass in a figure rather than a map
     # this assumes that a map is the first child
-    if not (isinstance(fig, folium.Map) or isinstance(fig, folium.plugins.DualMap)):
-        folium_map = list(fig._children.values())[0]
+    if not (isinstance(fig, (folium.Map, folium.plugins.DualMap))):
+        folium_map = next(iter(fig._children.values()))
 
     folium_map.render()
 
@@ -329,6 +327,7 @@ def st_folium(
         else {},
         "last_circle_radius": None,
         "last_circle_polygon": None,
+        "selected_layers": None,
     }
 
     # If the user passes a custom list of returned objects, we'll only return those
@@ -399,7 +398,7 @@ def st_folium(
         css_links.extend([href for _, href in getattr(elem, "default_css", [])])
         js_links.extend([src for _, src in getattr(elem, "default_js", [])])
 
-    component_value = _component_func(
+    return _component_func(
         script=leaflet,
         html=html,
         id=m_id,
@@ -417,8 +416,6 @@ def st_folium(
         css_links=css_links,
         js_links=js_links,
     )
-
-    return component_value
 
 
 def _generate_leaflet_string(
@@ -477,15 +474,13 @@ def _generate_leaflet_string(
         return leaflet, mappings
 
     for idx, child in enumerate(m._children.values()):
-        try:
+        with contextlib.suppress(UndefinedError, AttributeError):
             leaflet += (
                 "\n"
                 + _generate_leaflet_string(
                     child, base_id=f"{base_id}_{idx}", mappings=mappings
                 )[0]
             )
-        except (UndefinedError, AttributeError):
-            pass
 
     return leaflet, mappings
 
@@ -520,6 +515,4 @@ def generate_leaflet_string(
     """
     leaflet, mappings = _generate_leaflet_string(m, nested=nested, base_id=base_id)
 
-    leaflet = _replace_folium_vars(leaflet, mappings)
-
-    return leaflet
+    return _replace_folium_vars(leaflet, mappings)

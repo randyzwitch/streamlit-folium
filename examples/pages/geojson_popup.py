@@ -1,3 +1,5 @@
+import io
+
 import branca
 import folium
 import geopandas
@@ -32,7 +34,7 @@ def get_df() -> pd.DataFrame:
         "https://gist.githubusercontent.com/tvpmb/4734703/raw/"
         "b54d03154c339ed3047c66fefcece4727dfc931a/US%2520State%2520List"
     )
-    abbrs = pd.read_json(response.text)
+    abbrs = pd.read_json(io.StringIO(response.text))
 
     statesmerge = states.merge(abbrs, how="left", left_on="name", right_on="name")
     statesmerge["geometry"] = statesmerge.geometry.simplify(0.05)
