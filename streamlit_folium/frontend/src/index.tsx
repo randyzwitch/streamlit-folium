@@ -30,6 +30,7 @@ declare global {
     drawnItems: any
     feature_group: any
     layer_control: any
+    Streamlit: any
   }
 }
 
@@ -204,6 +205,7 @@ function getPixelatedStyles(pixelated: boolean) {
   `
   return styles
 }
+window.Streamlit = Streamlit;
 
 window.initComponent = (map: any, return_on_hover: boolean) => {
   const global_data = window.__GLOBAL_DATA__
