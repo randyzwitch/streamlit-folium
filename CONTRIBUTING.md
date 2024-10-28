@@ -1,7 +1,9 @@
 # Contributing to streamlit-folium
 
 All of the necessary commands to get the project running are in the
-[Taskfile](https://taskfile.dev/).
+[Taskfile](https://taskfile.dev/). You can install task with Homebrew:
+`brew install go-task`. See [Installation](https://taskfile.dev/installation/)
+for more details.
 
 ### Linting and formatting
 
