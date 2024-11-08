@@ -224,7 +224,7 @@ def st_folium(
         None, and the component's arguments are changed, the component will
         be re-mounted in the Streamlit frontend and lose its current state.
     returned_objects: Iterable
-        A list of folium objects (as keys of the returned dictionart) that will be
+        A list of folium objects (as keys of the returned dictionary) that will be
         returned to the user when they interact with the map. If None, all folium
         objects will be returned. This is mainly useful for when you only want your
         streamlit app to rerun under certain conditions, and not every time the user
