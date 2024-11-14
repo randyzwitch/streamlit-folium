@@ -391,3 +391,27 @@ def test_layer_control_dynamic_update(page: Page):
         .get_by_role("img")
         .locator("path")
     ).to_be_visible()
+
+
+def test_frame_height_matches_content_height(page: Page):
+    """Make sure that the frame height matches the document height to confirm that
+    Streamlit.setFrameHeight was called correctly."""
+
+    iframe = page.get_by_test_id("stCustomComponentV1")
+    iframe_html = page.frame_locator("[data-testid=stCustomComponentV1]").locator(
+        "html"
+    )
+
+    # Wait for the iframe to load and have a height - otherwise the test will be flaky
+    page.wait_for_function(
+        "el => window.getComputedStyle(el).height !== '0px'",
+        arg=iframe.element_handle(),
+    )
+
+    # Now make sure that the heights match
+    iframe_height = iframe.evaluate("el => window.getComputedStyle(el).height")
+    iframe_html_height = iframe_html.evaluate(
+        "el => window.getComputedStyle(el).height"
+    )
+
+    assert iframe_height == iframe_html_height
