@@ -421,6 +421,7 @@ async function onRender(event: Event) {
     })
   }
   finalizeOnRender()
+  Streamlit.setFrameHeight()
 }
 
 // Attach our `onRender` handler to Streamlit's render event.
