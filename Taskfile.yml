@@ -4,7 +4,7 @@ tasks:
   install-pre-commit:
     desc: Install pre-commit hooks
     cmds:
-      - pip install pre-commit
+      - uv pip install pre-commit
       - pre-commit install
     sources:
       - .pre-commit-config.yaml
@@ -12,7 +12,7 @@ tasks:
   install-package:
     desc: Install the package
     cmds:
-      - pip install -e .
+      - uv pip install -e .
     sources:
       - requirements.txt
       - setup.py
@@ -20,7 +20,8 @@ tasks:
   install-test-deps:
     desc: Install the dependencies for testing
     cmds:
-      - pip install -r tests/requirements.txt
+      - uv pip install -r tests/requirements.txt
+      - playwright install --with-deps
     sources:
       - tests/requirements.txt
 
