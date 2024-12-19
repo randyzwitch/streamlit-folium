@@ -53,14 +53,14 @@ def test_draw_support():
     assert "drawnItems.addLayer(layer);" in leaflet
 
     assert (
-        """            map_div.on('draw:created', function(e) {
+        """map_div.on('draw:created', function(e) {
                 drawnItems.addLayer(e.layer);
             });"""
         in leaflet
     )
 
     assert (
-        """            var draw_control_div_1 = new L.Control.Draw(
+        """var draw_control_div_1 = new L.Control.Draw(
                 options
             ).addTo( map_div );"""
         in leaflet
