@@ -6,7 +6,7 @@ import os
 import re
 import warnings
 from textwrap import dedent
-from typing import Iterable
+from typing import Callable, Iterable
 
 import branca
 import folium
@@ -212,6 +212,7 @@ def st_folium(
     pixelated: bool = False,
     debug: bool = False,
     render: bool = True,
+    on_change: Callable | None = None,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -398,11 +399,19 @@ def st_folium(
         css_links.extend([href for _, href in getattr(elem, "default_css", [])])
         js_links.extend([src for _, src in getattr(elem, "default_js", [])])
 
+    hash_key = generate_js_hash(leaflet, key, return_on_hover)
+
+    def _on_change():
+        if key is not None:
+            st.session_state[key] = st.session_state.get(hash_key, {})
+        if on_change is not None:
+            on_change()
+
     return _component_func(
         script=leaflet,
         html=html,
         id=m_id,
-        key=generate_js_hash(leaflet, key, return_on_hover),
+        key=hash_key,
         height=height,
         width=width,
         returned_objects=returned_objects,
@@ -415,6 +424,7 @@ def st_folium(
         pixelated=pixelated,
         css_links=css_links,
         js_links=js_links,
+        on_change=_on_change,
     )
 
 

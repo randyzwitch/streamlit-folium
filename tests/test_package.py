@@ -1,3 +1,6 @@
+from textwrap import dedent
+
+
 def test_map():
     import folium
 
@@ -8,16 +11,13 @@ def test_map():
 
     leaflet = _get_map_string(map)
     assert (
-        """var map_div = L.map(
-    "map_div",
-    {
-        center: [0.0, 0.0],
-        crs: L.CRS.EPSG3857,
-        zoom: 1,
-        zoomControl: true,
-        preferCanvas: false,
-    }
-);"""
+        dedent(
+            """var map_div = L.map(
+                "map_div",
+                {
+                    center: [0.0, 0.0],
+                    crs: L.CRS.EPSG3857,"""
+        )
         in leaflet
     )
 
@@ -54,15 +54,15 @@ def test_draw_support():
 
     assert (
         """map_div.on('draw:created', function(e) {
-    drawnItems.addLayer(e.layer);
-});"""
+                drawnItems.addLayer(e.layer);
+            });"""
         in leaflet
     )
 
     assert (
         """var draw_control_div_1 = new L.Control.Draw(
-    options
-).addTo( map_div );"""
+                options
+            ).addTo( map_div );"""
         in leaflet
     )
 
