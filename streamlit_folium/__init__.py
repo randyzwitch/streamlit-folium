@@ -411,7 +411,7 @@ def st_folium(
         script=leaflet,
         html=html,
         id=m_id,
-        key=generate_js_hash(leaflet, key, return_on_hover),
+        key=hash_key,
         height=height,
         width=width,
         returned_objects=returned_objects,
