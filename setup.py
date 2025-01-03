@@ -6,6 +6,7 @@ setuptools.setup(
     author="Randy Zwitch",
     author_email="rzwitch@gmail.com",
     description="Render Folium objects in Streamlit",
+    license="MIT",
     long_description="",
     long_description_content_type="text/plain",
     url="https://github.com/randyzwitch/streamlit-folium",
