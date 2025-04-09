@@ -5,7 +5,7 @@ import { Layer } from "leaflet"
 
 /* Sometimes we get a new render event when we are still
    initializing the map. This happens during the load of
-   external javascript. 
+   external javascript.
    This variable is used as a flag during loading to ignore
    that extra render event.
 */
