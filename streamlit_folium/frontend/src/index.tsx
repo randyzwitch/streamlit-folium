@@ -3,6 +3,14 @@ import { debounce } from "underscore"
 import { circleToPolygon } from "./circle-to-polygon"
 import { Layer } from "leaflet"
 
+/* Sometimes we get a new render event when we are still
+   initializing the map. This happens during the load of
+   external javascript.
+   This variable is used as a flag during loading to ignore
+   that extra render event.
+*/
+var ignore_render = false;
+
 type GlobalData = {
   lat_lng_clicked: any
   last_object_clicked: any
@@ -266,6 +274,7 @@ async function onRender(event: Event) {
 
   // load scripts
   const loadScripts = async () => {
+    ignore_render = true;
     for (const link of js_links) {
       // use promise to load scripts synchronously
       await new Promise((resolve, reject) => {
@@ -291,6 +300,11 @@ async function onRender(event: Event) {
 
   // finalize rendering
   const finalizeOnRender = () => {
+    /* if we don't have a map yet,
+       we have an extra render event before
+       we are initialized.
+    */
+    if (!window.map) return
     if (
       feature_group !== window.__GLOBAL_DATA__.last_feature_group ||
       layer_control !== window.__GLOBAL_DATA__.last_layer_control
@@ -352,7 +366,7 @@ async function onRender(event: Event) {
     }
   }
 
-  if (!window.map) {
+  if (!window.map && ignore_render === false) {
     // Only run this if the map hasn't already been created (and thus the global
     //data hasn't been initialized)
     const parent_div = document.getElementById("parent")
@@ -402,8 +416,8 @@ async function onRender(event: Event) {
       }
     }
     await loadScripts().then(() => {
+      ignore_render = false;
       const render_script = document.createElement("script")
-
       if (!window.map) {
         render_script.innerHTML =
           script +

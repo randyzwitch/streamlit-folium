@@ -407,6 +407,7 @@ def test_frame_height_matches_content_height(page: Page):
         "el => window.getComputedStyle(el).height !== '0px'",
         arg=iframe.element_handle(),
     )
+    sleep(0.5)
 
     # Now make sure that the heights match
     iframe_height = iframe.evaluate("el => window.getComputedStyle(el).height")
