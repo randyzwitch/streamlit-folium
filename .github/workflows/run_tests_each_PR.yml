@@ -4,6 +4,8 @@
 name: Run tests each PR
 
 on:
+  schedule:
+    - cron: "0 0 * * 0"
   push:
     branches: [master]
   pull_request:
@@ -52,7 +54,7 @@ jobs:
           path: test-results.xml
           fail-on-empty: false
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: screenshots
