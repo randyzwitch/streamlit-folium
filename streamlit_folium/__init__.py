@@ -106,17 +106,28 @@ def folium_static(
     return st_folium(fig, width=width, height=height, returned_objects=[])
 
 
-def _get_siblings(fig: folium.MacroElement) -> str:
-    """Get the html for any siblings of the map"""
-    children = list(fig.get_root()._children.values())
+def _get_header(fig: folium.MacroElement) -> str:
+    """Get the header string for the map"""
+    header = fig.get_root().header.render()
+    header = re.sub(
+        r'<script src=".*?"></script>',
+        "",
+        header
+    )
+    header = re.sub(
+        r'<link rel="stylesheet" href=".*?"/>',
+        "",
+        header
+    )
+    map_id = get_full_id(fig)
+    return header.replace(map_id, "map_div")
 
-    html = ""
-    if len(children) > 1:
-        for child in children[1:]:
-            with contextlib.suppress(Exception):
-                html += child._template.module.html() + "\n"
 
-    return html
+def _get_html(fig: folium.MacroElement) -> str:
+    """Get the html string for the map"""
+    html = fig.get_root().html.render()
+    html = re.sub(r'<div class="folium-map" id=".*" ></div>', "", html)
+    return html.strip()
 
 
 def get_full_id(m: folium.MacroElement) -> str:
@@ -282,7 +293,10 @@ def st_folium(
 
     folium_map: folium.Map = fig  # type: ignore
     if render:
-        folium_map.render()
+        if isinstance(fig, folium.plugins.DualMap):
+            folium_map.render()
+        else:
+            folium_map.get_root().render()
 
     # handle the case where you pass in a figure rather than a map
     # this assumes that a map is the first child
@@ -291,9 +305,12 @@ def st_folium(
 
     folium_map.render()
 
-    leaflet = _get_map_string(folium_map)  # type: ignore
+    # we need to do this before _get_map_string, because
+    # _get_map_string alters the folium structure
+    html = _get_html(folium_map)
+    header = _get_header(folium_map)
 
-    html = _get_siblings(folium_map)
+    leaflet = _get_map_string(folium_map)  # type: ignore
 
     m_id = get_full_id(folium_map)
 
@@ -363,6 +380,10 @@ def st_folium(
                 st.info("HTML:")
                 st.code(html)
 
+            if header:
+                st.info("HEADER:")
+                st.code(header)
+
             st.info("Main Map Leaflet js:")
             st.code(leaflet)
 
@@ -409,6 +430,7 @@ def st_folium(
 
     return _component_func(
         script=leaflet,
+        header=header,
         html=html,
         id=m_id,
         key=hash_key,
