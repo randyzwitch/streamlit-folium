@@ -109,16 +109,8 @@ def folium_static(
 def _get_header(fig: folium.MacroElement) -> str:
     """Get the header string for the map"""
     header = fig.get_root().header.render()
-    header = re.sub(
-        r'<script src=".*?"></script>',
-        "",
-        header
-    )
-    header = re.sub(
-        r'<link rel="stylesheet" href=".*?"/>',
-        "",
-        header
-    )
+    header = re.sub(r'<script src=".*?"></script>', "", header)
+    header = re.sub(r'<link rel="stylesheet" href=".*?"/>', "", header)
     map_id = get_full_id(fig)
     return header.replace(map_id, "map_div")
 

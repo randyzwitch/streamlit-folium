@@ -1,13 +1,11 @@
 import folium
+import requests
 import streamlit as st
 from folium.plugins import Timeline, TimelineSlider
-import requests
 
 from streamlit_folium import st_folium
 
-st.set_page_config(
-    layout="wide"
-)
+st.set_page_config(layout="wide")
 
 m = folium.Map()
 
