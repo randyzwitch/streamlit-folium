@@ -1,6 +1,6 @@
 import folium
 import streamlit as st
-from folium.features import Marker, Popup
+from folium import Marker, Popup
 
 from streamlit_folium import st_folium
 
