@@ -6,7 +6,7 @@ import geopandas
 import pandas as pd
 import requests
 import streamlit as st
-from folium.features import GeoJsonPopup, GeoJsonTooltip
+from folium import GeoJsonPopup, GeoJsonTooltip
 
 from streamlit_folium import st_folium
 

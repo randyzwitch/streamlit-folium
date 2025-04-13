@@ -1,7 +1,7 @@
 import folium
 import streamlit as st
+from folium import WmsTileLayer
 from folium.plugins import Draw
-from folium.raster_layers import WmsTileLayer
 
 from streamlit_folium import st_folium
 
