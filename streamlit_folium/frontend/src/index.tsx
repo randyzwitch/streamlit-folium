@@ -261,6 +261,8 @@ async function onRender(event: Event) {
   const height: number = data.args["height"]
   const width: number = data.args["width"]
   const html: string = data.args["html"]
+  const header: string = data.args["header"]
+
   const js_links: Array<string> = data.args["js_links"]
   const css_links: Array<string> = data.args["css_links"]
   const returned_objects: Array<string> = data.args["returned_objects"]
@@ -296,6 +298,8 @@ async function onRender(event: Event) {
     const style = document.createElement("style")
     style.innerHTML = getPixelatedStyles(pixelated)
     window.document.head.appendChild(style)
+
+    window.document.head.innerHTML += header;
   }
 
   // finalize rendering
@@ -380,14 +384,6 @@ async function onRender(event: Event) {
       div1.style.height = `${height}px`
       div1.style.width = `${width}px`
 
-      if (script.indexOf("document.getElementById('export')") !== -1) {
-        let a = document.createElement("a")
-        a.href = "#"
-        a.id = "export"
-        a.innerHTML = "Export"
-        document.body.appendChild(a)
-      }
-
       // HACK -- update the folium-generated JS to add, most importantly,
       // the map to this global variable so that it can be used elsewhere
       // in the script.
@@ -419,13 +415,17 @@ async function onRender(event: Event) {
       ignore_render = false;
       const render_script = document.createElement("script")
       if (!window.map) {
+	/* first add the html elements as the scripts may
+           refer to them */
+        const html_div = document.createElement("div")
+        html_div.innerHTML = html
+        document.body.appendChild(html_div)
+
+	/* now the script */
         render_script.innerHTML =
           script +
           `window.map = map_div; window.initComponent(map_div, ${return_on_hover});`
         document.body.appendChild(render_script)
-        const html_div = document.createElement("div")
-        html_div.innerHTML = html
-        document.body.appendChild(html_div)
         const styles = getPixelatedStyles(pixelated)
         var styleSheet = document.createElement("style")
         styleSheet.innerText = styles
