@@ -20,8 +20,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
           python-version: ${{ matrix.python-version }}
       - uses: actions/setup-node@v3
@@ -34,18 +34,16 @@ jobs:
           npm run build
       - name: Install python dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r tests/requirements.txt
-          pip install -e .
+          uv sync --group dev --group test
       - name: Install playwright dependencies
         run: |
-          playwright install --with-deps
+          uv run playwright install --with-deps
       - name: Install annotate-failures-plugin
-        run: pip install pytest-github-actions-annotate-failures
+        run: uv add pytest-github-actions-annotate-failures --dev
 
       - name: Test with pytest and retry flaky tests up to 3 times
         run: |
-          pytest --browser chromium -s --reruns 3 --junit-xml=test-results.xml
+          uv run pytest --browser chromium -s --reruns 3 --junit-xml=test-results.xml
 
       - name: Surface failing tests
         if: always()

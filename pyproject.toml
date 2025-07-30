@@ -1,3 +1,32 @@
+[project]
+name = "streamlit-folium"
+version = "0.23.2"
+description = "Render Folium objects in Streamlit"
+readme = "README.md"
+authors = [{ name = "Randy Zwitch", email = "rzwitch@gmail.com" }]
+requires-python = ">=3.9"
+dependencies = [
+    "streamlit>=1.13.0",
+    "folium>=0.13,!=0.15.0",
+    "jinja2",
+    "branca",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.4,<0.9"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = "."
+source-include = [
+    "README.md",
+    "LICENSE"
+]
+source-exclude = [
+    "streamlit_folium/frontend/node_modules/**/*",
+    "streamlit_folium/frontend/src/**/*"
+]
+
 [tool.ruff]
 line-length = 88
 
@@ -31,3 +60,18 @@ follow_imports = "silent"
 ignore_missing_imports = true
 scripts_are_modules = true
 python_version = "3.9"
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "mypy",
+    "pre-commit",
+]
+test = [
+    "folium>=0.13,!=0.15.0",
+    "geopandas>=1.0.1",
+    "pytest>=7.1.2",
+    "pytest-playwright>=0.7.0",
+    "pytest-rerunfailures>=15.1",
+    "streamlit>=1.13.0,!=1.34.0",
+]

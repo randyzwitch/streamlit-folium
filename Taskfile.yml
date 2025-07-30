@@ -4,41 +4,40 @@ tasks:
   install-pre-commit:
     desc: Install pre-commit hooks
     cmds:
-      - uv pip install pre-commit
-      - pre-commit install
+      - uv add pre-commit --dev
+      - uv run pre-commit install
     sources:
       - .pre-commit-config.yaml
 
   install-package:
     desc: Install the package
     cmds:
-      - uv pip install -e .
+      - uv sync
     sources:
-      - requirements.txt
-      - setup.py
+      - pyproject.toml
+      - uv.lock
 
   install-test-deps:
     desc: Install the dependencies for testing
     cmds:
-      - uv pip install -r tests/requirements.txt
-      - playwright install --with-deps
+      - uv sync --group dev --group test
+      - uv run playwright install --with-deps
     sources:
-      - tests/requirements.txt
+      - pyproject.toml
 
   lint:
     desc: Run linting checks
     deps:
       - install-pre-commit
     cmds:
-      - pre-commit run --all-files
+      - uv run pre-commit run --all-files
 
   test:
     desc: Run all tests
     deps:
-      - install-package
       - install-test-deps
     cmds:
-      - pytest
+      - uv run pytest
 
   test-frontend:
     cmds:
@@ -51,9 +50,9 @@ tasks:
       - npm install
       - npm run start
 
-  _run-streamlit: streamlit run examples/streamlit_app.py --server.port 8599 --server.headless true
+  _run-streamlit: uv run streamlit run examples/streamlit_app.py --server.port 8599 --server.headless true
 
-  _run-playwright: playwright codegen localhost:8599 --target=python-pytest
+  _run-playwright: uv run playwright codegen localhost:8599 --target=python-pytest
 
   generate-tests:
     desc: Generate tests for the frontend
