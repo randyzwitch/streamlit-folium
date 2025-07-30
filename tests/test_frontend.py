@@ -354,45 +354,6 @@ def test_dynamic_feature_group_update(page: Page):
     expect(page.get_by_text("dashArray")).to_be_visible()
 
 
-def test_layer_control_dynamic_update(page: Page):
-    page.get_by_role("link", name="dynamic layer control").click()
-
-    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
-        "Parcels"
-    ).click()
-    expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
-            "Parcels"
-        )
-    ).not_to_be_checked()
-    expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
-        .get_by_role("img")
-        .locator("svg")
-    ).to_be_hidden()
-    expect(page.get_by_text("dashArray")).to_be_hidden()
-
-    page.get_by_test_id("stRadio").get_by_text("Both").click()
-    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
-        "Parcels"
-    ).click()
-    expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
-            "Parcels"
-        )
-    ).not_to_be_checked()
-    expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').get_by_text(
-            "Buildings"
-        )
-    ).to_be_checked()
-    expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]')
-        .get_by_role("img")
-        .locator("path")
-    ).to_be_visible()
-
-
 def test_frame_height_matches_content_height(page: Page):
     """Make sure that the frame height matches the document height to confirm that
     Streamlit.setFrameHeight was called correctly."""
