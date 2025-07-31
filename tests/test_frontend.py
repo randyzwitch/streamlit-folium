@@ -379,7 +379,6 @@ def test_layer_control_dynamic_update(page: Page):
         .get_by_role("img")
         .locator("svg")
     ).to_be_hidden()
-    # Skip code visibility check - focus on map functionality
 
     page.get_by_test_id("stRadio").get_by_text("Both").click()
 
