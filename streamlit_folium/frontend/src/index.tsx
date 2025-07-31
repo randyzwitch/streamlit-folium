@@ -27,6 +27,7 @@ type GlobalData = {
   last_center: any
   last_feature_group: any
   last_layer_control: any
+  height: any
   selected_layers: Record<string, { name: string; url: string }>
 }
 
@@ -244,7 +245,7 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("overlayadd", addLayer);
   map.on("overlayremove", removeLayer);
 
-  Streamlit.setFrameHeight()
+  Streamlit.setFrameHeight(global_data.height);
   updateComponentValue(map)
 }
 
@@ -311,7 +312,8 @@ async function onRender(event: Event) {
     if (!window.map) return
     if (
       feature_group !== window.__GLOBAL_DATA__.last_feature_group ||
-      layer_control !== window.__GLOBAL_DATA__.last_layer_control
+      layer_control !== window.__GLOBAL_DATA__.last_layer_control ||
+      height !== window.__GLOBAL_DATA__.height
     ) {
       // remove previous feature group and layer control
       if (window.feature_group && window.feature_group.length > 0) {
@@ -327,6 +329,7 @@ async function onRender(event: Event) {
       // update feature group and layer control cache
       window.__GLOBAL_DATA__.last_feature_group = feature_group
       window.__GLOBAL_DATA__.last_layer_control = layer_control
+      window.__GLOBAL_DATA__.height = height
 
       if (feature_group) {
         // eslint-disable-next-line
@@ -344,6 +347,7 @@ async function onRender(event: Event) {
         // eslint-disable-next-line
         eval(layer_control)
       }
+      Streamlit.setFrameHeight(height)
     }
 
     var view_changed = false
@@ -404,7 +408,8 @@ async function onRender(event: Event) {
         last_center: null,
         last_feature_group: null,
         last_layer_control: null,
-        selected_layers: {}
+        selected_layers: {},
+        height: height
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")
@@ -435,7 +440,6 @@ async function onRender(event: Event) {
     })
   }
   finalizeOnRender()
-  Streamlit.setFrameHeight()
 }
 
 // Attach our `onRender` handler to Streamlit's render event.
