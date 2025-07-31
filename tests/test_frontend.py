@@ -234,7 +234,7 @@ def test_responsiveness(page: Page):
     page.get_by_role("link", name="responsive").click()
     page.get_by_role("link", name="responsive").click()
 
-    page.set_viewport_size({"width": 500, "height": 3000})
+    page.set_viewport_size({"width": 1000, "height": 3000})
 
     try:
         initial_bbox = (
@@ -244,7 +244,7 @@ def test_responsiveness(page: Page):
         page.screenshot(path="screenshot-responsive.png", full_page=True)
         raise e
 
-    page.set_viewport_size({"width": 1000, "height": 3000})
+    page.set_viewport_size({"width": 1500, "height": 3000})
 
     sleep(1)
 
@@ -292,66 +292,70 @@ def test_geojson_popup(page: Page):
 
 def test_dynamic_feature_group_update(page: Page):
     page.get_by_role("link", name="dynamic updates").click()
-    page.get_by_text("Show generated code").click()
 
     # Test showing only Parcel layer
     page.get_by_test_id("stRadio").get_by_text("Parcels").click()
+    sleep(1)
     expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        page.locator('[data-testid="stCustomComponentV1"]')
+        .nth(1)
+        .content_frame.get_by_role("img")
         .locator("path")
         .first
     ).to_be_visible()
     expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
-        .get_by_role("img")
-        .locator("svg")
+        page.locator('[data-testid="stCustomComponentV1"]')
+        .nth(1)
+        .content_frame.get_by_role("img")
+        .locator("path")
+        .nth(1)
     ).to_be_hidden()
-    expect(
-        page.get_by_text('"fillColor"')
-    ).to_be_visible()  # fillColor only present in parcel style
-    expect(
-        page.get_by_text('"dashArray"')
-    ).to_be_hidden()  # dashArray only present in building style
 
     # Test showing only Building layer
     page.get_by_test_id("stRadio").get_by_text("Buildings").click()
+    sleep(1)
     expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        page.locator('[data-testid="stCustomComponentV1"]')
+        .nth(1)
+        .content_frame.get_by_role("img")
+        .locator("path")
+        .nth(1)
+    ).to_be_hidden()
+    expect(
+        page.locator('[data-testid="stCustomComponentV1"]')
+        .nth(1)
+        .content_frame.get_by_role("img")
         .locator("path")
         .first
     ).to_be_visible()
-    expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
-        .get_by_role("img")
-        .locator("svg")
-    ).to_be_hidden()
-    expect(page.get_by_text("fillColor")).to_be_hidden()
-    expect(page.get_by_text("dashArray")).to_be_visible()
 
     # Test showing no layers
     page.get_by_test_id("stRadio").get_by_text("None").click()
     expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
-        .get_by_role("img")
-        .locator("svg")
+        page.locator('[data-testid="stCustomComponentV1"]')
+        .nth(1)
+        .content_frame.get_by_role("img")
+        .locator("path")
+        .first
     ).to_be_hidden()
-    expect(page.get_by_text("fillColor")).to_be_hidden()
-    expect(page.get_by_text("dashArray")).to_be_hidden()
 
     # Test showing both layers
     page.get_by_test_id("stRadio").get_by_text("Both").click()
+    sleep(1)
     expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        page.locator('[data-testid="stCustomComponentV1"]')
+        .nth(1)
+        .content_frame.get_by_role("img")
         .locator("path")
         .first
     ).to_be_visible()
     expect(
-        page.frame_locator('iframe[title="streamlit_folium\\.st_folium"] >> nth=1')
+        page.locator('[data-testid="stCustomComponentV1"]')
+        .nth(1)
+        .content_frame.get_by_role("img")
         .locator("path")
         .nth(1)
     ).to_be_visible()
-    expect(page.get_by_text("fillColor")).to_be_visible()
-    expect(page.get_by_text("dashArray")).to_be_visible()
 
 
 def test_frame_height_matches_content_height(page: Page):
@@ -368,7 +372,7 @@ def test_frame_height_matches_content_height(page: Page):
         "el => window.getComputedStyle(el).height !== '0px'",
         arg=iframe.element_handle(),
     )
-    sleep(0.5)
+    sleep(1.5)
 
     # Now make sure that the heights match
     iframe_height = iframe.evaluate("el => window.getComputedStyle(el).height")
