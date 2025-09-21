@@ -164,22 +164,30 @@ function onLayerClick(e: any) {
   const global_data = window.__GLOBAL_DATA__
   global_data.last_object_clicked = e.latlng
 
-  if (e.sourceTarget._tooltip && e.sourceTarget._tooltip._content) {
-    let tooltip_text = extractContent(e.sourceTarget.getTooltip().getContent())
-    global_data.last_object_clicked_tooltip = tooltip_text
-  } else if (e.target._tooltip && e.target._tooltip._content) {
-    let tooltip_text = e.target.getTooltip().getContent()(
-      e.sourceTarget
-    ).innerText
-    global_data.last_object_clicked_tooltip = tooltip_text
+  try {
+    if (e.sourceTarget._tooltip && e.sourceTarget._tooltip._content) {
+      let tooltip_text = extractContent(e.sourceTarget.getTooltip().getContent())
+      global_data.last_object_clicked_tooltip = tooltip_text
+    } else if (e.target._tooltip && e.target._tooltip._content) {
+      let tooltip_text = e.target.getTooltip().getContent()(
+	e.sourceTarget
+      ).innerText
+      global_data.last_object_clicked_tooltip = tooltip_text
+    }
+  } catch(error) {
+    console.log(error);
   }
 
-  if (e.sourceTarget._popup && e.sourceTarget._popup._content) {
-    let popup_text = e.sourceTarget.getPopup().getContent().innerText
-    global_data.last_object_clicked_popup = popup_text
-  } else if (e.target._popup && e.target._popup._content) {
-    let popup_text = e.target.getPopup().getContent()(e.sourceTarget).innerText
-    global_data.last_object_clicked_popup = popup_text
+  try {
+    if (e.sourceTarget._popup && e.sourceTarget._popup._content) {
+      let popup_text = e.sourceTarget.getPopup().getContent().innerText
+      global_data.last_object_clicked_popup = popup_text
+    } else if (e.target._popup && e.target._popup._content) {
+      let popup_text = e.target.getPopup().getContent()(e.sourceTarget).innerText
+      global_data.last_object_clicked_popup = popup_text
+    }
+  } catch(error) {
+    console.log(error);
   }
 
   let details: Array<any> = []
