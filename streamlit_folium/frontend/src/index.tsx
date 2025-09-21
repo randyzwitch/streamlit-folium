@@ -40,13 +40,8 @@ declare global {
     feature_group: any
     layer_control: any
     Streamlit: any
+    debouncedUpdateComponentValue: any
   }
-}
-
-function onMapClick(e: any) {
-  const global_data = window.__GLOBAL_DATA__
-  global_data.lat_lng_clicked = e.latlng
-  debouncedUpdateComponentValue(window.map)
 }
 
 let debouncedUpdateComponentValue = debounce(updateComponentValue, 250)
@@ -88,10 +83,6 @@ function updateComponentValue(map: any) {
     global_data.previous_data = data
     Streamlit.setComponentValue(data)
   }
-}
-
-function onMapMove(e: any) {
-  debouncedUpdateComponentValue(window.map)
 }
 
 function extractContent(s: string) {
@@ -215,11 +206,12 @@ function getPixelatedStyles(pixelated: boolean) {
   return styles
 }
 window.Streamlit = Streamlit;
+window.debouncedUpdateComponentValue = debouncedUpdateComponentValue;
 
 window.initComponent = (map: any, return_on_hover: boolean) => {
   const global_data = window.__GLOBAL_DATA__
-  map.on("click", onMapClick)
-  map.on("moveend", onMapMove)
+  // map.on("click", onMapClick)
+  // map.on("moveend", onMapMove)
   for (let key in map._layers) {
     let layer = map._layers[key]
     if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {

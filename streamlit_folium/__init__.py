@@ -18,7 +18,7 @@ from jinja2 import UndefinedError
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
-_RELEASE = True
+_RELEASE = False
 
 
 if not _RELEASE:
@@ -296,6 +296,21 @@ def st_folium(
         folium_map = next(iter(fig._children.values()))
 
     folium_map.render()
+
+    folium_map.on(
+        click=folium.JsCode("""
+            function onMapClick(e) {
+                const global_data = window.__GLOBAL_DATA__
+                global_data.lat_lng_clicked = e.latlng
+                debouncedUpdateComponentValue(window.map)
+            }
+        """),
+        move=folium.JsCode("""
+            function onMapMove(e) {
+                debouncedUpdateComponentValue(window.map)
+            }
+        """),
+    )
 
     # we need to do this before _get_map_string, because
     # _get_map_string alters the folium structure
