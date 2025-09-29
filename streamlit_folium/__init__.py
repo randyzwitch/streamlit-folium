@@ -412,6 +412,10 @@ def st_folium(
         css_links.extend([href for _, href in getattr(elem, "default_css", [])])
         js_links.extend([src for _, src in getattr(elem, "default_js", [])])
 
+    # deduplicate links
+    css_links = list(dict.fromkeys(css_links))
+    js_links = list(dict.fromkeys(js_links))
+
     hash_key = generate_js_hash(leaflet, key, return_on_hover)
 
     def _on_change():
