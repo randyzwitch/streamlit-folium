@@ -1,6 +1,6 @@
 [project]
 name = "streamlit-folium"
-version = "0.25.2"
+version = "0.25.3"
 description = "Render Folium objects in Streamlit"
 readme = "README.md"
 authors = [{ name = "Randy Zwitch", email = "rzwitch@gmail.com" }]
