@@ -70,4 +70,6 @@ m.add_child(fm)
 
 with st.echo():
     # call to render Folium map in Streamlit
-    st_folium(m, width=2000, height=500, returned_objects=[], debug=True)
+    data = st_folium(m, width=2000, height=500, debug=True)
+
+st.write(data)
