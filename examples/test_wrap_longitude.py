@@ -26,7 +26,9 @@ col1, col2 = st.columns(2)
 with col1:
     st.subheader("wrap_longitude=False (default)")
     m1 = folium.Map(location=[0, 170], zoom_start=2)
-    result1 = st_folium(m1, key="map1", wrap_longitude=False, height=400, use_container_width=True)
+    result1 = st_folium(
+        m1, key="map1", wrap_longitude=False, height=400, use_container_width=True
+    )
 
     if result1:
         st.write("**Center:**", result1.get("center"))
@@ -40,7 +42,9 @@ with col1:
 with col2:
     st.subheader("wrap_longitude=True")
     m2 = folium.Map(location=[0, 170], zoom_start=2)
-    result2 = st_folium(m2, key="map2", wrap_longitude=True, height=400, use_container_width=True)
+    result2 = st_folium(
+        m2, key="map2", wrap_longitude=True, height=400, use_container_width=True
+    )
 
     if result2:
         st.write("**Center:**", result2.get("center"))
