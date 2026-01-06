@@ -216,6 +216,7 @@ def st_folium(
     debug: bool = False,
     render: bool = True,
     on_change: Callable | None = None,
+    wrap_longitude: bool = False,
 ):
     """Display a Folium object in Streamlit, returning data as user interacts
     with app.
@@ -268,6 +269,10 @@ def st_folium(
         Disabling this may improve performance as you can cache the rendering step.
         *Note* if this is disabled and the map is not rendered elsewhere the map
         will be missing attributes
+    wrap_longitude: bool
+        If True, normalize longitude values to be within -180 to 180 degrees.
+        This is useful when panning around the world causes longitude values to
+        exceed the standard bounds.
     Returns
     -------
     dict
@@ -443,6 +448,7 @@ def st_folium(
         css_links=css_links,
         js_links=js_links,
         on_change=_on_change,
+        wrap_longitude=wrap_longitude,
     )
 
 
