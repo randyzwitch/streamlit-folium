@@ -29,6 +29,7 @@ type GlobalData = {
   last_layer_control: any
   height: any
   selected_layers: Record<string, { name: string; url: string }>
+  wrap_longitude: boolean
 }
 
 declare global {
@@ -56,18 +57,31 @@ function updateComponentValue(map: any) {
   let previous_data = global_data.previous_data
   let bounds = map.getBounds()
   let zoom = map.getZoom()
+  let center = map.getCenter()
+  const wrapLng = global_data.wrap_longitude
+
+  // Use Leaflet's built-in wrapLatLng and wrapLatLngBounds if wrapping is enabled
+  const wrapLatLng = (latlng: any) => {
+    if (!latlng || !wrapLng) return latlng
+    return map.wrapLatLng(latlng)
+  }
+  const wrapBounds = (b: any) => {
+    if (!b || !wrapLng) return b
+    return map.wrapLatLngBounds(b)
+  }
+
   let _data = {
-    last_clicked: global_data.lat_lng_clicked,
-    last_object_clicked: global_data.last_object_clicked,
+    last_clicked: wrapLatLng(global_data.lat_lng_clicked),
+    last_object_clicked: wrapLatLng(global_data.last_object_clicked),
     last_object_clicked_tooltip: global_data.last_object_clicked_tooltip,
     last_object_clicked_popup: global_data.last_object_clicked_popup,
     all_drawings: global_data.all_drawings,
     last_active_drawing: global_data.last_active_drawing,
-    bounds: bounds,
+    bounds: wrapBounds(bounds),
     zoom: zoom,
     last_circle_radius: global_data.last_circle_radius,
     last_circle_polygon: global_data.last_circle_polygon,
-    center: map.getCenter(),
+    center: wrapLatLng(center),
     selected_layers: Object.values(global_data.selected_layers)
   }
 
@@ -282,6 +296,7 @@ async function onRender(event: Event) {
   const return_on_hover: boolean = data.args["return_on_hover"]
   const layer_control: string = data.args["layer_control"]
   const pixelated: boolean = data.args["pixelated"]
+  const wrap_longitude: boolean = data.args["wrap_longitude"] ?? false
 
   // load scripts
   const loadScripts = async () => {
@@ -417,7 +432,8 @@ async function onRender(event: Event) {
         last_feature_group: null,
         last_layer_control: null,
         selected_layers: {},
-        height: height
+        height: height,
+        wrap_longitude: wrap_longitude
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")
