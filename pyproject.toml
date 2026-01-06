@@ -4,7 +4,7 @@ version = "0.25.3"
 description = "Render Folium objects in Streamlit"
 readme = "README.md"
 authors = [{ name = "Randy Zwitch", email = "rzwitch@gmail.com" }]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "streamlit>=1.13.0",
     "folium>=0.13,!=0.15.0",
@@ -59,7 +59,7 @@ files = ["**/*.py"]
 follow_imports = "silent"
 ignore_missing_imports = true
 scripts_are_modules = true
-python_version = "3.9"
+python_version = "3.10"
 
 [dependency-groups]
 dev = [
