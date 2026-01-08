@@ -111,6 +111,15 @@ def _get_header(fig: folium.MacroElement) -> str:
     header = fig.get_root().header.render()
     header = re.sub(r'<script src=".*?"></script>', "", header)
     header = re.sub(r'<link rel="stylesheet" href=".*?"/>', "", header)
+    # Fix Leaflet default marker icon path issue
+    # Folium may generate incorrect imagePath missing "/images/" directory
+    # See: https://github.com/randyzwitch/streamlit-folium/issues/275
+    # See: https://github.com/Leaflet/Leaflet/issues/4968
+    header = re.sub(
+        r'(L\.Icon\.Default\.imagePath\s*=\s*["\'])([^"\']*?/dist)(["\'])',
+        r"\1\2/images/\3",
+        header,
+    )
     map_id = get_full_id(fig)
     return header.replace(map_id, "map_div")
 
