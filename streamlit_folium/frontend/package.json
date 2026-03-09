@@ -46,6 +46,9 @@
     "@types/underscore": "^1.11.4"
   },
   "overrides": {
+    "bfj": {
+      "jsonpath": "^1.2.0"
+    },
     "nth-check": "^2.0.1",
     "postcss": "^8.4.31",
     "serialize-javascript": "^7.0.4",
