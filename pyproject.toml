@@ -70,6 +70,7 @@ dev = [
 test = [
     "pyproj>=3.7.2; python_version >= '3.11'",
     "pyproj>=3.7.1; python_version < '3.11'",
+    "pyogrio>=0.12.1; python_version >= '3.14'",
     "folium>=0.13,!=0.15.0",
     "geopandas>=1.0.1",
     "pytest>=7.1.2",
