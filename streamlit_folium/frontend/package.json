@@ -16,7 +16,7 @@
     "react-scripts": "^5.0.1",
     "streamlit-component-lib": "^2.0.0",
     "typescript": "^4",
-    "underscore": "^1.13.2"
+    "underscore": "^1.13.8"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -46,8 +46,10 @@
     "@types/underscore": "^1.11.4"
   },
   "overrides": {
-    "bfj": {
-      "jsonpath": "^1.2.0"
-    }
+    "nth-check": "^2.0.1",
+    "postcss": "^8.4.31",
+    "serialize-javascript": "^7.0.4",
+    "webpack-dev-server": "^5.2.1",
+    "underscore": "^1.13.8"
   }
 }
