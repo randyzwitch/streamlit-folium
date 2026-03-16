@@ -1,301 +1,267 @@
 import streamlit as st
 
 
-st.set_page_config(
-    page_title="Agent Demo",
-    page_icon="🤖",
-    layout="wide",
+st.set_page_config(page_title="Agent Demo", layout="wide")
+
+st.markdown(
+    """
+    <style>
+    html, body, [class*="css"] {
+        font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    }
+
+    .main {
+        background: #09111f;
+    }
+
+    .block-container {
+        max-width: 1200px;
+        padding: 3rem 4rem;
+    }
+
+    .hero {
+        text-align: center;
+        padding: 3rem 0 2rem;
+    }
+
+    .hero-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #172a49, #0b1830);
+        border: 1px solid #274777;
+        color: #8dc3ff;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.42rem 1rem;
+        border-radius: 999px;
+        margin-bottom: 1.2rem;
+    }
+
+    .hero-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #dce9ff;
+        line-height: 1.2;
+        margin-bottom: 0.9rem;
+    }
+
+    .hero-title span {
+        color: #74b0ff;
+    }
+
+    .hero-sub {
+        color: #8b9fbe;
+        font-size: 1rem;
+        font-weight: 400;
+        max-width: 620px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    .section-title {
+        color: #7fa4db;
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin: 2rem 0 1.1rem;
+    }
+
+    .scenario-card {
+        background: #ffffff;
+        border: 1px solid #d6dfef;
+        border-radius: 18px;
+        padding: 1.4rem 1.5rem;
+        margin-bottom: 0.9rem;
+        box-shadow: 0 12px 32px rgba(7, 17, 33, 0.08);
+    }
+
+    .scenario-number {
+        color: #5e7fb0;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .scenario-title {
+        color: #152132;
+        font-size: 1.08rem;
+        font-weight: 700;
+        line-height: 1.35;
+        margin-bottom: 0.55rem;
+    }
+
+    .scenario-body {
+        color: #52627d;
+        font-size: 0.92rem;
+        line-height: 1.65;
+    }
+
+    .divider {
+        border: none;
+        border-top: 1px solid #20314f;
+        margin: 2.7rem 0;
+    }
+
+    .workspace-panel {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        border: 1px solid #d6dfef;
+        border-radius: 18px;
+        padding: 1.5rem;
+        min-height: 240px;
+        box-shadow: 0 12px 32px rgba(7, 17, 33, 0.08);
+    }
+
+    .workspace-title {
+        color: #142033;
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 0.7rem;
+    }
+
+    .workspace-body {
+        color: #51617c;
+        font-size: 0.93rem;
+        line-height: 1.7;
+    }
+
+    .workspace-list {
+        color: #21304a;
+        font-size: 0.9rem;
+        line-height: 1.75;
+        margin: 0.8rem 0 0;
+        padding-left: 1.1rem;
+    }
+
+    .footer-note {
+        text-align: center;
+        color: #5f7190;
+        font-size: 0.8rem;
+        margin-top: 2rem;
+        letter-spacing: 0.04em;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Space+Grotesk:wght@400;600;700&display=swap');
-
-html, body, [class*="css"] {
-    font-family: 'Noto Sans KR', sans-serif;
-}
-
-.main {
-    background-color: #0a0f1e;
-}
-
-.block-container {
-    padding: 3rem 4rem;
-    max-width: 1200px;
-}
-
-/* 헤더 */
-.hero {
-    text-align: center;
-    padding: 3rem 0 2rem 0;
-    margin-bottom: 1rem;
-}
-
-.hero-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #1a2a4a, #0d1b35);
-    border: 1px solid #2a4a7f;
-    color: #6eb3ff;
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding: 0.4rem 1.2rem;
-    border-radius: 100px;
-    margin-bottom: 1.5rem;
-}
-
-.hero-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 2.8rem;
-    font-weight: 700;
-    color: #6eb3ff;
-    line-height: 1.2;
-    margin-bottom: 1rem;
-}
-
-.hero-title span {
-    background: linear-gradient(135deg, #6eb3ff, #a78bfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.hero-sub {
-    color: #8899bb;
-    font-size: 1rem;
-    font-weight: 300;
-    max-width: 540px;
-    margin: 0 auto;
-    line-height: 1.7;
-}
-
-/* 섹션 타이틀 */
-.section-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.4rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #4a6fa0;
-    margin-bottom: 1.2rem;
-    padding-left: 0.2rem;
-}
-
-/* 워크플로우 카드 */
-.workflow-card {
-    background: #ffffff;
-    border: 2px solid #2e4e7f;
-    border-radius: 16px;
-    padding: 1.8rem;
-    margin-bottom: 1rem;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s ease;
-    cursor: pointer;
-}
-
-.workflow-card:hover {
-    border-color: #5a8acf;
-}
-
-.workflow-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #3a6aaf, transparent);
-}
-
-.card-number {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    color: #4a6fa0;
-    margin-bottom: 0.6rem;
-}
-
-.card-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 0.8rem;
-    line-height: 1.3;
-}
-
-.card-context-label {
-    font-size: 0.65rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #6eb3ff;
-    margin-bottom: 0.4rem;
-}
-
-.card-context {
-    font-size: 0.85rem;
-    color: #444444;
-    line-height: 1.7;
-    font-weight: 300;
-}
-
-.card-icon {
-    float: right;
-    font-size: 1.8rem;
-    opacity: 0.5;
-    margin-top: -0.3rem;
-}
-
-/* 채팅 카드 */
-.chat-card {
-    background: #ffffff;
-    border: 2px solid #2a4a38; 
-    border-radius: 12px;
-    padding: 1.4rem 1.6rem;
-    margin-bottom: 0.7rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: border-color 0.2s ease;
-    cursor: pointer;
-}
-
-.chat-card:hover {
-    border-color: #4a8a6a;
-}
-
-.chat-index {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #1a4a3a;
-    min-width: 2rem;
-    text-align: center;
-}
-
-.chat-content {}
-
-.chat-title {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #1a1a1a;
-    margin-bottom: 0.15rem;
-}
-
-.chat-title-en {
-    font-size: 0.75rem;
-    color: #3a7a5a;
-    font-weight: 400;
-}
-
-.chat-tag {
-    display: inline-block;
-    background: #0a2a1a;
-    border: 1px solid #1a4a2a;
-    color: #4aaa7a;
-    font-size: 0.65rem;
-    padding: 0.15rem 0.6rem;
-    border-radius: 100px;
-    font-weight: 500;
-}
-
-/* 구분선 */
-.divider {
-    border: none;
-    border-top: 1px solid #1a2a3a;
-    margin: 2.5rem 0;
-}
-
-/* 하단 */
-.footer-note {
-    text-align: center;
-    color: #2a3a5a;
-    font-size: 0.75rem;
-    margin-top: 2rem;
-    letter-spacing: 0.05em;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-# ── 히어로 ──────────────────────────────────────────
-st.markdown("""
-<div class="hero">
-    <div class="hero-badge">🤖 AI Agent Demo</div>
-    <div class="hero-title">안녕하세요,<br><span>에이전트 데모</span> 시연 UI입니다</div>
-    <div class="hero-sub">복잡한 업무를 자동화하는 AI 에이전트 시나리오를<br>직접 체험해 보세요.</div>
-</div>
-""", unsafe_allow_html=True)
-
-
-# ── 워크플로우 시나리오 ──────────────────────────────
-st.markdown('<div class="section-title">⚡ Workflow Agent Scenarios</div>', unsafe_allow_html=True)
-
-scenarios = [
+workflow_scenarios = [
     {
-        "num": "SCENARIO 01",
-        "icon": "🧾",
-        "title": "지능형 청구서 검증 워크벤치 (Smart Invoice Validator)",
-        "context": "재무팀 담당자가 이메일로 수신한 공급업체(도쿄전자)의 청구서(PDF)를 처리해야 합니다. 발주(PO) 시스템에 등록된 금액과 청구서 금액이 달라, 이를 수작업으로 대조하고 원인을 파악해야 하는 상황입니다."
+        "number": "Scenario 01",
+        "title": "Smart invoice validation workbench",
+        "body": "A workflow-style demo that compares invoice files, purchase records, and review output in one place.",
     },
     {
-        "num": "SCENARIO 02",
-        "icon": "🏢",
-        "title": "新規取引先リスク評価エージェント (Supplier Onboarding Wizard)",
-        "context": "購買チームが緊急の資材調達のために初めて見る企業「フューチャーテック」と取引を開始する必要があります。急いでいますが、倒産リスクのある企業や詐欺企業の危険を避けるため、AIを通じて迅速かつ深く検証しようとしています。"
+        "number": "Scenario 02",
+        "title": "New supplier risk evaluation agent",
+        "body": "A guided onboarding demo that walks through input, review, and supplier risk checkpoints.",
     },
     {
-        "num": "SCENARIO 03",
-        "icon": "🔍",
-        "title": "AI 내부 통제 및 감사 매니저 (AI Compliance & Audit Manager)",
-        "context": "감사팀 직원이 출근하여 전날 발생한 법인카드 사용 내역 중 '부정 사용' 의심 건을 검토합니다. 수천 건 중 AI가 미리 필터링한 '고위험군'만 집중해서 확인합니다."
+        "number": "Scenario 03",
+        "title": "AI compliance and audit manager",
+        "body": "A monitoring and review demo focused on surfacing high-risk findings and follow-up actions.",
     },
 ]
-
-for s in scenarios:
-    st.markdown(f"""
-    <div class="workflow-card">
-        <span class="card-icon">{s['icon']}</span>
-        <div class="card-number">{s['num']}</div>
-        <div class="card-title">{s['title']}</div>
-        <div class="card-context-label">Context</div>
-        <div class="card-context">{s['context']}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-st.markdown('<hr class="divider">', unsafe_allow_html=True)
-
-
-# ── 채팅 시나리오 ────────────────────────────────────
-st.markdown('<div class="section-title">💬 Chat Agent Scenarios</div>', unsafe_allow_html=True)
-
-st.markdown("""
-<div style="font-size:0.82rem; color:#4a6a8a; margin-bottom:1.2rem; line-height:1.6; font-weight:300;">
-    비정형 질문 · 빠른 정보 검색 · 모바일 환경 대응 — 워크플로우의 기본 UI를 활용하거나 최소한의 커스텀만 적용합니다.
-</div>
-""", unsafe_allow_html=True)
 
 chat_scenarios = [
-    ("사내 규정 및 구매 가이드 챗봇", "Policy & Compliance Bot"),
-    ("계약서 독소 조항 자동 검토", "Contract AI Reviewer"),
-    ("자연어 기반 주문 현황 조회", "Sales Field Assistant"),
+    {
+        "number": "Scenario 04",
+        "title": "Policy and purchase guide chatbot",
+        "body": "A lightweight chat scenario for quick policy lookup and guidance.",
+    },
+    {
+        "number": "Scenario 05",
+        "title": "Contract clause reviewer",
+        "body": "A chat-first review flow that summarizes risky clauses and supporting reasoning.",
+    },
+    {
+        "number": "Scenario 06",
+        "title": "Natural language order lookup",
+        "body": "A conversational lookup flow that explains order status and suggested next actions.",
+    },
 ]
 
-for i, (ko, en) in enumerate(chat_scenarios, 1):
-    st.markdown(f"""
-    <div class="chat-card">
-        <div class="chat-index">0{i}</div>
-        <div class="chat-content">
-            <div class="chat-title">{ko}</div>
-            <div class="chat-title-en">{en}</div>
+st.markdown(
+    """
+    <div class="hero">
+        <div class="hero-badge">CTC AI Agent Demo</div>
+        <div class="hero-title">Existing demo scenarios and a<br><span>planner-friendly UI workspace</span></div>
+        <div class="hero-sub">
+            The original demo flows stay in place. The new 90-series pages give planners a clean area to draft Streamlit screens with reusable blocks and mock data.
         </div>
-        <div style="margin-left:auto;"><span class="chat-tag">Chat</span></div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
+st.markdown('<div class="section-title">Workflow Agent Scenarios</div>', unsafe_allow_html=True)
+for scenario in workflow_scenarios:
+    st.markdown(
+        f"""
+        <div class="scenario-card">
+            <div class="scenario-number">{scenario['number']}</div>
+            <div class="scenario-title">{scenario['title']}</div>
+            <div class="scenario-body">{scenario['body']}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-st.markdown('<div class="footer-note">Powered by Claude · Internal Demo Only</div>', unsafe_allow_html=True)
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Chat Agent Scenarios</div>', unsafe_allow_html=True)
+for scenario in chat_scenarios:
+    st.markdown(
+        f"""
+        <div class="scenario-card">
+            <div class="scenario-number">{scenario['number']}</div>
+            <div class="scenario-title">{scenario['title']}</div>
+            <div class="scenario-body">{scenario['body']}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Planner Workspace</div>', unsafe_allow_html=True)
+
+left, right = st.columns([1.3, 1])
+with left:
+    st.markdown(
+        """
+        <div class="workspace-panel">
+            <div class="workspace-title">90-series planner workspace</div>
+            <div class="workspace-body">
+                This area is separate from the legacy demo screens. A planner can copy a sample, change the copy and mock data, and review the draft in the same app navigation.
+            </div>
+            <ul class="workspace-list">
+                <li>90 guide page: workspace rules and quick-start notes</li>
+                <li>91 sample page: list plus detail starter</li>
+                <li>92 sample page: input form starter</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+with right:
+    st.markdown(
+        """
+        <div class="workspace-panel">
+            <div class="workspace-title">Numbering and rules</div>
+            <div class="workspace-body">
+                Shared workspace pages stay in the 90 to 94 range. Planner-owned drafts start at 95 and remain mock-only until the screen story is stable.
+            </div>
+            <ul class="workspace-list">
+                <li>90-94: shared samples and guides</li>
+                <li>95-99: planner draft screens</li>
+                <li>`planner/README.md`: quick start</li>
+                <li>`planner/starter_page.py`: copyable base file</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+st.markdown('<div class="footer-note">Internal demo workspace</div>', unsafe_allow_html=True)
