@@ -109,7 +109,12 @@ def folium_static(
 def _get_header(fig: folium.MacroElement) -> str:
     """Get the header string for the map"""
     header = fig.get_root().header.render()
-    header = re.sub(r'<script src=".*?"></script>', "", header)
+    header = re.sub(
+        r'<script\b[^>]*\bsrc=["\'][^"\']*["\'][^>]*>.*?</script\b[^>]*>',
+        "",
+        header,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
     header = re.sub(r'<link rel="stylesheet" href=".*?"/>', "", header)
     # Fix Leaflet default marker icon path issue
     # Folium may generate incorrect imagePath missing "/images/" directory
