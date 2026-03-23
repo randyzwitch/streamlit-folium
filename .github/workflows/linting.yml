@@ -3,6 +3,9 @@
 
 name: Linting, formatting, and type checking
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches: [master]
