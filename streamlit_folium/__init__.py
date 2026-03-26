@@ -16,6 +16,8 @@ import streamlit as st
 import streamlit.components.v1 as components
 from jinja2 import UndefinedError
 
+from .event_handlers import click, move
+
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
 _RELEASE = True
@@ -315,6 +317,11 @@ def st_folium(
         folium_map = next(iter(fig._children.values()))
 
     folium_map.render()
+
+    folium_map.on(
+        click=click,
+        move=move,
+    )
 
     # we need to do this before _get_map_string, because
     # _get_map_string alters the folium structure
