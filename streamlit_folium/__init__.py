@@ -464,6 +464,7 @@ def st_folium(
         "selected_layers": None,
         "geoman_drawings": None,
         "last_geoman_drawing": None,
+        "selected_tags": None,
     }
 
     # If the user passes a custom list of returned objects, we'll only return those
