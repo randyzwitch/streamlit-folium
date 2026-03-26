@@ -1,7 +1,9 @@
 import folium
+import folium.elements
 import streamlit as st
+from jinja2 import Template
 
-from streamlit_folium import Geoman, st_folium
+from streamlit_folium import st_folium
 
 st.set_page_config(layout="wide")
 st.title("Geoman Drawing Plugin")
@@ -10,20 +12,44 @@ st.write(
     "Supports drawing, editing, dragging, cutting, and rotating shapes."
 )
 
+# Create a MacroElement to load Geoman and initialize its controls
+geoman = folium.MacroElement()
+geoman._template = Template(
+    """
+    {% macro script(this, kwargs) %}
+    {{ this._parent.get_name() }}.pm.addControls({
+        position: 'topleft',
+        drawCircle: true,
+        drawCircleMarker: true,
+        drawPolyline: true,
+        drawRectangle: true,
+        drawPolygon: true,
+        drawMarker: true,
+        drawText: true,
+        editMode: true,
+        dragMode: true,
+        cutPolygon: true,
+        removalMode: true,
+        rotateMode: true,
+    });
+    {% endmacro %}
+"""
+)
+geoman.default_js = [
+    (
+        "leaflet-geoman",
+        "https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.min.js",
+    ),
+]
+geoman.default_css = [
+    (
+        "leaflet-geoman-css",
+        "https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.css",
+    ),
+]
+
 m = folium.Map(location=[40.7128, -74.0060], zoom_start=12)
-Geoman(
-    position="topleft",
-    draw_marker=True,
-    draw_polygon=True,
-    draw_polyline=True,
-    draw_rectangle=True,
-    draw_circle=True,
-    edit_mode=True,
-    drag_mode=True,
-    cut_polygon=True,
-    removal_mode=True,
-    rotate_mode=True,
-).add_to(m)
+geoman.add_to(m)
 
 output = st_folium(m, width=700, height=500)
 
