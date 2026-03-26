@@ -14,7 +14,7 @@ import folium.elements
 import folium.plugins
 import streamlit as st
 import streamlit.components.v1 as components
-from jinja2 import UndefinedError
+from jinja2 import Template, UndefinedError
 
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
@@ -30,6 +30,111 @@ else:
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(parent_dir, "frontend/build")
     _component_func = components.declare_component("st_folium", path=build_dir)
+
+
+class Geoman(folium.MacroElement):
+    """Add Geoman drawing controls to a folium map.
+
+    Geoman is a modern alternative to Leaflet.Draw with support for
+    drawing, editing, dragging, cutting, and rotating shapes.
+
+    Parameters
+    ----------
+    position : str
+        Position of the control. Default "topleft".
+    draw_marker : bool
+        Enable marker drawing. Default True.
+    draw_polygon : bool
+        Enable polygon drawing. Default True.
+    draw_polyline : bool
+        Enable polyline drawing. Default True.
+    draw_rectangle : bool
+        Enable rectangle drawing. Default True.
+    draw_circle : bool
+        Enable circle drawing. Default True.
+    draw_circle_marker : bool
+        Enable circle marker drawing. Default True.
+    draw_text : bool
+        Enable text drawing. Default True.
+    edit_mode : bool
+        Enable edit mode. Default True.
+    drag_mode : bool
+        Enable drag mode. Default True.
+    cut_polygon : bool
+        Enable polygon cutting. Default True.
+    removal_mode : bool
+        Enable removal mode. Default True.
+    rotate_mode : bool
+        Enable rotate mode. Default True.
+    """
+
+    _template = Template(
+        """
+        {% macro script(this, kwargs) %}
+        {{ this._parent.get_name() }}.pm.addControls({
+            position: '{{ this.position }}',
+            drawCircle: {{ this.draw_circle | tojson }},
+            drawCircleMarker: {{ this.draw_circle_marker | tojson }},
+            drawPolyline: {{ this.draw_polyline | tojson }},
+            drawRectangle: {{ this.draw_rectangle | tojson }},
+            drawPolygon: {{ this.draw_polygon | tojson }},
+            drawMarker: {{ this.draw_marker | tojson }},
+            drawText: {{ this.draw_text | tojson }},
+            editMode: {{ this.edit_mode | tojson }},
+            dragMode: {{ this.drag_mode | tojson }},
+            cutPolygon: {{ this.cut_polygon | tojson }},
+            removalMode: {{ this.removal_mode | tojson }},
+            rotateMode: {{ this.rotate_mode | tojson }},
+        });
+        {% endmacro %}
+    """
+    )
+
+    default_js = [
+        (
+            "leaflet-geoman",
+            "https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.min.js",
+        ),
+    ]
+
+    default_css = [
+        (
+            "leaflet-geoman-css",
+            "https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.css",
+        ),
+    ]
+
+    def __init__(
+        self,
+        position="topleft",
+        draw_marker=True,
+        draw_polygon=True,
+        draw_polyline=True,
+        draw_rectangle=True,
+        draw_circle=True,
+        draw_circle_marker=True,
+        draw_text=True,
+        edit_mode=True,
+        drag_mode=True,
+        cut_polygon=True,
+        removal_mode=True,
+        rotate_mode=True,
+    ):
+        super().__init__()
+        self._name = "Geoman"
+        self.position = position
+        self.draw_marker = draw_marker
+        self.draw_polygon = draw_polygon
+        self.draw_polyline = draw_polyline
+        self.draw_rectangle = draw_rectangle
+        self.draw_circle = draw_circle
+        self.draw_circle_marker = draw_circle_marker
+        self.draw_text = draw_text
+        self.edit_mode = edit_mode
+        self.drag_mode = drag_mode
+        self.cut_polygon = cut_polygon
+        self.removal_mode = removal_mode
+        self.rotate_mode = rotate_mode
 
 
 def generate_js_hash(
@@ -357,6 +462,8 @@ def st_folium(
         "last_circle_radius": None,
         "last_circle_polygon": None,
         "selected_layers": None,
+        "geoman_drawings": None,
+        "last_geoman_drawing": None,
     }
 
     # If the user passes a custom list of returned objects, we'll only return those
