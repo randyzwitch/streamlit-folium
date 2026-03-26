@@ -6,7 +6,7 @@ import os
 import re
 import warnings
 from textwrap import dedent
-from typing import Callable, Iterable
+from typing import Callable, ClassVar, Iterable
 
 import branca
 import folium
@@ -90,14 +90,14 @@ class Geoman(folium.MacroElement):
     """
     )
 
-    default_js = [
+    default_js: ClassVar[list[tuple[str, str]]] = [
         (
             "leaflet-geoman",
             "https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.min.js",
         ),
     ]
 
-    default_css = [
+    default_css: ClassVar[list[tuple[str, str]]] = [
         (
             "leaflet-geoman-css",
             "https://unpkg.com/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.css",
