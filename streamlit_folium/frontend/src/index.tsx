@@ -30,6 +30,7 @@ type GlobalData = {
   height: any
   selected_layers: Record<string, { name: string; url: string }>
   wrap_longitude: boolean
+  selected_tags: Array<string>
 }
 
 declare global {
@@ -82,7 +83,8 @@ function updateComponentValue(map: any) {
     last_circle_radius: global_data.last_circle_radius,
     last_circle_polygon: global_data.last_circle_polygon,
     center: wrapLatLng(center),
-    selected_layers: Object.values(global_data.selected_layers)
+    selected_layers: Object.values(global_data.selected_layers),
+    selected_tags: global_data.selected_tags
   }
 
   let to_return = global_data.returned_objects
@@ -236,6 +238,29 @@ function getPixelatedStyles(pixelated: boolean) {
   `
   return styles
 }
+function hookTagFilterButtons(map: any) {
+  const global_data = window.__GLOBAL_DATA__
+  // Find TagFilterButton controls by scanning window for variables
+  // that are L.control.tagFilterButton instances (they have _selectedTags
+  // and options.data). Folium generates them as tag_filter_button_* variables.
+  for (let key in window) {
+    if (key.startsWith("tag_filter_button_")) {
+      const control = (window as any)[key]
+      if (control && typeof control._selectedTags !== "undefined") {
+        // Wrap the existing onSelectionComplete callback
+        const originalCallback = control.options.onSelectionComplete
+        control.options.onSelectionComplete = function (selectedTags: string[]) {
+          global_data.selected_tags = selectedTags || []
+          debouncedUpdateComponentValue(map)
+          if (originalCallback) {
+            originalCallback.call(this, selectedTags)
+          }
+        }
+      }
+    }
+  }
+}
+
 window.Streamlit = Streamlit;
 
 window.initComponent = (map: any, return_on_hover: boolean) => {
@@ -266,6 +291,9 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   // Adding functionality for tracking layer changes
   map.on("overlayadd", addLayer);
   map.on("overlayremove", removeLayer);
+
+  // Hook into TagFilterButton controls to capture selected tags
+  hookTagFilterButtons(map);
 
   Streamlit.setFrameHeight(global_data.height);
   updateComponentValue(map)
@@ -433,7 +461,8 @@ async function onRender(event: Event) {
         last_layer_control: null,
         selected_layers: {},
         height: height,
-        wrap_longitude: wrap_longitude
+        wrap_longitude: wrap_longitude,
+        selected_tags: []
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")

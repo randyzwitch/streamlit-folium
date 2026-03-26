@@ -357,6 +357,7 @@ def st_folium(
         "last_circle_radius": None,
         "last_circle_polygon": None,
         "selected_layers": None,
+        "selected_tags": None,
     }
 
     # If the user passes a custom list of returned objects, we'll only return those
