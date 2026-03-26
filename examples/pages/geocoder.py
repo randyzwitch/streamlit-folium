@@ -1,7 +1,7 @@
 import folium
+import streamlit as st
 from folium.plugins import Geocoder
 
-import streamlit as st
 from streamlit_folium import st_folium
 
 st.set_page_config(layout="wide")
