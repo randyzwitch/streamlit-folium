@@ -31,6 +31,7 @@ type GlobalData = {
   selected_layers: Record<string, { name: string; url: string }>
   wrap_longitude: boolean
   selected_tags: Array<string>
+  last_geocoder_result: any
 }
 
 declare global {
@@ -43,6 +44,25 @@ declare global {
     layer_control: any
     Streamlit: any
   }
+}
+
+function onGeocoderResult(result: any) {
+  const global_data = window.__GLOBAL_DATA__
+  const geocode = result.geocode || result
+  global_data.last_geocoder_result = {
+    lat: geocode.center.lat,
+    lng: geocode.center.lng,
+    bbox: geocode.bbox
+      ? [
+          [geocode.bbox.getSouthWest().lat, geocode.bbox.getSouthWest().lng],
+          [geocode.bbox.getNorthEast().lat, geocode.bbox.getNorthEast().lng],
+        ]
+      : null,
+    name: geocode.name || null,
+    html: geocode.html || null,
+    properties: geocode.properties || null,
+  }
+  debouncedUpdateComponentValue(window.map)
 }
 
 function onMapClick(e: any) {
@@ -78,6 +98,7 @@ function updateComponentValue(map: any) {
     last_object_clicked_popup: global_data.last_object_clicked_popup,
     all_drawings: global_data.all_drawings,
     last_active_drawing: global_data.last_active_drawing,
+    last_geocoder_result: global_data.last_geocoder_result,
     bounds: wrapBounds(bounds),
     zoom: zoom,
     last_circle_radius: global_data.last_circle_radius,
@@ -488,7 +509,8 @@ async function onRender(event: Event) {
         selected_layers: {},
         height: height,
         wrap_longitude: wrap_longitude,
-        selected_tags: []
+        selected_tags: [],
+        last_geocoder_result: null
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")
@@ -497,6 +519,17 @@ async function onRender(event: Event) {
     }
     await loadScripts().then(() => {
       ignore_render = false;
+
+      // Patch geocoder to capture search results before map script runs
+      const L = (window as any).L
+      if (L?.Control?.Geocoder?.prototype?.markGeocode) {
+        const origMarkGeocode = L.Control.Geocoder.prototype.markGeocode
+        L.Control.Geocoder.prototype.markGeocode = function(result: any) {
+          onGeocoderResult(result)
+          return origMarkGeocode.call(this, result)
+        }
+      }
+
       const render_script = document.createElement("script")
       if (!window.map) {
 	/* first add the html elements as the scripts may
