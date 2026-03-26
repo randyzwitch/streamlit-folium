@@ -32,19 +32,19 @@ with st.echo(code_location="below"):
     folium.Marker(
         [45.5, -122.6], tooltip="Restaurant A", tags=["restaurant", "downtown"]
     ).add_to(m)
-    folium.Marker(
-        [45.52, -122.62], tooltip="Park B", tags=["park", "downtown"]
-    ).add_to(m)
+    folium.Marker([45.52, -122.62], tooltip="Park B", tags=["park", "downtown"]).add_to(
+        m
+    )
     folium.Marker(
         [45.48, -122.58], tooltip="Restaurant C", tags=["restaurant", "eastside"]
     ).add_to(m)
-    folium.Marker(
-        [45.51, -122.65], tooltip="Park D", tags=["park", "westside"]
-    ).add_to(m)
+    folium.Marker([45.51, -122.65], tooltip="Park D", tags=["park", "westside"]).add_to(
+        m
+    )
 
-    TagFilterButton(
-        ["restaurant", "park", "downtown", "eastside", "westside"]
-    ).add_to(m)
+    TagFilterButton(["restaurant", "park", "downtown", "eastside", "westside"]).add_to(
+        m
+    )
 
     c1, c2 = st.columns(2)
     with c1:
