@@ -30,6 +30,8 @@ type GlobalData = {
   height: any
   selected_layers: Record<string, { name: string; url: string }>
   wrap_longitude: boolean
+  geoman_drawings: any
+  last_geoman_drawing: any
   selected_tags: Array<string>
 }
 
@@ -43,6 +45,61 @@ declare global {
     layer_control: any
     Streamlit: any
   }
+}
+
+function collectGeomanDrawings() {
+  const global_data = window.__GLOBAL_DATA__
+  const map = window.map
+  if (!map || !map.pm) return
+
+  const layers = map.pm.getGeomanLayers()
+  const features: any[] = []
+  layers.forEach((layer: any) => {
+    if (layer.toGeoJSON) {
+      const feature = layer.toGeoJSON()
+      if (layer.getRadius) {
+        feature.properties = feature.properties || {}
+        feature.properties.radius = layer.getRadius()
+      }
+      features.push(feature)
+    }
+  })
+  global_data.geoman_drawings = features
+}
+
+function onGeomanCreate(e: any) {
+  const global_data = window.__GLOBAL_DATA__
+  const layer = e.layer
+  if (layer && layer.toGeoJSON) {
+    const feature = layer.toGeoJSON()
+    if (layer.getRadius) {
+      feature.properties = feature.properties || {}
+      feature.properties.radius = layer.getRadius()
+    }
+    global_data.last_geoman_drawing = feature
+  }
+  collectGeomanDrawings()
+  debouncedUpdateComponentValue(window.map)
+}
+
+function onGeomanChange(e: any) {
+  const global_data = window.__GLOBAL_DATA__
+  const layer = e.layer
+  if (layer && layer.toGeoJSON) {
+    const feature = layer.toGeoJSON()
+    if (layer.getRadius) {
+      feature.properties = feature.properties || {}
+      feature.properties.radius = layer.getRadius()
+    }
+    global_data.last_geoman_drawing = feature
+  }
+  collectGeomanDrawings()
+  debouncedUpdateComponentValue(window.map)
+}
+
+function onGeomanRemove(_e: any) {
+  collectGeomanDrawings()
+  debouncedUpdateComponentValue(window.map)
 }
 
 function onMapClick(e: any) {
@@ -78,6 +135,8 @@ function updateComponentValue(map: any) {
     last_object_clicked_popup: global_data.last_object_clicked_popup,
     all_drawings: global_data.all_drawings,
     last_active_drawing: global_data.last_active_drawing,
+    geoman_drawings: global_data.geoman_drawings,
+    last_geoman_drawing: global_data.last_geoman_drawing,
     bounds: wrapBounds(bounds),
     zoom: zoom,
     last_circle_radius: global_data.last_circle_radius,
@@ -313,6 +372,16 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("draw:edited", onDraw)
   map.on("draw:deleted", onDraw)
 
+  // Geoman event listeners
+  if (map.pm) {
+    map.on("pm:create", onGeomanCreate)
+    map.on("pm:edit", onGeomanChange)
+    map.on("pm:remove", onGeomanRemove)
+    map.on("pm:cut", onGeomanChange)
+    map.on("pm:rotateend", onGeomanChange)
+    map.on("pm:dragend", onGeomanChange)
+  }
+
   // Adding functionality for tracking layer changes
   map.on("overlayadd", addLayer);
   map.on("overlayremove", removeLayer);
@@ -488,6 +557,8 @@ async function onRender(event: Event) {
         selected_layers: {},
         height: height,
         wrap_longitude: wrap_longitude,
+        geoman_drawings: null,
+        last_geoman_drawing: null,
         selected_tags: []
       }
       if (script.indexOf("map_div2") !== -1) {

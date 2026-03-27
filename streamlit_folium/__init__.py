@@ -357,6 +357,8 @@ def st_folium(
         "last_circle_radius": None,
         "last_circle_polygon": None,
         "selected_layers": None,
+        "geoman_drawings": None,
+        "last_geoman_drawing": None,
         "selected_tags": None,
     }
 
