@@ -178,13 +178,26 @@ function addLayer(e: any) {
 
 function onLayerClick(e: any) {
   const global_data = window.__GLOBAL_DATA__
-  global_data.last_object_clicked = e.latlng
+  global_data.last_object_clicked = e.latlng || null
 
+  // Extract tooltip text, guarding against layers that don't fully implement
+  // the Leaflet Layer interface (e.g. geocoder result markers).
+  // See: https://github.com/randyzwitch/streamlit-folium/issues/248
   try {
-    if (e.sourceTarget._tooltip && e.sourceTarget._tooltip._content) {
+    if (
+      e.sourceTarget &&
+      typeof e.sourceTarget.getTooltip === "function" &&
+      e.sourceTarget._tooltip &&
+      e.sourceTarget._tooltip._content
+    ) {
       let tooltip_text = extractContent(e.sourceTarget.getTooltip().getContent())
       global_data.last_object_clicked_tooltip = tooltip_text
-    } else if (e.target._tooltip && e.target._tooltip._content) {
+    } else if (
+      e.target &&
+      typeof e.target.getTooltip === "function" &&
+      e.target._tooltip &&
+      e.target._tooltip._content
+    ) {
       let tooltip_text = e.target.getTooltip().getContent()(
 	e.sourceTarget
       ).innerText
@@ -194,11 +207,22 @@ function onLayerClick(e: any) {
     console.log(error);
   }
 
+  // Extract popup text, with the same defensive guards.
   try {
-    if (e.sourceTarget._popup && e.sourceTarget._popup._content) {
+    if (
+      e.sourceTarget &&
+      typeof e.sourceTarget.getPopup === "function" &&
+      e.sourceTarget._popup &&
+      e.sourceTarget._popup._content
+    ) {
       let popup_text = e.sourceTarget.getPopup().getContent().innerText
       global_data.last_object_clicked_popup = popup_text
-    } else if (e.target._popup && e.target._popup._content) {
+    } else if (
+      e.target &&
+      typeof e.target.getPopup === "function" &&
+      e.target._popup &&
+      e.target._popup._content
+    ) {
       let popup_text = e.target.getPopup().getContent()(e.sourceTarget).innerText
       global_data.last_object_clicked_popup = popup_text
     }
@@ -207,10 +231,10 @@ function onLayerClick(e: any) {
   }
 
   let details: Array<any> = []
-  if (e.layer && e.layer.toGeoJSON) {
+  if (e.layer && typeof e.layer.toGeoJSON === "function") {
     global_data.last_active_drawing = e.layer.toGeoJSON()
   }
-  if (window.drawnItems.toGeoJSON) {
+  if (window.drawnItems && typeof window.drawnItems.toGeoJSON === "function") {
     details = window.drawnItems.toGeoJSON().features
   }
   global_data.all_drawings = details
@@ -269,7 +293,8 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("moveend", onMapMove)
   for (let key in map._layers) {
     let layer = map._layers[key]
-    if (layer && layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
+    if (!layer || typeof layer.on !== "function") continue
+    if (layer["_url"] && layer["wmsParams"] && layer["wmsParams"]["layers"]) {
       const layerName = layer["wmsParams"]["layers"];
       const layerUrl = layer["_url"];
 
@@ -387,6 +412,7 @@ async function onRender(event: Event) {
         eval(feature_group + layer_control)
         for (let key in window.map._layers) {
           let layer = window.map._layers[key]
+          if (!layer || typeof layer.on !== "function") continue
           layer.off("click", onLayerClick)
           layer.on("click", onLayerClick)
           if (return_on_hover) {
