@@ -10,9 +10,12 @@ from streamlit_folium_vnext.compiler.plugins import (
     compile_layer_control,
 )
 from streamlit_folium_vnext.compiler.plugins.map_objects import (
+    compile_circle,
     compile_circle_marker,
     compile_geojson,
     compile_marker,
+    compile_polygon,
+    compile_polyline,
     compile_tile_layer,
 )
 from streamlit_folium_vnext.compiler.registry import CompilerRegistry
@@ -22,6 +25,9 @@ registry = CompilerRegistry()
 registry.register(folium.raster_layers.TileLayer, compile_tile_layer)
 registry.register(folium.map.Marker, compile_marker)
 registry.register(folium.vector_layers.CircleMarker, compile_circle_marker)
+registry.register(folium.vector_layers.Circle, compile_circle)
+registry.register(folium.vector_layers.PolyLine, compile_polyline)
+registry.register(folium.vector_layers.Polygon, compile_polygon)
 registry.register(folium.features.GeoJson, compile_geojson)
 registry.register(folium.FeatureGroup, compile_feature_group)
 registry.register(folium.LayerControl, compile_layer_control)
@@ -52,6 +58,9 @@ def compile_folium_map(
                 "tile_layer"
                 | "marker"
                 | "circle_marker"
+                | "circle"
+                | "polyline"
+                | "polygon"
                 | "geojson"
                 | "feature_group"
             ):

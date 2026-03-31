@@ -20,6 +20,11 @@ pg = st.navigation(
             st.Page("pages/drawing.py", title="Drawing", icon=":material/draw:"),
             st.Page("pages/geojson.py", title="GeoJSON", icon=":material/layers:"),
             st.Page(
+                "pages/vector_shapes.py",
+                title="Vector Shapes",
+                icon=":material/pentagon:",
+            ),
+            st.Page(
                 "pages/multiple_maps.py",
                 title="Multiple Maps",
                 icon=":material/grid_view:",

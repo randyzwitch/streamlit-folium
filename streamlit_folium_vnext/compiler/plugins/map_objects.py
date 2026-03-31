@@ -64,3 +64,63 @@ def compile_geojson(obj: folium.features.GeoJson, context: CompileContext) -> Ma
         data=obj.data,
         options=dict(obj.options),
     )
+
+
+def _extract_tooltip_popup(obj: object) -> tuple[dict | None, dict | None]:
+    tooltip = None
+    popup = None
+    for child in getattr(obj, "_children", {}).values():
+        if isinstance(child, folium.map.Popup):
+            popup = {
+                "html": child.html.render()
+                if hasattr(child, "html")
+                else getattr(child, "text", None)
+            }
+        elif isinstance(child, folium.map.Tooltip):
+            tooltip = {"text": child.text}
+    return tooltip, popup
+
+
+def compile_circle(
+    obj: folium.vector_layers.Circle, context: CompileContext
+) -> MapNode:
+    location = list(obj.location) if obj.location is not None else None
+    tooltip, popup = _extract_tooltip_popup(obj)
+    return make_node(
+        "circle",
+        context.allocate_id("circle"),
+        location=location,
+        tooltip=tooltip,
+        popup=popup,
+        options=dict(obj.options),
+    )
+
+
+def compile_polyline(
+    obj: folium.vector_layers.PolyLine, context: CompileContext
+) -> MapNode:
+    locations = [list(loc) for loc in obj.locations] if obj.locations else []
+    tooltip, popup = _extract_tooltip_popup(obj)
+    return make_node(
+        "polyline",
+        context.allocate_id("polyline"),
+        locations=locations,
+        tooltip=tooltip,
+        popup=popup,
+        options=dict(obj.options),
+    )
+
+
+def compile_polygon(
+    obj: folium.vector_layers.Polygon, context: CompileContext
+) -> MapNode:
+    locations = [list(loc) for loc in obj.locations] if obj.locations else []
+    tooltip, popup = _extract_tooltip_popup(obj)
+    return make_node(
+        "polygon",
+        context.allocate_id("polygon"),
+        locations=locations,
+        tooltip=tooltip,
+        popup=popup,
+        options=dict(obj.options),
+    )
