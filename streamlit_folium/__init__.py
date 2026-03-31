@@ -16,9 +16,12 @@ import streamlit as st
 import streamlit.components.v1 as components
 from jinja2 import UndefinedError
 
+from streamlit_folium.plugins import build_plugin_specs
+from streamlit_folium.spec import AssetSpec, MapSpec
+
 # Create a _RELEASE constant. We'll set this to False while we're developing
 # the component, and True when we're ready to package and distribute it.
-_RELEASE = True
+_RELEASE = False
 
 
 if not _RELEASE:
@@ -214,6 +217,62 @@ def _get_layer_control_string(
     return control_string
 
 
+def _build_map_spec(
+    *,
+    folium_map: folium.Map,
+    html: str,
+    header: str,
+    leaflet: str,
+    defaults: dict,
+    feature_group_to_add: list[folium.FeatureGroup] | folium.FeatureGroup | None,
+    layer_control: folium.LayerControl | None,
+) -> MapSpec:
+    css_links: list[str] = []
+    js_links: list[str] = []
+
+    def walk(fig):
+        if isinstance(fig, branca.colormap.ColorMap):
+            yield fig
+        if isinstance(fig, folium.plugins.DualMap):
+            yield from walk(fig.m1)
+            yield from walk(fig.m2)
+        if isinstance(fig, folium.elements.JSCSSMixin):
+            yield fig
+        if hasattr(fig, "_children"):
+            for child in fig._children.values():
+                yield from walk(child)
+
+    for elem in walk(folium_map):
+        if isinstance(elem, branca.colormap.ColorMap):
+            js_links.insert(
+                0, "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"
+            )
+            js_links.insert(0, "https://d3js.org/d3.v4.min.js")
+        css_links.extend([href for _, href in getattr(elem, "default_css", [])])
+        js_links.extend([src for _, src in getattr(elem, "default_js", [])])
+
+    assets = AssetSpec(
+        js=list(dict.fromkeys(js_links)),
+        css=list(dict.fromkeys(css_links)),
+    )
+    plugins = build_plugin_specs(
+        feature_group_to_add=feature_group_to_add,
+        layer_control=layer_control,
+        folium_map=folium_map,
+        feature_group_serializer=_get_feature_group_string,
+        layer_control_serializer=_get_layer_control_string,
+    )
+    return MapSpec(
+        html=html,
+        header=header,
+        script=leaflet,
+        map_id=get_full_id(folium_map),
+        defaults=defaults,
+        assets=assets,
+        plugins=plugins,
+    )
+
+
 def st_folium(
     fig: folium.MacroElement,
     key: str | None = None,
@@ -323,7 +382,7 @@ def st_folium(
 
     leaflet = _get_map_string(folium_map)  # type: ignore
 
-    m_id = get_full_id(folium_map)
+    get_full_id(folium_map)
 
     def bounds_to_dict(bounds_list: list[list[float]]) -> dict[str, dict[str, float]]:
         southwest, northeast = bounds_list
@@ -369,73 +428,32 @@ def st_folium(
         if returned_objects is None or k in returned_objects
     }
 
-    # Convert the feature group to a javascript string which can be used to create it
-    # on the frontend.
-    feature_group_string = None
-    if feature_group_to_add is not None:
-        if isinstance(feature_group_to_add, folium.FeatureGroup):
-            feature_group_to_add = [feature_group_to_add]
-        feature_group_string = ""
-        for idx, feature_group in enumerate(feature_group_to_add):
-            feature_group_string += _get_feature_group_string(
-                feature_group,
-                map=folium_map,
-                idx=idx,
-            )
-
-    layer_control_string = None
-    if layer_control is not None:
-        layer_control_string = _get_layer_control_string(layer_control, folium_map)
+    map_spec = _build_map_spec(
+        folium_map=folium_map,
+        html=html,
+        header=header,
+        leaflet=leaflet,
+        defaults=defaults,
+        feature_group_to_add=feature_group_to_add,
+        layer_control=layer_control,
+    )
 
     if debug:
         with st.expander("Show generated code"):
-            if html:
+            if map_spec.html:
                 st.info("HTML:")
-                st.code(html)
+                st.code(map_spec.html)
 
-            if header:
+            if map_spec.header:
                 st.info("HEADER:")
-                st.code(header)
+                st.code(map_spec.header)
 
             st.info("Main Map Leaflet js:")
-            st.code(leaflet)
+            st.code(map_spec.script)
 
-            if feature_group_string is not None:
-                st.info("Feature group js:")
-                st.code(feature_group_string)
-
-            if layer_control_string is not None:
-                st.info("Layer control js:")
-                st.code(layer_control_string)
-
-    def walk(fig):
-        if isinstance(fig, branca.colormap.ColorMap):
-            yield fig
-        if isinstance(fig, folium.plugins.DualMap):
-            yield from walk(fig.m1)
-            yield from walk(fig.m2)
-        if isinstance(fig, folium.elements.JSCSSMixin):
-            yield fig
-        if hasattr(fig, "_children"):
-            for child in fig._children.values():
-                yield from walk(child)
-
-    css_links: list[str] = []
-    js_links: list[str] = []
-
-    for elem in walk(folium_map):
-        if isinstance(elem, branca.colormap.ColorMap):
-            # manually add d3.js
-            js_links.insert(
-                0, "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"
-            )
-            js_links.insert(0, "https://d3js.org/d3.v4.min.js")
-        css_links.extend([href for _, href in getattr(elem, "default_css", [])])
-        js_links.extend([src for _, src in getattr(elem, "default_js", [])])
-
-    # deduplicate links
-    css_links = list(dict.fromkeys(css_links))
-    js_links = list(dict.fromkeys(js_links))
+            for plugin in map_spec.plugins:
+                st.info(f"Plugin js ({plugin.kind}):")
+                st.code(plugin.script)
 
     hash_key = generate_js_hash(leaflet, key, return_on_hover)
 
@@ -446,23 +464,22 @@ def st_folium(
             on_change()
 
     return _component_func(
-        script=leaflet,
-        header=header,
-        html=html,
-        id=m_id,
+        script=map_spec.script,
+        header=map_spec.header,
+        html=map_spec.html,
+        id=map_spec.map_id,
         key=hash_key,
         height=height,
         width=width,
         returned_objects=returned_objects,
-        default=defaults,
+        default=map_spec.defaults,
         zoom=zoom,
         center=center,
-        feature_group=feature_group_string,
+        plugins=[plugin.to_payload() for plugin in map_spec.plugins],
         return_on_hover=return_on_hover,
-        layer_control=layer_control_string,
         pixelated=pixelated,
-        css_links=css_links,
-        js_links=js_links,
+        css_links=map_spec.assets.css,
+        js_links=map_spec.assets.js,
         on_change=_on_change,
         wrap_longitude=wrap_longitude,
     )

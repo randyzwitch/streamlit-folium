@@ -1,0 +1,7 @@
+[project]
+name = "streamlit-folium-vnext"
+version = "0.0.1"
+
+[[tool.streamlit.component.components]]
+name = "st_folium_vnext"
+asset_dir = "frontend/build"

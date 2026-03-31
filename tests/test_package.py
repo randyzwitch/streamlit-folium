@@ -1,6 +1,49 @@
 from textwrap import dedent
 
 
+def test_build_plugin_specs():
+    import folium
+
+    from streamlit_folium import _get_feature_group_string, _get_layer_control_string
+    from streamlit_folium.plugins import build_plugin_specs
+
+    m = folium.Map()
+    fg = folium.FeatureGroup()
+    lc = folium.LayerControl()
+
+    specs = build_plugin_specs(
+        feature_group_to_add=fg,
+        layer_control=lc,
+        folium_map=m,
+        feature_group_serializer=_get_feature_group_string,
+        layer_control_serializer=_get_layer_control_string,
+    )
+
+    assert [spec.kind for spec in specs] == ["feature_group", "layer_control"]
+    assert "feature_group_feature_group_0" in specs[0].script
+    assert "layer_control_layer_control" in specs[1].script
+
+
+def test_map_spec_payload():
+    from streamlit_folium.spec import AssetSpec, MapSpec, PluginSpec
+
+    spec = MapSpec(
+        html="<div></div>",
+        header="<style></style>",
+        script="var map_div = {};",
+        map_id="map_div",
+        defaults={"zoom": 5},
+        assets=AssetSpec(js=["a.js"], css=["a.css"]),
+        plugins=[PluginSpec(kind="layer_control", script="console.log('x')")],
+    )
+
+    payload = spec.to_payload()
+
+    assert payload["assets"] == {"js": ["a.js"], "css": ["a.css"]}
+    assert payload["plugins"][0]["kind"] == "layer_control"
+    assert payload["id"] == "map_div"
+
+
 def test_map():
     import folium
 
