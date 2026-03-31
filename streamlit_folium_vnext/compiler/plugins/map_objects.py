@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import folium
 
+from streamlit_folium_vnext.compiler.context import CompileContext
 from streamlit_folium_vnext.compiler.nodes import make_node
+from streamlit_folium_vnext.models.spec import MapNode
 
 
-def compile_tile_layer(obj: folium.raster_layers.TileLayer, context):
+def compile_tile_layer(
+    obj: folium.raster_layers.TileLayer, context: CompileContext
+) -> MapNode:
     return make_node(
         "tile_layer",
         context.allocate_id("tile-layer"),
@@ -16,7 +20,7 @@ def compile_tile_layer(obj: folium.raster_layers.TileLayer, context):
     )
 
 
-def compile_marker(obj: folium.map.Marker, context):
+def compile_marker(obj: folium.map.Marker, context: CompileContext) -> MapNode:
     location = list(obj.location) if obj.location is not None else None
     popup = None
     tooltip = None
@@ -40,7 +44,9 @@ def compile_marker(obj: folium.map.Marker, context):
     )
 
 
-def compile_circle_marker(obj: folium.vector_layers.CircleMarker, context):
+def compile_circle_marker(
+    obj: folium.vector_layers.CircleMarker, context: CompileContext
+) -> MapNode:
     location = list(obj.location) if obj.location is not None else None
     return make_node(
         "circle_marker",
@@ -51,7 +57,7 @@ def compile_circle_marker(obj: folium.vector_layers.CircleMarker, context):
     )
 
 
-def compile_geojson(obj: folium.features.GeoJson, context):
+def compile_geojson(obj: folium.features.GeoJson, context: CompileContext) -> MapNode:
     return make_node(
         "geojson",
         context.allocate_id("geojson"),

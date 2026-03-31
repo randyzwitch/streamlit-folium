@@ -5,7 +5,6 @@ import streamlit as st
 
 from streamlit_folium_vnext import st_folium_vnext
 
-st.set_page_config(page_title="Basic Map", layout="wide")
 st.title("Basic Map")
 st.caption("Pan, zoom, and interact. The map should NOT flicker.")
 

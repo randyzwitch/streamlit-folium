@@ -5,9 +5,8 @@ import streamlit as st
 
 from streamlit_folium_vnext import st_folium_vnext
 
-st.set_page_config(page_title="Multiple Maps", layout="wide")
 st.title("Multiple Maps")
-st.caption("Two independent maps side by side. Each should maintain its own state.")
+st.caption("Two independent maps side by side. Each maintains its own state.")
 
 col1, col2 = st.columns(2)
 

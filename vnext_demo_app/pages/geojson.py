@@ -5,7 +5,6 @@ import streamlit as st
 
 from streamlit_folium_vnext import st_folium_vnext
 
-st.set_page_config(page_title="GeoJSON", layout="wide")
 st.title("GeoJSON Features")
 st.caption("Various GeoJSON geometries rendered on a map.")
 
@@ -45,21 +44,14 @@ geojson_data = {
         },
         {
             "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [-95.0, 38.0],
-            },
+            "geometry": {"type": "Point", "coordinates": [-95.0, 38.0]},
             "properties": {"name": "Kansas"},
         },
         {
             "type": "Feature",
             "geometry": {
                 "type": "MultiPoint",
-                "coordinates": [
-                    [-112.0, 33.4],
-                    [-111.9, 33.5],
-                    [-112.1, 33.3],
-                ],
+                "coordinates": [[-112.0, 33.4], [-111.9, 33.5], [-112.1, 33.3]],
             },
             "properties": {"name": "Phoenix area"},
         },
@@ -76,7 +68,6 @@ folium.LayerControl().add_to(m)
 
 result = st_folium_vnext(m, key="geojson-map", height=500)
 
-st.subheader("State")
 col1, col2 = st.columns(2)
 with col1:
     st.metric("Zoom", result.zoom if result and result.zoom else "—")

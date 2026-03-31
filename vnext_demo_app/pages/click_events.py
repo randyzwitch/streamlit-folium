@@ -5,7 +5,6 @@ import streamlit as st
 
 from streamlit_folium_vnext import st_folium_vnext
 
-st.set_page_config(page_title="Click Events", layout="wide")
 st.title("Click Events")
 st.caption("Click anywhere on the map to see the coordinates.")
 
@@ -17,12 +16,7 @@ folium.Marker(
     tooltip="Click me!",
 ).add_to(m)
 
-result = st_folium_vnext(
-    m,
-    key="click-map",
-    height=500,
-    subscribe=["click"],
-)
+result = st_folium_vnext(m, key="click-map", height=500, subscribe=["click"])
 
 if result and result.event and result.event.get("type") == "click":
     st.session_state["last_click"] = result.event
@@ -33,7 +27,8 @@ if last_click:
     obj = payload.get("object")
     if obj:
         st.success(
-            f"Clicked **{obj['kind']}** ({obj.get('tooltip') or obj.get('id', '')}) at: **{payload['lat']:.6f}, {payload['lng']:.6f}**"
+            f"Clicked **{obj['kind']}** ({obj.get('tooltip') or obj.get('id', '')}) "
+            f"at: **{payload['lat']:.6f}, {payload['lng']:.6f}**"
         )
     else:
         st.success(f"Clicked map at: **{payload['lat']:.6f}, {payload['lng']:.6f}**")

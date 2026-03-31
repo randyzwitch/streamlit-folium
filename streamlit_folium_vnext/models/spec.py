@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 
-@dataclass
+@dataclass(slots=True)
 class MapNode:
     kind: str
     id: str
@@ -14,7 +14,7 @@ class MapNode:
         return asdict(self)
 
 
-@dataclass
+@dataclass(slots=True)
 class MapSpec:
     version: int = 1
     map: dict[str, Any] = field(default_factory=dict)

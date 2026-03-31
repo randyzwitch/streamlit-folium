@@ -6,7 +6,6 @@ from folium.plugins import Draw
 
 from streamlit_folium_vnext import st_folium_vnext
 
-st.set_page_config(page_title="Accumulated State", layout="wide")
 st.title("Accumulated State")
 st.caption(
     "Clicks and drawn features are automatically accumulated across interactions. "
@@ -57,11 +56,12 @@ with col_right:
     if clicks:
         for i, c in enumerate(clicks):
             obj = c.get("object")
-            if obj:
-                label = f"{obj['kind']} ({obj.get('tooltip') or obj.get('id', '?')})"
-            else:
-                label = "map"
-            st.text(f"{i+1}. [{label}] ({c['lat']:.5f}, {c['lng']:.5f})")
+            label = (
+                f"{obj['kind']} ({obj.get('tooltip') or obj.get('id', '?')})"
+                if obj
+                else "map"
+            )
+            st.text(f"{i + 1}. [{label}] ({c['lat']:.5f}, {c['lng']:.5f})")
     else:
         st.info("Click on the map or markers to accumulate points.")
 
@@ -117,7 +117,7 @@ result = st_folium_vnext(
 )
 
 # result.state persists across reruns via st.session_state
-clicks = result.state["clicks"]          # list of click payloads
+clicks = result.state["clicks"]            # list of click payloads
 features = result.state["drawn_features"]  # list of drawn GeoJSON features
 """,
         language="python",

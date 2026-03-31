@@ -6,7 +6,6 @@ from folium.plugins import Draw
 
 from streamlit_folium_vnext import st_folium_vnext
 
-st.set_page_config(page_title="Drawing", layout="wide")
 st.title("Drawing Tools")
 st.caption("Use the draw toolbar to create shapes, then edit or delete them.")
 
@@ -35,9 +34,10 @@ if result and result.event:
     elif event_type == "click":
         obj = result.event["payload"].get("object")
         if obj and obj.get("kind") == "drawn":
-            st.info(
-                f"Clicked drawn shape — geometry type: **{obj['geojson']['geometry']['type'] if obj.get('geojson') else '?'}**"
+            geom_type = (
+                obj["geojson"]["geometry"]["type"] if obj.get("geojson") else "?"
             )
+            st.info(f"Clicked drawn shape — geometry type: **{geom_type}**")
 else:
     st.info("Draw a shape on the map to see events here.")
 

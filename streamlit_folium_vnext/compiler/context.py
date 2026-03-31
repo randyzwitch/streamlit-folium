@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(slots=True)
 class CompileContext:
     next_id: int = 0
 

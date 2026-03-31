@@ -39,9 +39,10 @@ let leafletPromise: Promise<void> | null = null
 let leafletDrawPromise: Promise<void> | null = null
 
 type MapInstance = {
-  map: any
+  map: any | null
   container: HTMLElement
   building: boolean
+  layerRefs: Map<string, any>
 }
 
 const instances = new Map<string, MapInstance>()
@@ -106,12 +107,12 @@ function ensureLeafletDraw(): Promise<void> {
   return leafletDrawPromise
 }
 
-function renderTileLayer(map: any, node: MapNode) {
+function renderTileLayer(map: any, node: MapNode): any {
   const opts = node.props.options ? camelizeKeys(node.props.options as Record<string, unknown>) : {}
-  L.tileLayer(String(node.props.url), opts).addTo(map)
+  return L.tileLayer(String(node.props.url), opts).addTo(map)
 }
 
-function renderMarker(map: any, node: MapNode, setTrigger?: (k: string, v: unknown) => void) {
+function renderMarker(map: any, node: MapNode, setTrigger?: (k: string, v: unknown) => void): any {
   const opts = node.props.options ? camelizeKeys(node.props.options as Record<string, unknown>) : {}
   const marker = L.marker(node.props.location as [number, number], opts)
   const popup = node.props.popup as { html?: string } | undefined
@@ -135,7 +136,7 @@ function renderMarker(map: any, node: MapNode, setTrigger?: (k: string, v: unkno
   return marker
 }
 
-function renderGeoJson(map: any, node: MapNode, setTrigger?: (k: string, v: unknown) => void) {
+function renderGeoJson(map: any, node: MapNode, setTrigger?: (k: string, v: unknown) => void): any {
   const opts = node.props.options ? camelizeKeys(node.props.options as Record<string, unknown>) : {}
   const layer = L.geoJSON(node.props.data, {
     ...opts,
@@ -155,9 +156,10 @@ function renderGeoJson(map: any, node: MapNode, setTrigger?: (k: string, v: unkn
     } : undefined,
   })
   layer.addTo(map)
+  return layer
 }
 
-function renderCircleMarker(map: any, node: MapNode, setTrigger?: (k: string, v: unknown) => void) {
+function renderCircleMarker(map: any, node: MapNode, setTrigger?: (k: string, v: unknown) => void): any {
   const opts = node.props.options ? camelizeKeys(node.props.options as Record<string, unknown>) : {}
   const cm = L.circleMarker(node.props.location as [number, number], { ...opts, bubblingMouseEvents: false })
   if (setTrigger) {
@@ -174,14 +176,38 @@ function renderCircleMarker(map: any, node: MapNode, setTrigger?: (k: string, v:
     })
   }
   cm.addTo(map)
+  return cm
 }
 
-function renderLayer(map: any, node: MapNode, setTrigger?: (k: string, v: unknown) => void) {
+function renderLayer(map: any, node: MapNode, setTrigger?: (k: string, v: unknown) => void): any {
   switch (node.kind) {
-    case "tile_layer": renderTileLayer(map, node); break
-    case "marker": renderMarker(map, node, setTrigger); break
-    case "geojson": renderGeoJson(map, node, setTrigger); break
-    case "circle_marker": renderCircleMarker(map, node, setTrigger); break
+    case "tile_layer": return renderTileLayer(map, node)
+    case "marker": return renderMarker(map, node, setTrigger)
+    case "geojson": return renderGeoJson(map, node, setTrigger)
+    case "circle_marker": return renderCircleMarker(map, node, setTrigger)
+  }
+  return null
+}
+
+function syncLayers(
+  inst: MapInstance,
+  layers: MapNode[],
+  setTrigger: (k: string, v: unknown) => void,
+) {
+  const newIds = new Set(layers.map((n) => n.id))
+
+  for (const id of inst.layerRefs.keys()) {
+    if (!newIds.has(id)) {
+      inst.map.removeLayer(inst.layerRefs.get(id))
+      inst.layerRefs.delete(id)
+    }
+  }
+
+  for (const node of layers) {
+    if (!inst.layerRefs.has(node.id)) {
+      const layer = renderLayer(inst.map, node, setTrigger)
+      if (layer != null) inst.layerRefs.set(node.id, layer)
+    }
   }
 }
 
@@ -269,6 +295,7 @@ const StFoliumVnext: FrontendRenderer<ComponentState, ComponentData> = (args) =>
     setStateValue("center", center)
     setStateValue("zoom", zoom)
     setStateValue("bounds", bounds)
+    syncLayers(inst, spec.layers, setTriggerValue)
     return () => {}
   }
 
@@ -284,7 +311,7 @@ const StFoliumVnext: FrontendRenderer<ComponentState, ComponentData> = (args) =>
   container.style.height = `${h}px`
   root.appendChild(container)
 
-  const placeholder: MapInstance = { map: null, container, building: true }
+  const placeholder: MapInstance = { map: null, container, building: true, layerRefs: new Map() }
   instances.set(mapId, placeholder)
 
   const hasDraw = spec.plugins.some((p) => p.kind === "draw")
@@ -297,7 +324,10 @@ const StFoliumVnext: FrontendRenderer<ComponentState, ComponentData> = (args) =>
     const map = L.map(container, { zoomControl: true })
       .setView(spec.map.center ?? [0, 0], spec.map.zoom ?? 2)
 
-    for (const node of spec.layers) renderLayer(map, node, setTriggerValue)
+    for (const node of spec.layers) {
+      const layer = renderLayer(map, node, setTriggerValue)
+      if (layer != null) placeholder.layerRefs.set(node.id, layer)
+    }
     for (const ctrl of spec.controls) {
       if (ctrl.kind === "layer_control") mountLayerControl(map, ctrl)
     }

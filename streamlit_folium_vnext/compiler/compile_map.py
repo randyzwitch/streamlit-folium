@@ -47,17 +47,18 @@ def compile_folium_map(
         if handler is None:
             continue
         node = handler(child, context)
-        if node.kind in {
-            "tile_layer",
-            "marker",
-            "circle_marker",
-            "geojson",
-            "feature_group",
-        }:
-            spec.layers.append(node)
-        elif node.kind in {"layer_control"}:
-            spec.controls.append(node)
-        else:
-            spec.plugins.append(node)
+        match node.kind:
+            case (
+                "tile_layer"
+                | "marker"
+                | "circle_marker"
+                | "geojson"
+                | "feature_group"
+            ):
+                spec.layers.append(node)
+            case "layer_control":
+                spec.controls.append(node)
+            case _:
+                spec.plugins.append(node)
 
     return spec
