@@ -67,6 +67,8 @@ def compile_folium_map(
                 | "polygon"
                 | "geojson"
                 | "feature_group"
+                | "marker_cluster"
+                | "heat"
             ):
                 spec.layers.append(node)
             case "layer_control":

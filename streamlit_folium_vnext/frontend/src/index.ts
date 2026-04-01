@@ -440,8 +440,8 @@ function syncLayers(
 
 function collectDeps(spec: MapSpec): Promise<void> {
   const loads: Promise<void>[] = [ensureLeaflet()]
-  for (const plugin of spec.plugins) {
-    const loader = pluginDeps.get(plugin.kind)
+  for (const node of [...spec.layers, ...spec.plugins]) {
+    const loader = pluginDeps.get(node.kind)
     if (loader) loads.push(loader())
   }
   return Promise.all(loads).then(() => {})
