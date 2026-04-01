@@ -15,11 +15,12 @@ requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["streamlit_folium_vnext"]
 include-package-data = true
+package-dir = {"" = "src"}
 
-[tool.setuptools.package-dir]
-streamlit_folium_vnext = "."
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["streamlit_folium_vnext*"]
 
 [tool.setuptools.package-data]
 streamlit_folium_vnext = ["frontend/build/*.js"]
