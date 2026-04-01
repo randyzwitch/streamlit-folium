@@ -6,7 +6,11 @@ requires-python = ">=3.11"
 dependencies = [
     "streamlit>=1.13.0",
     "folium>=0.13,!=0.15.0",
+    "streamlit-folium-vnext",
 ]
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+streamlit-folium-vnext = { path = "vendor/streamlit_folium_vnext_pkg", editable = true }

@@ -865,6 +865,25 @@ wheels = [
 ]
 
 [[package]]
+name = "streamlit-folium-vnext"
+version = "0.0.1"
+source = { editable = "vendor/streamlit_folium_vnext_pkg" }
+dependencies = [
+    { name = "branca" },
+    { name = "folium" },
+    { name = "jinja2" },
+    { name = "streamlit" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "branca" },
+    { name = "folium", specifier = ">=0.13,!=0.15.0" },
+    { name = "jinja2" },
+    { name = "streamlit", specifier = ">=1.13.0" },
+]
+
+[[package]]
 name = "tenacity"
 version = "9.1.4"
 source = { registry = "https://pypi.org/simple" }
@@ -933,12 +952,14 @@ source = { virtual = "." }
 dependencies = [
     { name = "folium" },
     { name = "streamlit" },
+    { name = "streamlit-folium-vnext" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "folium", specifier = ">=0.13,!=0.15.0" },
     { name = "streamlit", specifier = ">=1.13.0" },
+    { name = "streamlit-folium-vnext", editable = "vendor/streamlit_folium_vnext_pkg" },
 ]
 
 [[package]]
