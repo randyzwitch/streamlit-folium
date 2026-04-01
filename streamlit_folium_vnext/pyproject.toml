@@ -11,14 +11,18 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["uv_build>=0.8.4,<0.9"]
-build-backend = "uv_build"
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
 
-[tool.uv.build-backend]
-module-root = ".."
-source-include = [
-    "streamlit_folium_vnext/frontend/build/**/*",
-]
+[tool.setuptools]
+packages = ["streamlit_folium_vnext"]
+include-package-data = true
+
+[tool.setuptools.package-dir]
+streamlit_folium_vnext = "."
+
+[tool.setuptools.package-data]
+streamlit_folium_vnext = ["frontend/build/*.js"]
 
 [[tool.streamlit.component.components]]
 name = "st_folium_vnext"

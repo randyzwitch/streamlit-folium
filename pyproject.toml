@@ -16,20 +16,6 @@ dependencies = [
 requires = ["uv_build>=0.8.4,<0.9"]
 build-backend = "uv_build"
 
-[tool.uv.build-backend]
-module-root = "."
-source-include = [
-    "README.md",
-    "LICENSE",
-    "streamlit_folium_vnext/frontend/build/**/*"
-]
-source-exclude = [
-    "streamlit_folium/frontend/node_modules/**/*",
-    "streamlit_folium/frontend/src/**/*",
-    "streamlit_folium_vnext/frontend/node_modules/**/*",
-    "streamlit_folium_vnext/frontend/src/**/*"
-]
-
 [tool.ruff]
 line-length = 88
 
@@ -58,7 +44,7 @@ select = [
 
 
 [tool.mypy]
-files = ["streamlit_folium/**/*.py", "streamlit_folium_vnext/**/*.py"]
+files = ["**/*.py"]
 follow_imports = "silent"
 ignore_missing_imports = true
 scripts_are_modules = true
