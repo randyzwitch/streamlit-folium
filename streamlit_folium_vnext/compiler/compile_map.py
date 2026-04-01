@@ -13,7 +13,9 @@ from streamlit_folium_vnext.compiler.plugins.map_objects import (
     compile_circle,
     compile_circle_marker,
     compile_geojson,
+    compile_heat,
     compile_marker,
+    compile_marker_cluster,
     compile_polygon,
     compile_polyline,
     compile_tile_layer,
@@ -32,6 +34,8 @@ registry.register(folium.features.GeoJson, compile_geojson)
 registry.register(folium.FeatureGroup, compile_feature_group)
 registry.register(folium.LayerControl, compile_layer_control)
 registry.register(folium.plugins.Draw, compile_draw)
+registry.register(folium.plugins.MarkerCluster, compile_marker_cluster)
+registry.register(folium.plugins.HeatMap, compile_heat)
 
 
 def compile_folium_map(

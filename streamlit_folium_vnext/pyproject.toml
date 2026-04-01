@@ -1,6 +1,24 @@
 [project]
 name = "streamlit-folium-vnext"
 version = "0.0.1"
+description = "Components v2 rewrite for streamlit-folium"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.13.0",
+    "folium>=0.13,!=0.15.0",
+    "branca",
+    "jinja2",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.4,<0.9"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ".."
+source-include = [
+    "streamlit_folium_vnext/frontend/build/**/*",
+]
 
 [[tool.streamlit.component.components]]
 name = "st_folium_vnext"

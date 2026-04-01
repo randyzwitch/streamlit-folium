@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import folium
+import folium.plugins
 
 from streamlit_folium_vnext.compiler.context import CompileContext
 from streamlit_folium_vnext.compiler.nodes import make_node
@@ -122,5 +123,44 @@ def compile_polygon(
         locations=locations,
         tooltip=tooltip,
         popup=popup,
+        options=dict(obj.options),
+    )
+
+
+def compile_marker_cluster(
+    obj: folium.plugins.MarkerCluster, context: CompileContext
+) -> MapNode:
+    markers = []
+    for child in obj._children.values():
+        if not isinstance(child, folium.map.Marker):
+            continue
+        location = list(child.location) if child.location is not None else None
+        tooltip_text = None
+        popup_html = None
+        for grandchild in child._children.values():
+            if isinstance(grandchild, folium.map.Popup):
+                popup_html = (
+                    grandchild.html.render()
+                    if hasattr(grandchild, "html")
+                    else getattr(grandchild, "text", None)
+                )
+            elif isinstance(grandchild, folium.map.Tooltip):
+                tooltip_text = grandchild.text
+        markers.append(
+            {"location": location, "tooltip": tooltip_text, "popup": popup_html}
+        )
+    return make_node(
+        "marker_cluster",
+        context.allocate_id("marker-cluster"),
+        markers=markers,
+        options=dict(obj.options),
+    )
+
+
+def compile_heat(obj: folium.plugins.HeatMap, context: CompileContext) -> MapNode:
+    return make_node(
+        "heat",
+        context.allocate_id("heat"),
+        data=obj.data,
         options=dict(obj.options),
     )
