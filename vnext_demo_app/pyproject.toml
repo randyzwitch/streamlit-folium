@@ -8,3 +8,6 @@ dependencies = [
     "folium>=0.13,!=0.15.0",
     "streamlit-folium-vnext @ git+https://github.com/blackary/streamlit-folium.git@ccv2-poc#subdirectory=streamlit_folium_vnext",
 ]
+
+[tool.poetry]
+package-mode = false
