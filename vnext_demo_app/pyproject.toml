@@ -6,8 +6,10 @@ requires-python = ">=3.11"
 dependencies = [
     "streamlit>=1.13.0",
     "folium>=0.13,!=0.15.0",
-    "streamlit-folium-vnext @ git+https://github.com/blackary/streamlit-folium.git@ccv2-poc#subdirectory=streamlit_folium_vnext",
+    "streamlit-folium-vnext==0.0.1",
 ]
 
-[tool.poetry]
-package-mode = false
+[tool.uv]
+index-url = "https://pypi.org/simple"
+extra-index-url = ["https://test.pypi.org/simple/"]
+index-strategy = "unsafe-best-match"
