@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>streamlit-folium vs streamlit-folium-vnext: How They Work Differently</title>
+<style>
+  :root {
+    --bg:        #0f1117;
+    --surface:   #1a1d27;
+    --border:    #2d3147;
+    --text:      #e2e8f0;
+    --muted:     #8892a4;
+    --accent:    #4f8ef7;
+    --green:     #34d399;
+    --red:       #f87171;
+    --yellow:    #fbbf24;
+    --purple:    #a78bfa;
+    --orange:    #fb923c;
+    --code-bg:   #12151f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    padding: 2rem 1rem;
+  }
+
+  .page { max-width: 900px; margin: 0 auto; }
+
+  h1 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 2.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.45rem;
+    margin: 2.5rem 0 1rem;
+  }
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--purple);
+    margin: 1.25rem 0 0.6rem;
+  }
+
+  p { margin-bottom: 0.85rem; color: var(--text); }
+
+  code {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.82em;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    color: var(--yellow);
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.1rem 1.25rem;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    margin: 0.75rem 0 1.25rem;
+  }
+
+  pre .kw  { color: #c792ea; }
+  pre .fn  { color: #82aaff; }
+  pre .str { color: #c3e88d; }
+  pre .cm  { color: #546e7a; font-style: italic; }
+  pre .ty  { color: #ffcb6b; }
+  pre .op  { color: #89ddff; }
+  pre .lit { color: #f78c6c; }
+  pre .id  { color: var(--text); }
+
+  .cols2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  @media (max-width: 680px) { .cols2 { grid-template-columns: 1fr; } }
+
+  .col-old { border-top: 3px solid var(--red); }
+  .col-new { border-top: 3px solid var(--green); }
+  .col-old, .col-new {
+    background: var(--surface);
+    border-radius: 0 0 6px 6px;
+    padding: 1rem;
+  }
+
+  .col-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .col-old .col-label { color: var(--red); }
+  .col-new .col-label { color: var(--green); }
+
+  .col-old pre, .col-new pre { margin: 0.5rem 0 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin: 0.75rem 0 1.25rem;
+  }
+  th {
+    text-align: left;
+    padding: 0.55rem 0.75rem;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--border);
+  }
+  td {
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15em 0.55em;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+  }
+  .tag-old { background: rgba(248,113,113,0.15); color: var(--red); }
+  .tag-new { background: rgba(52,211,153,0.15); color: var(--green); }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: rgba(79,142,247,0.07);
+    border-radius: 0 6px 6px 0;
+    padding: 0.8rem 1rem;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+  }
+  .callout.warn {
+    border-color: var(--yellow);
+    background: rgba(251,191,36,0.07);
+  }
+
+  .flow {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.78rem;
+    line-height: 1.9;
+    overflow-x: auto;
+    margin: 0.75rem 0 1.25rem;
+    white-space: pre;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    padding: 0.1em 0.5em;
+    border-radius: 3px;
+    font-weight: 700;
+    vertical-align: middle;
+    margin-left: 0.3em;
+  }
+  .badge-old { background: rgba(248,113,113,0.2); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+  .badge-new { background: rgba(52,211,153,0.2); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  ul { padding-left: 1.4rem; margin-bottom: 0.85rem; }
+  li { margin-bottom: 0.3rem; color: var(--text); font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>streamlit-folium vs streamlit-folium-vnext</h1>
+<p class="subtitle">A complete comparison of how the two packages work — from Python API to frontend rendering</p>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>1. The Core Difference in One Sentence</h2>
+
+<p>
+  The old package lets <strong>folium</strong> render the map — Python hands the frontend a blob of Leaflet JavaScript and the frontend executes it.
+  The new package lets the <strong>frontend</strong> render the map — Python extracts structured data and the frontend reconstructs Leaflet objects from that data.
+</p>
+
+<div class="callout">
+  <strong>Old:</strong> Python → folium Jinja2 templates → raw HTML + raw JS strings → <code>eval()</code> in browser<br>
+  <strong>New:</strong> Python → <code>CompilerRegistry</code> → typed <code>MapSpec</code> data tree → frontend registry dispatch → Leaflet API calls
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>2. Components v1 vs Components v2</h2>
+
+<p>
+  The packages use entirely different Streamlit component APIs. This is not just an implementation detail —
+  the move from CCv1 to CCv2 is what makes most of the other improvements possible.
+</p>
+
+<div class="cols2">
+  <div class="col-old">
+    <div class="col-label">Old — streamlit.components.v1</div>
+<pre>
+<span class="cm"># Python: register by URL or build path</span>
+<span class="kw">import</span> streamlit.components.v1 <span class="kw">as</span> components
+
+_component_func = components.<span class="fn">declare_component</span>(
+    <span class="str">"st_folium"</span>,
+    url=<span class="str">"http://localhost:3001"</span>,  <span class="cm"># dev</span>
+    <span class="cm"># path=build_dir            # prod</span>
+)
+
+<span class="cm"># Call site: pass args as flat kwargs</span>
+<span class="fn">_component_func</span>(
+    script=leaflet_js_string,
+    html=html_string,
+    js_links=cdn_url_list,
+    plugins=plugin_dicts,
+    returned_objects=[<span class="str">"last_clicked"</span>],
+    ...
+)
+</pre>
+  </div>
+  <div class="col-new">
+    <div class="col-label">New — streamlit.components.v2</div>
+<pre>
+<span class="cm"># Python: JS bundle inlined — no server needed</span>
+<span class="kw">import</span> streamlit.components.v2 <span class="kw">as</span> components_v2
+
+_component = components_v2.<span class="fn">component</span>(
+    <span class="str">"st_folium_vnext"</span>,
+    js=_JS_CODE,          <span class="cm"># bundle read from disk</span>
+    html=<span class="str">" "</span>,
+    isolate_styles=<span class="kw">False</span>,
+)
+
+<span class="cm"># Call site: data + per-key callbacks</span>
+<span class="fn">_component</span>(
+    key=key,
+    data={<span class="str">"spec"</span>: spec_dict, <span class="str">"height"</span>: height},
+    default={<span class="str">"center"</span>: <span class="kw">None</span>, <span class="str">"zoom"</span>: <span class="kw">None</span>, ...},
+    on_center_change=_noop,
+    on_zoom_change=_noop,
+    on_bounds_change=_noop,
+    on_event_change=_noop,
+)
+</pre>
+  </div>
+</div>
+
+<h3>How the frontend is structured</h3>
+
+<div class="cols2">
+  <div class="col-old">
+    <div class="col-label">Old — event listener in an iframe</div>
+    <p style="font-size:0.83rem;color:var(--muted)">
+      The frontend is a React app served from a separate dev server or build directory.
+      Streamlit embeds it in an <code>&lt;iframe&gt;</code>. The app registers a listener
+      for <code>RENDER_EVENT</code> and calls <code>Streamlit.setComponentValue()</code>
+      to send data back. Frame height is managed manually.
+    </p>
+<pre>
+<span class="cm">// Must call these explicitly</span>
+Streamlit.events.<span class="fn">addEventListener</span>(
+    Streamlit.RENDER_EVENT, onRender
+)
+Streamlit.<span class="fn">setComponentReady</span>()
+Streamlit.<span class="fn">setFrameHeight</span>()
+
+<span class="cm">// To send state back to Python</span>
+Streamlit.<span class="fn">setComponentValue</span>({ last_clicked: ..., zoom: ... })
+</pre>
+  </div>
+  <div class="col-new">
+    <div class="col-label">New — renderer function, no iframe</div>
+    <p style="font-size:0.83rem;color:var(--muted)">
+      The frontend is a single exported function. Streamlit calls it directly and passes a
+      <code>parentElement</code> DOM node (inside the Streamlit page itself — no iframe).
+      State is sent back per-key via <code>setStateValue</code> / <code>setTriggerValue</code>.
+      No manual setup or frame sizing required.
+    </p>
+<pre>
+<span class="cm">// The entire frontend is this one function</span>
+<span class="kw">const</span> StFoliumVnext: <span class="ty">FrontendRenderer</span>&lt;<span class="ty">ComponentState</span>, <span class="ty">ComponentData</span>&gt;
+  = ({ parentElement, data, setStateValue, setTriggerValue }) => {
+
+  <span class="cm">// parentElement is a real DOM node in the page</span>
+  <span class="cm">// Build the Leaflet map inside it...</span>
+
+  <span class="cm">// Send state back per key</span>
+  <span class="fn">setStateValue</span>(<span class="str">"center"</span>, [lat, lng])
+  <span class="fn">setStateValue</span>(<span class="str">"zoom"</span>, zoom)
+  <span class="fn">setTriggerValue</span>(<span class="str">"event"</span>, { type: <span class="str">"click"</span>, ... })
+
+  <span class="kw">return</span> () => {}  <span class="cm">// optional cleanup on unmount</span>
+}
+
+<span class="kw">export default</span> StFoliumVnext
+</pre>
+  </div>
+</div>
+
+<h3>setStateValue vs setTriggerValue vs setComponentValue</h3>
+
+<table>
+  <thead><tr><th>Concept</th><th><span class="tag tag-old">CCv1</span></th><th><span class="tag tag-new">CCv2</span></th></tr></thead>
+  <tbody>
+    <tr><td>How state is sent to Python</td><td>One call: <code>Streamlit.setComponentValue({...})</code> — a single flat dict</td><td>Per-key: <code>setStateValue(key, val)</code> / <code>setTriggerValue(key, val)</code></td></tr>
+    <tr><td>State persistence across reruns</td><td>No — rebuilt from scratch each time</td><td><code>setStateValue</code> values persist; <code>setTriggerValue</code> resets to <code>null</code> after one rerun</td></tr>
+    <tr><td>Python callbacks</td><td>Single <code>default=</code> dict; no per-key callbacks</td><td><code>on_&lt;key&gt;_change=</code> callback per state key</td></tr>
+    <tr><td>Component isolation</td><td>Full iframe — styles and globals cannot leak either way</td><td>No iframe — shares the page DOM; <code>isolate_styles=False</code> allows Leaflet CSS to work correctly</td></tr>
+    <tr><td>JS delivery</td><td>Served from a URL (dev server or <code>path=</code>)</td><td>Bundle read from disk and inlined via <code>js=_JS_CODE</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Why no iframe is the key enabler</h3>
+
+<p>
+  The CCv1 iframe persists across reruns as long as <code>key=</code> doesn't change, which is
+  how the old package achieves partial incremental updates at all — <code>window.map</code> stays
+  alive. But because all layer state is tracked through <code>window</code> globals written by
+  eval'd strings, only <code>feature_group</code> and <code>layer_control</code> can be swapped.
+  In CCv2, <code>parentElement</code> is equally stable, but the <code>instances</code> Map tracks
+  every layer by a stable typed ID — so <code>syncLayers()</code> can diff any layer type cleanly,
+  without globals, eval, or re-hooking listeners.
+</p>
+
+<div class="callout">
+  <strong>Chain of enablement:</strong> CCv2 persistent <code>parentElement</code>
+  → <code>instances</code> Map survives reruns
+  → <code>syncLayers()</code> can diff against live Leaflet objects
+  → incremental layer updates without rebuilding the map
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>3. What Python Sends to the Frontend</h2>
+
+<p>The most visible difference is the shape of the payload that crosses the Python/JS boundary.</p>
+
+<div class="cols2">
+  <div class="col-old">
+    <div class="col-label">Old — streamlit_folium</div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.3rem">Raw strings from folium's Jinja2 render pipeline:</p>
+<pre>
+<span class="ty">MapSpec</span>(
+  html   = <span class="str">"&lt;div class='folium-map' ...&gt;"</span>,
+  header = <span class="str">"&lt;link rel=stylesheet ...&gt;..."</span>,
+  script = <span class="str">"var map_div = L.map('map_div', {...}); ..."</span>,
+  map_id = <span class="str">"map_5f9d46..."</span>,
+  assets = <span class="ty">AssetSpec</span>(
+    js  = [<span class="str">"https://cdnjs.../leaflet.js"</span>, ...],
+    css = [<span class="str">"https://cdnjs.../leaflet.css"</span>, ...],
+  ),
+  plugins = [
+    <span class="ty">PluginSpec</span>(
+      kind   = <span class="str">"feature_group"</span>,
+      script = <span class="str">"var feature_group_feature_group_0 = ..."</span>,
+    ),
+  ],
+)
+</pre>
+  </div>
+  <div class="col-new">
+    <div class="col-label">New — streamlit_folium_vnext</div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.3rem">Structured data tree — no JavaScript anywhere:</p>
+<pre>
+<span class="ty">MapSpec</span>(
+  version = <span class="lit">1</span>,
+  map = {<span class="str">"id"</span>: <span class="str">"map-0"</span>, <span class="str">"center"</span>: [<span class="lit">45.5</span>, <span class="lit">-122.6</span>],
+         <span class="str">"zoom"</span>: <span class="lit">12</span>, <span class="str">"options"</span>: {...}},
+  layers = [
+    <span class="ty">MapNode</span>(kind=<span class="str">"tile_layer"</span>, id=<span class="str">"tile-layer-0"</span>,
+             props={<span class="str">"url"</span>: <span class="str">"https://tile.openstreetmap..."</span>}),
+    <span class="ty">MapNode</span>(kind=<span class="str">"marker"</span>, id=<span class="str">"marker-1"</span>,
+             props={<span class="str">"location"</span>: [<span class="lit">45.5</span>, <span class="lit">-122.6</span>], ...}),
+  ],
+  controls = [...],
+  plugins  = [
+    <span class="ty">MapNode</span>(kind=<span class="str">"marker_cluster"</span>, id=<span class="str">"marker-cluster-2"</span>,
+             props={<span class="str">"markers"</span>: [...]}),
+  ],
+  subscriptions = [<span class="str">"last_clicked"</span>],
+)
+</pre>
+  </div>
+</div>
+
+<p>
+  The old <code>PluginSpec.script</code> field contains a raw JavaScript string — it is the literal output of calling <code>folium_object.render()</code>,
+  which runs folium's internal Jinja2 templates. The new <code>MapNode.props</code> is a plain Python dict
+  of typed values. No JavaScript is ever generated in Python.
+</p>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>4. How Python Builds the Payload</h2>
+
+<div class="cols2">
+  <div class="col-old">
+    <div class="col-label">Old — render pipeline</div>
+<pre>
+<span class="cm"># 1. Let folium render itself to JS strings</span>
+html   = fig.<span class="fn">get_root</span>().html.<span class="fn">render</span>()
+header = fig.<span class="fn">get_root</span>().header.<span class="fn">render</span>()
+script = <span class="fn">generate_leaflet_string</span>(fig)
+
+<span class="cm"># 2. Scrape CDN URLs by walking the element tree</span>
+<span class="kw">for</span> elem <span class="kw">in</span> <span class="fn">walk</span>(folium_map):
+    css_links.<span class="fn">extend</span>(elem.default_css)
+    js_links.<span class="fn">extend</span>(elem.default_js)
+
+<span class="cm"># 3. Render plugin JS strings via Jinja2</span>
+feature_group.<span class="fn">render</span>()
+script_str = <span class="fn">generate_leaflet_string</span>(feature_group)
+plugins.<span class="fn">append</span>(<span class="ty">PluginSpec</span>(kind=<span class="str">"feature_group"</span>,
+                           script=script_str))
+</pre>
+  </div>
+  <div class="col-new">
+    <div class="col-label">New — compiler pipeline</div>
+<pre>
+<span class="cm"># 1. Walk the folium object tree</span>
+<span class="kw">for</span> child <span class="kw">in</span> obj._children.<span class="fn">values</span>():
+
+    <span class="cm"># 2. Look up a compile function by Python type</span>
+    handler = registry.<span class="fn">resolve</span>(child)
+
+    <span class="cm"># 3. Extract structured data — no JS generated</span>
+    node = <span class="fn">handler</span>(child, context)
+
+    <span class="cm"># 4. Route by kind into the right bucket</span>
+    <span class="kw">match</span> node.kind:
+        <span class="kw">case</span> <span class="str">"marker"</span> | <span class="str">"geojson"</span> | ...:
+            spec.layers.<span class="fn">append</span>(node)
+        <span class="kw">case</span> <span class="str">"layer_control"</span>:
+            spec.controls.<span class="fn">append</span>(node)
+        <span class="kw">case</span> _:
+            spec.plugins.<span class="fn">append</span>(node)
+</pre>
+  </div>
+</div>
+
+<p>
+  In the old version Python is a <em>pass-through</em> — it calls folium's render methods and relays the
+  resulting JS strings. In the new version Python is a <em>compiler</em> — it reads folium object attributes
+  and emits a data representation.
+</p>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>5. How the Frontend Initializes the Map</h2>
+
+<div class="cols2">
+  <div class="col-old">
+    <div class="col-label">Old — script injection + eval</div>
+<pre>
+<span class="cm">// 1. Inject CDN &lt;script&gt; tags sequentially</span>
+<span class="kw">for</span> (<span class="kw">const</span> link <span class="kw">of</span> js_links) {
+  <span class="kw">await</span> <span class="kw">new</span> <span class="ty">Promise</span>((resolve, reject) => {
+    <span class="kw">const</span> s = document.<span class="fn">createElement</span>(<span class="str">"script"</span>)
+    s.src = link
+    s.onload = resolve; s.onerror = reject
+    document.body.<span class="fn">appendChild</span>(s)
+  })
+}
+
+<span class="cm">// 2. Inject folium HTML into DOM</span>
+html_div.innerHTML = html
+document.body.<span class="fn">appendChild</span>(html_div)
+
+<span class="cm">// 3. Eval the entire rendered Leaflet script</span>
+render_script.innerHTML =
+  script +
+  <span class="str">`window.map = map_div;
+   window.initComponent(map_div, ...);`</span>
+document.body.<span class="fn">appendChild</span>(render_script)
+</pre>
+  </div>
+  <div class="col-new">
+    <div class="col-label">New — registry dispatch</div>
+<pre>
+<span class="cm">// 1. Load all needed CDN deps in parallel</span>
+<span class="kw">await</span> <span class="fn">collectDeps</span>(spec)    <span class="cm">// Promise.all</span>
+
+<span class="cm">// 2. Create the Leaflet map from spec data</span>
+<span class="kw">const</span> map = <span class="id">L</span>.<span class="fn">map</span>(container, camelizeKeys(spec.map.options))
+map.<span class="fn">setView</span>(spec.map.center, spec.map.zoom)
+
+<span class="cm">// 3. Render each layer via registry lookup</span>
+<span class="kw">for</span> (<span class="kw">const</span> node <span class="kw">of</span> spec.layers) {
+  <span class="kw">const</span> fn = layerRenderers.<span class="fn">get</span>(node.kind)
+  <span class="kw">if</span> (fn) fn(map, node, setTrigger)
+}
+
+<span class="cm">// 4. Mount controls and plugins via registries</span>
+<span class="kw">for</span> (<span class="kw">const</span> node <span class="kw">of</span> spec.controls) {
+  controlMounters.<span class="fn">get</span>(node.kind)?.(map, node)
+}
+<span class="kw">for</span> (<span class="kw">const</span> node <span class="kw">of</span> spec.plugins) {
+  pluginMounters.<span class="fn">get</span>(node.kind)?.(map, node, setTrigger)
+}
+</pre>
+  </div>
+</div>
+
+<div class="callout warn">
+  <strong>eval() in the old package</strong> — on plugin re-renders (e.g. when a new <code>feature_group</code> is passed) the old frontend
+  literally calls <code>eval(feature_group + layer_control)</code> with the raw JavaScript strings sent from Python.
+  The new package never evaluates strings — it calls Leaflet's API directly.
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>6. CDN Loading</h2>
+
+<p>
+  The old and new packages solve the "load extra CDN libraries for plugins" problem in completely different places.
+</p>
+
+<div class="cols2">
+  <div class="col-old">
+    <div class="col-label">Old — Python scrapes, frontend loads sequentially</div>
+<pre>
+<span class="cm"># Python: walk element tree, collect URLs</span>
+<span class="kw">for</span> elem <span class="kw">in</span> <span class="fn">walk</span>(folium_map):
+    css_links.<span class="fn">extend</span>(
+        href <span class="kw">for</span> _, href <span class="kw">in</span> elem.default_css
+    )
+    js_links.<span class="fn">extend</span>(
+        src <span class="kw">for</span> _, src <span class="kw">in</span> elem.default_js
+    )
+assets = <span class="ty">AssetSpec</span>(js=js_links, css=css_links)
+</pre>
+<pre>
+<span class="cm">// Frontend: inject each &lt;script&gt; sequentially</span>
+<span class="kw">for</span> (<span class="kw">const</span> link <span class="kw">of</span> js_links) {
+  <span class="kw">await</span> <span class="kw">new</span> <span class="ty">Promise</span>(...) <span class="cm">// one at a time</span>
+}
+</pre>
+  </div>
+  <div class="col-new">
+    <div class="col-label">New — TypeScript owns all CDN knowledge</div>
+<pre>
+<span class="cm">// TypeScript: each plugin kind declares its CDN deps</span>
+pluginDeps.<span class="fn">set</span>(<span class="str">"marker_cluster"</span>, () =>
+  <span class="fn">ensureDep</span>(<span class="str">"leaflet-markercluster"</span>, <span class="kw">async</span> () => {
+    <span class="kw">await</span> <span class="fn">loadStylesheet</span>(<span class="str">"sl-mc-css"</span>,
+      <span class="str">"https://unpkg.com/leaflet.markercluster@1.5.3/..."</span>)
+    <span class="kw">if</span> (!<span class="id">L</span>?.MarkerClusterGroup)
+      <span class="kw">await</span> <span class="fn">loadScript</span>(<span class="str">"https://unpkg.com/.../leaflet.markercluster.js"</span>)
+  })
+)
+
+<span class="cm">// All plugins' deps fanned out in parallel</span>
+<span class="kw">function</span> <span class="fn">collectDeps</span>(spec): <span class="ty">Promise</span>&lt;<span class="ty">void</span>&gt; {
+  <span class="kw">const</span> loads = spec.plugins
+    .<span class="fn">map</span>(p => pluginDeps.<span class="fn">get</span>(p.kind)?.())
+    .<span class="fn">filter</span>(Boolean)
+  <span class="kw">return</span> <span class="ty">Promise</span>.<span class="fn">all</span>(loads)
+}
+</pre>
+  </div>
+</div>
+
+<table>
+  <thead><tr><th>Concern</th><th>Old</th><th>New</th></tr></thead>
+  <tbody>
+    <tr><td>Where CDN URLs live</td><td>Inside folium/branca Python objects (<code>default_js</code>, <code>default_css</code>)</td><td>In TypeScript <code>pluginDeps</code> Map</td></tr>
+    <tr><td>Who controls loading order</td><td>Python (sends ordered list); frontend loads serially</td><td>Frontend; all needed deps loaded in parallel via <code>Promise.all</code></td></tr>
+    <tr><td>Deduplication when two maps use same plugin</td><td>Not handled — same URL injected twice</td><td><code>ensureDep(key, ...)</code> memoises by string key</td></tr>
+    <tr><td>Adding a CDN dep for a new plugin</td><td>Must add to folium object's <code>default_js</code> / <code>default_css</code> (inside folium library, not this package)</td><td>One <code>pluginDeps.set("kind", ...)</code> call in <code>index.ts</code></td></tr>
+  </tbody>
+</table>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>7. Re-renders and Layer Updates</h2>
+
+<p>
+  When Streamlit sends a new render event (e.g. a Python slider changed the data), the two packages behave very differently.
+</p>
+
+<div class="cols2">
+  <div class="col-old">
+    <div class="col-label">Old — partial incremental updates, hackily</div>
+    <p style="font-size:0.83rem;color:var(--muted)">
+      The base map (tile layer, markers, GeoJSON baked into the initial script) is rendered <em>once</em>
+      at init and can never be updated. However, <code>feature_group</code> and <code>layer_control</code>
+      plugins <em>can</em> be swapped between reruns — via a fragile mechanism using <code>window</code>
+      globals, <code>JSON.stringify</code> diffing, and <code>eval()</code>.
+    </p>
+<pre>
+<span class="cm">// On every RENDER_EVENT, finalizeOnRender() runs:</span>
+
+<span class="cm">// 1. Detect change via full JSON.stringify diff</span>
+<span class="kw">if</span> (<span class="ty">JSON</span>.<span class="fn">stringify</span>(plugins) !==
+    <span class="ty">JSON</span>.<span class="fn">stringify</span>(window.__GLOBAL_DATA__.last_feature_group)) {
+
+  <span class="cm">// 2. Remove old layers via window.feature_group global</span>
+  window.feature_group.<span class="fn">forEach</span>((layer: <span class="ty">Layer</span>) => {
+    window.map.<span class="fn">removeLayer</span>(layer)
+  })
+  window.map.<span class="fn">removeControl</span>(window.layer_control)
+
+  <span class="cm">// 3. Re-add by eval()ing the new raw JS strings</span>
+  <span class="cm">// eslint-disable-next-line</span>
+  <span class="fn">eval</span>(feature_group + layer_control)
+
+  <span class="cm">// 4. Re-hook all click listeners on every layer</span>
+  <span class="kw">for</span> (<span class="kw">let</span> key <span class="kw">in</span> window.map._layers) {
+    window.map._layers[key].<span class="fn">on</span>(<span class="str">"click"</span>, onLayerClick)
+  }
+}
+</pre>
+    <p style="font-size:0.83rem;color:var(--muted)">
+      This only works because the CCv1 iframe persists across Python reruns as long as the
+      <code>key=</code> parameter doesn't change — keeping <code>window.map</code> alive.
+      But it relies on three side-channel globals (<code>window.map</code>, <code>window.feature_group</code>,
+      <code>window.layer_control</code>) written by the eval'd JS strings, and re-hooks
+      click listeners on <em>every</em> layer on every update.
+    </p>
+  </div>
+  <div class="col-new">
+    <div class="col-label">New — incremental diffing via <code>syncLayers()</code></div>
+    <p style="font-size:0.83rem;color:var(--muted)">
+      Every <code>MapInstance</code> holds a <code>layerRefs: Map&lt;string, any&gt;</code> keyed by stable node IDs.
+      On every render event, <code>syncLayers()</code> computes the diff: IDs no longer in the spec are
+      removed from the Leaflet map; new IDs are created and added. Only the changed layers are touched.
+      Works for <em>all</em> layer types, not just feature groups.
+    </p>
+  </div>
+</div>
+
+<pre>
+<span class="cm">// New — syncLayers() incremental diff</span>
+<span class="kw">function</span> <span class="fn">syncLayers</span>(instance: <span class="ty">MapInstance</span>, spec: <span class="ty">MapSpec</span>, setTrigger: <span class="ty">SetTrigger</span>) {
+  <span class="kw">const</span> { map, layerRefs } = instance
+  <span class="kw">const</span> nextIds = <span class="kw">new</span> <span class="ty">Set</span>(spec.layers.<span class="fn">map</span>(n => n.id))
+
+  <span class="cm">// Remove layers that are no longer in the spec</span>
+  <span class="kw">for</span> (<span class="kw">const</span> [id, layer] <span class="kw">of</span> layerRefs) {
+    <span class="kw">if</span> (!nextIds.<span class="fn">has</span>(id)) { map.<span class="fn">removeLayer</span>(layer); layerRefs.<span class="fn">delete</span>(id) }
+  }
+
+  <span class="cm">// Add layers that are new</span>
+  <span class="kw">for</span> (<span class="kw">const</span> node <span class="kw">of</span> spec.layers) {
+    <span class="kw">if</span> (layerRefs.<span class="fn">has</span>(node.id)) <span class="kw">continue</span>          <span class="cm">// already present</span>
+    <span class="kw">const</span> fn = layerRenderers.<span class="fn">get</span>(node.kind)
+    <span class="kw">if</span> (fn) layerRefs.<span class="fn">set</span>(node.id, <span class="fn">fn</span>(map, node, setTrigger))
+  }
+}
+</pre>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>8. Events and Return Values</h2>
+
+<div class="cols2">
+  <div class="col-old">
+    <div class="col-label">Old — window globals + string keys</div>
+    <p style="font-size:0.83rem;color:var(--muted)">
+      All event state lives in <code>window.__GLOBAL_DATA__</code>. Click/move/draw handlers write directly
+      into named fields. The user specifies which fields to return via the <code>returned_objects</code>
+      argument (a list of strings). The frontend filters <code>__GLOBAL_DATA__</code> to only those keys
+      before calling <code>Streamlit.setComponentValue()</code>.
+    </p>
+<pre>
+<span class="cm">// 27 fields in window.__GLOBAL_DATA__</span>
+global_data.lat_lng_clicked = e.latlng
+global_data.last_object_clicked = e.latlng
+global_data.last_object_clicked_tooltip = ...
+global_data.all_drawings = ...
+<span class="cm">// ...etc</span>
+</pre>
+  </div>
+  <div class="col-new">
+    <div class="col-label">New — typed subscriptions</div>
+    <p style="font-size:0.83rem;color:var(--muted)">
+      The Python compiler specifies which events to subscribe to via <code>MapSpec.subscriptions</code>.
+      The frontend only tracks and returns the subscribed fields. Event state is held in a typed
+      <code>ComponentState</code> interface rather than a catch-all global object.
+    </p>
+<pre>
+<span class="cm">// Python side — explicit subscription</span>
+spec = <span class="fn">compile_folium_map</span>(m,
+    subscribe=[<span class="str">"last_clicked"</span>, <span class="str">"bounds"</span>])
+
+<span class="cm">// Frontend — typed state</span>
+<span class="kw">interface</span> <span class="ty">ComponentState</span> {
+  center: [<span class="ty">number</span>, <span class="ty">number</span>] | <span class="ty">null</span>
+  zoom:   <span class="ty">number</span> | <span class="ty">null</span>
+  bounds: [[<span class="ty">number</span>, <span class="ty">number</span>], [<span class="ty">number</span>, <span class="ty">number</span>]] | <span class="ty">null</span>
+  event:  <span class="ty">unknown</span>
+}
+</pre>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>9. Case Study: Marker Cluster</h2>
+
+<p>
+  Marker cluster is a good end-to-end example because it requires a CDN library, has nested children
+  (individual markers), and fires click events.
+</p>
+
+<div class="cols2">
+  <div class="col-old">
+    <div class="col-label">Old — folium renders everything</div>
+<pre>
+<span class="cm"># Python does nothing special for MarkerCluster.</span>
+<span class="cm"># folium's own Jinja2 template renders it to JS:</span>
+<span class="cm">#</span>
+<span class="cm">#  var marker_cluster_abc123 =</span>
+<span class="cm">#      L.markerClusterGroup({...});</span>
+<span class="cm">#  var marker_xyz = L.marker([45.5, -122.6])</span>
+<span class="cm">#      .addTo(marker_cluster_abc123);</span>
+<span class="cm">#  marker_cluster_abc123.addTo(map_div);</span>
+<span class="cm">#</span>
+<span class="cm"># That JS string is included in the main</span>
+<span class="cm"># 'script' payload field and eval()d at init.</span>
+<span class="cm">#</span>
+<span class="cm"># CDN URL scraped from:</span>
+<span class="cm">#   MarkerCluster.default_js (inside folium)</span>
+</pre>
+  </div>
+  <div class="col-new">
+    <div class="col-label">New — two explicit registration points</div>
+<pre>
+<span class="cm"># Python: extract data from folium object</span>
+<span class="kw">def</span> <span class="fn">compile_marker_cluster</span>(obj, context):
+    markers = []
+    <span class="kw">for</span> child <span class="kw">in</span> obj._children.<span class="fn">values</span>():
+        markers.<span class="fn">append</span>({
+            <span class="str">"location"</span>: <span class="fn">list</span>(child.location),
+            <span class="str">"tooltip"</span>:  tooltip_text,
+            <span class="str">"popup"</span>:    popup_html,
+        })
+    <span class="kw">return</span> <span class="fn">make_node</span>(<span class="str">"marker_cluster"</span>,
+        context.<span class="fn">allocate_id</span>(<span class="str">"marker-cluster"</span>),
+        markers=markers,
+        options=<span class="fn">dict</span>(obj.options),
+    )
+
+registry.<span class="fn">register</span>(
+    folium.plugins.MarkerCluster,
+    compile_marker_cluster,
+)
+</pre>
+<pre>
+<span class="cm">// TypeScript: CDN dep registration</span>
+pluginDeps.<span class="fn">set</span>(<span class="str">"marker_cluster"</span>, () =>
+  <span class="fn">ensureDep</span>(<span class="str">"leaflet-markercluster"</span>, <span class="kw">async</span> () => {
+    <span class="kw">await</span> <span class="fn">loadStylesheet</span>(<span class="str">"sl-mc-css"</span>, <span class="str">"..."</span>)
+    <span class="kw">if</span> (!<span class="id">L</span>?.MarkerClusterGroup)
+      <span class="kw">await</span> <span class="fn">loadScript</span>(<span class="str">"...leaflet.markercluster.js"</span>)
+  })
+)
+
+<span class="cm">// TypeScript: render registration</span>
+layerRenderers.<span class="fn">set</span>(<span class="str">"marker_cluster"</span>, renderMarkerCluster)
+
+<span class="kw">function</span> <span class="fn">renderMarkerCluster</span>(map, node, setTrigger) {
+  <span class="kw">const</span> group = <span class="id">L</span>.<span class="fn">markerClusterGroup</span>()
+  <span class="kw">for</span> (<span class="kw">const</span> m <span class="kw">of</span> node.props.markers) {
+    <span class="kw">const</span> marker = <span class="id">L</span>.<span class="fn">marker</span>(m.location)
+    <span class="cm">// attach tooltip, popup, click handler...</span>
+    group.<span class="fn">addLayer</span>(marker)
+  }
+  <span class="kw">return</span> group.<span class="fn">addTo</span>(map)
+}
+</pre>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>10. Adding Support for a New Folium Object</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Step</th>
+      <th><span class="tag tag-old">Old</span></th>
+      <th><span class="tag tag-new">New</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Write Python data extractor</td>
+      <td>Not needed — folium renders it to JS itself via Jinja2. No Python code to write.</td>
+      <td>Write a <code>compile_*(obj, context) → MapNode</code> function in <code>compiler/plugins/</code></td>
+    </tr>
+    <tr>
+      <td>Register the Python type</td>
+      <td>Not applicable</td>
+      <td><code>registry.register(folium.plugins.MyType, compile_my_type)</code> in <code>compile_map.py</code></td>
+    </tr>
+    <tr>
+      <td>CDN dependency</td>
+      <td>Must add <code>default_js</code> / <code>default_css</code> to the folium object class (inside the folium library — not this package)</td>
+      <td><code>pluginDeps.set("my_kind", () =&gt; ensureDep(...))</code> in <code>index.ts</code></td>
+    </tr>
+    <tr>
+      <td>Write frontend renderer</td>
+      <td>Not needed — folium's rendered JS is executed directly</td>
+      <td>Write a <code>renderMyKind(map, node, setTrigger)</code> function in <code>index.ts</code></td>
+    </tr>
+    <tr>
+      <td>Register the frontend renderer</td>
+      <td>Not applicable</td>
+      <td><code>layerRenderers.set("my_kind", renderMyKind)</code> <em>or</em> <code>pluginMounters.set(...)</code></td>
+    </tr>
+    <tr>
+      <td>Files touched total</td>
+      <td>0 files in this package (folium does everything)</td>
+      <td>2 files: <code>compile_map.py</code> + <code>compiler/plugins/*.py</code> (Python) and <code>index.ts</code> (TypeScript)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  The old package's "zero files" advantage is actually a constraint: you can only support what folium
+  already knows how to render via Jinja2. The new package requires more explicit work per type but gives
+  full control over the rendering, event handling, and CDN loading of each object.
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────────────── -->
+<h2>11. Full Architecture Comparison</h2>
+
+<div class="flow"><span style="color:var(--muted)">Old package data flow</span>
+
+  Python (st_folium)
+  │
+  ├─ folium.Map._children  ──► folium Jinja2 templates ──► raw JS strings
+  ├─ branca element tree   ──► scrape default_js/css    ──► CDN URL lists
+  │
+  └─ MapSpec { html, header, script, assets{js,css}, plugins[{kind, script}] }
+       │
+       │  (Streamlit component iframe)
+       ▼
+  Frontend (index.tsx)
+  │
+  ├─ inject &lt;script src=cdnUrl&gt; for each URL in js_links (sequentially)
+  ├─ inject HTML string into DOM
+  ├─ eval(script)  ──► Leaflet map created, all layers/markers/plugins added
+  ├─ window.map = map_div
+  ├─ initComponent() ──► walk map._layers, attach click/draw/move handlers
+  │
+  └─ On re-render: JSON.stringify(plugins) diff → if changed: removeLayer(window.feature_group),
+       removeControl(window.layer_control), eval(new_feature_group_script + new_layer_control_script),
+       re-hook click listeners on all layers. Base map layers unchanged.
+</div>
+
+<div class="flow"><span style="color:var(--muted)">New package data flow</span>
+
+  Python (st_folium_vnext)
+  │
+  ├─ folium.Map._children  ──► CompilerRegistry.resolve(type) ──► compile_fn
+  │                                                                    │
+  │                                                                    ▼
+  │                                                            MapNode{kind,id,props}
+  │
+  └─ MapSpec { map{center,zoom}, layers[], controls[], plugins[], subscriptions[] }
+       │
+       │  (Streamlit component iframe — pure JSON, no JS)
+       ▼
+  Frontend (index.ts)
+  │
+  ├─ collectDeps(spec)
+  │    └─ for each plugin kind: pluginDeps.get(kind)?.()
+  │         └─ ensureDep(key, loader)  ──► Promise.all (parallel CDN loading)
+  │
+  ├─ L.map(container, options).setView(center, zoom)
+  │
+  ├─ for each layer node:  layerRenderers.get(kind)(map, node, setTrigger)
+  ├─ for each control node: controlMounters.get(kind)(map, node)
+  ├─ for each plugin node:  pluginMounters.get(kind)(map, node, setTrigger)
+  │
+  └─ On re-render: syncLayers() ──► diff layerRefs Map, add/remove only changed nodes
+</div>
+
+<hr>
+
+<h2>12. Summary</h2>
+
+<table>
+  <thead><tr><th>Property</th><th><span class="tag tag-old">streamlit-folium (old)</span></th><th><span class="tag tag-new">streamlit-folium-vnext (new)</span></th></tr></thead>
+  <tbody>
+    <tr><td>Streamlit component API</td><td><code>components.v1.declare_component()</code> — iframe-based, event listener, <code>setComponentValue()</code></td><td><code>components.v2.component()</code> — no iframe, inline JS, <code>setStateValue()</code> / <code>setTriggerValue()</code></td></tr>
+    <tr><td>What Python sends</td><td>Raw HTML + JS strings from folium's Jinja2 render</td><td>Structured <code>MapSpec</code> data tree — no JavaScript</td></tr>
+    <tr><td>Who renders to Leaflet API</td><td>folium (in Python, via Jinja2)</td><td>The frontend TypeScript (via registry dispatch)</td></tr>
+    <tr><td>How scripts execute</td><td><code>eval()</code> of the raw JS string</td><td>Direct Leaflet API calls from TypeScript</td></tr>
+    <tr><td>CDN loading</td><td>Python scrapes; frontend injects sequentially</td><td>TypeScript <code>pluginDeps</code>; loaded in parallel</td></tr>
+    <tr><td>Layer updates on re-render</td><td><code>feature_group</code> and <code>layer_control</code> only — via <code>JSON.stringify</code> diff, <code>eval()</code>, and <code>window</code> globals. Base map layers are frozen.</td><td><code>syncLayers()</code> stable-ID diff — any layer type, no globals, no eval</td></tr>
+    <tr><td>Event state</td><td><code>window.__GLOBAL_DATA__</code> with 27 string-keyed fields</td><td>Typed <code>ComponentState</code>; explicit <code>subscriptions</code> list</td></tr>
+    <tr><td>Support for a new type</td><td>Free — if folium supports it, it renders automatically</td><td>Requires a Python compiler + TypeScript renderer (2 files)</td></tr>
+    <tr><td>External extensibility</td><td>Not possible without forking</td><td><code>layerRenderers.set()</code> / <code>registry.register()</code> from any module</td></tr>
+  </tbody>
+</table>
+
+</div>
+</body>
+</html>
