@@ -4,8 +4,7 @@ version = "0.1.0"
 description = "Demo app for streamlit-folium vnext"
 requires-python = ">=3.11"
 dependencies = [
-    "streamlit>=1.13.0",
-    "folium>=0.13,!=0.15.0",
+    "streamlit>=1.55.0",
     "streamlit-folium-vnext==0.0.1",
 ]
 

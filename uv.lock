@@ -1319,7 +1319,7 @@ wheels = [
 
 [[package]]
 name = "streamlit-folium"
-version = "0.27.1"
+version = "0.26.2"
 source = { editable = "." }
 dependencies = [
     { name = "branca" },

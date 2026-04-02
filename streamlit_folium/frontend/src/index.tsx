@@ -366,8 +366,9 @@ async function onRender(event: Event) {
   const _default: any = data.args["default"]
   const zoom: any = data.args["zoom"]
   const center: any = data.args["center"]
-  const plugins: Array<{ kind: string; script: string; metadata?: Record<string, unknown> }> = data.args["plugins"] ?? []
+  const feature_group: string = data.args["feature_group"]
   const return_on_hover: boolean = data.args["return_on_hover"]
+  const layer_control: string = data.args["layer_control"]
   const pixelated: boolean = data.args["pixelated"]
   const wrap_longitude: boolean = data.args["wrap_longitude"] ?? false
 
@@ -407,7 +408,8 @@ async function onRender(event: Event) {
     */
     if (!window.map) return
     if (
-      JSON.stringify(plugins) !== JSON.stringify(window.__GLOBAL_DATA__.last_feature_group) ||
+      feature_group !== window.__GLOBAL_DATA__.last_feature_group ||
+      layer_control !== window.__GLOBAL_DATA__.last_layer_control ||
       height !== window.__GLOBAL_DATA__.height
     ) {
       // remove previous feature group and layer control
@@ -421,7 +423,9 @@ async function onRender(event: Event) {
         window.map.removeControl(window.layer_control)
       }
 
-      window.__GLOBAL_DATA__.last_feature_group = plugins
+      // update feature group and layer control cache
+      window.__GLOBAL_DATA__.last_feature_group = feature_group
+      window.__GLOBAL_DATA__.last_layer_control = layer_control
       window.__GLOBAL_DATA__.height = height
 
       if (feature_group) {
@@ -436,6 +440,10 @@ async function onRender(event: Event) {
             layer.off("mouseover", onLayerClick)
             layer.on("mouseover", onLayerClick)
           }
+        }
+      } else {
+        // eslint-disable-next-line
+        eval(layer_control)
       }
       Streamlit.setFrameHeight(height)
     }

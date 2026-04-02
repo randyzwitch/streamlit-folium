@@ -16,6 +16,17 @@ dependencies = [
 requires = ["uv_build>=0.8.4,<0.9"]
 build-backend = "uv_build"
 
+[tool.uv.build-backend]
+module-root = "."
+source-include = [
+    "README.md",
+    "LICENSE"
+]
+source-exclude = [
+    "streamlit_folium/frontend/node_modules/**/*",
+    "streamlit_folium/frontend/src/**/*"
+]
+
 [tool.ruff]
 line-length = 88
 

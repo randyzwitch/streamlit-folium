@@ -946,15 +946,13 @@ name = "vnext-demo"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "folium" },
     { name = "streamlit" },
     { name = "streamlit-folium-vnext" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "folium", specifier = ">=0.13,!=0.15.0" },
-    { name = "streamlit", specifier = ">=1.13.0" },
+    { name = "streamlit", specifier = ">=1.55.0" },
     { name = "streamlit-folium-vnext", specifier = "==0.0.1" },
 ]
 
