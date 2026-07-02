@@ -1,0 +1,30 @@
+[project]
+name = "streamlit-folium-vnext"
+version = "0.0.1"
+description = "Components v2 rewrite for streamlit-folium"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.13.0",
+    "folium>=0.13,!=0.15.0",
+    "branca",
+    "jinja2",
+]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["streamlit_folium_vnext*"]
+
+[tool.setuptools.package-data]
+streamlit_folium_vnext = ["frontend/build/*.js"]
+
+[[tool.streamlit.component.components]]
+name = "st_folium_vnext"
+asset_dir = "frontend/build"
