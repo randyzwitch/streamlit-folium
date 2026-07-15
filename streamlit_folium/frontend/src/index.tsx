@@ -14,6 +14,7 @@ var ignore_render = false;
 type GlobalData = {
   lat_lng_clicked: any
   last_object_clicked: any
+  last_object_clicked_count: number
   last_object_clicked_tooltip: string | null
   last_object_clicked_popup: string | null
   last_active_drawing: any
@@ -94,6 +95,7 @@ function updateComponentValue(map: any) {
   let _data = {
     last_clicked: wrapLatLng(global_data.lat_lng_clicked),
     last_object_clicked: wrapLatLng(global_data.last_object_clicked),
+    last_object_clicked_count: global_data.last_object_clicked_count,
     last_object_clicked_tooltip: global_data.last_object_clicked_tooltip,
     last_object_clicked_popup: global_data.last_object_clicked_popup,
     all_drawings: global_data.all_drawings,
@@ -200,6 +202,7 @@ function addLayer(e: any) {
 function onLayerClick(e: any) {
   const global_data = window.__GLOBAL_DATA__
   global_data.last_object_clicked = e.latlng || null
+  global_data.last_object_clicked_count += 1
 
   // Extract tooltip text, guarding against layers that don't fully implement
   // the Leaflet Layer interface (e.g. geocoder result markers).
@@ -493,6 +496,7 @@ async function onRender(event: Event) {
       window.__GLOBAL_DATA__ = {
         lat_lng_clicked: null,
         last_object_clicked: null,
+        last_object_clicked_count: 0,
         last_object_clicked_tooltip: null,
         last_object_clicked_popup: null,
         all_drawings: null,

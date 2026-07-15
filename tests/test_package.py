@@ -117,3 +117,48 @@ def test_vector_grid():
     VectorGridProtobuf(url, "test").add_to(m)
     leaflet = _get_map_string(m)
     assert "var vector_grid_protobuf_div_1 = L.vectorGrid.protobuf(" in leaflet
+
+
+def test_last_object_clicked_count_default():
+    import folium  # noqa: PLC0415
+
+    import streamlit_folium as sf  # noqa: PLC0415
+    from streamlit_folium import st_folium  # noqa: PLC0415
+
+    original_component_func = sf._component_func
+    captured: dict = {}
+
+    def fake_component_func(**kwargs):
+        captured.update(kwargs)
+        return kwargs.get("default", {})
+
+    try:
+        sf._component_func = fake_component_func
+        m = folium.Map(location=[0, 0], zoom_start=1)
+        result = st_folium(m, returned_objects=["last_object_clicked_count"])
+        assert result["last_object_clicked_count"] is None
+        assert "last_object_clicked_count" in captured.get("default", {})
+    finally:
+        sf._component_func = original_component_func
+
+
+def test_last_object_clicked_count_not_in_default_when_not_requested():
+    import folium  # noqa: PLC0415
+
+    import streamlit_folium as sf  # noqa: PLC0415
+    from streamlit_folium import st_folium  # noqa: PLC0415
+
+    original_component_func = sf._component_func
+    captured: dict = {}
+
+    def fake_component_func(**kwargs):
+        captured.update(kwargs)
+        return kwargs.get("default", {})
+
+    try:
+        sf._component_func = fake_component_func
+        m = folium.Map(location=[0, 0], zoom_start=1)
+        result = st_folium(m, returned_objects=["last_object_clicked"])
+        assert "last_object_clicked_count" not in result
+    finally:
+        sf._component_func = original_component_func

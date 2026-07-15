@@ -346,6 +346,7 @@ def st_folium(
     _defaults = {
         "last_clicked": None,
         "last_object_clicked": None,
+        "last_object_clicked_count": None,
         "last_object_clicked_tooltip": None,
         "last_object_clicked_popup": None,
         "all_drawings": None,
