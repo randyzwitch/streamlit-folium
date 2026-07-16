@@ -120,10 +120,10 @@ def test_vector_grid():
 
 
 def test_last_object_clicked_count_default():
-    import folium  # noqa: PLC0415
+    import folium
 
-    import streamlit_folium as sf  # noqa: PLC0415
-    from streamlit_folium import st_folium  # noqa: PLC0415
+    import streamlit_folium as sf
+    from streamlit_folium import st_folium
 
     original_component_func = sf._component_func
     captured: dict = {}
@@ -143,10 +143,10 @@ def test_last_object_clicked_count_default():
 
 
 def test_last_object_clicked_count_not_in_default_when_not_requested():
-    import folium  # noqa: PLC0415
+    import folium
 
-    import streamlit_folium as sf  # noqa: PLC0415
-    from streamlit_folium import st_folium  # noqa: PLC0415
+    import streamlit_folium as sf
+    from streamlit_folium import st_folium
 
     original_component_func = sf._component_func
     captured: dict = {}

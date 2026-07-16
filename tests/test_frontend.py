@@ -284,6 +284,9 @@ def test_last_object_clicked_count(page: Page):
     # Click the same marker again; lat/lng does not change, but count should increment
     click_button_or_marker(page)
     expect(page.get_by_text('"last_object_clicked_count":2')).to_be_visible()
+
+
+def test_geojson_styles(page: Page):
     page.get_by_role("link", name="geojson styles").click()
     page.get_by_role("link", name="geojson styles").click()
 
