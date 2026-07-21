@@ -266,6 +266,26 @@ def test_responsiveness(page: Page):
     page.set_viewport_size({"width": 2000, "height": 2000})
 
 
+def test_last_object_clicked_count(page: Page):
+    page.get_by_role("link", name="last clicked count").click()
+    page.get_by_role("link", name="last clicked count").click()
+
+    expect(page).to_have_title("streamlit-folium documentation: Last Clicked Count")
+
+    # Initial state: count is 0 before any click (frontend initializes it)
+    expect(page.get_by_text('"last_object_clicked_count":0')).to_be_visible()
+
+    # Click the marker
+    click_button_or_marker(page)
+
+    # After one click, count should be 1
+    expect(page.get_by_text('"last_object_clicked_count":1')).to_be_visible()
+
+    # Click the same marker again; lat/lng does not change, but count should increment
+    click_button_or_marker(page)
+    expect(page.get_by_text('"last_object_clicked_count":2')).to_be_visible()
+
+
 def test_geojson_styles(page: Page):
     page.get_by_role("link", name="geojson styles").click()
     page.get_by_role("link", name="geojson styles").click()
