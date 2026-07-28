@@ -538,6 +538,18 @@ def _generate_leaflet_string(
 
 _FOLIUM_VAR_SUFFIX_PATTERN = re.compile("_[a-z0-9]+(?!_)")
 
+# Folium's GeoJsonStyleMapper cannot put a live object into the JSON style map,
+# so when a style value is an element -- a fill pattern, say -- it substitutes
+# the Jinja expression {{'<var name>'}} and lets the enclosing render pass turn
+# that back into a bare variable reference. We only render each element's script
+# macro once, so that second pass never happens and the expression would reach
+# the browser verbatim, breaking the whole layer. Resolve it here instead.
+_FOLIUM_ELEMENT_REF_PATTERN = re.compile(r"\{\{\s*'([A-Za-z_$][A-Za-z0-9_$]*)'\s*\}\}")
+
+
+def _resolve_element_refs(leaflet: str) -> str:
+    return _FOLIUM_ELEMENT_REF_PATTERN.sub(r"\1", leaflet)
+
 
 def _replace_folium_vars(leaflet: str, mappings: dict[str, str]) -> str:
     def replace(match: re.Match):
@@ -566,4 +578,4 @@ def generate_leaflet_string(
     """
     leaflet, mappings = _generate_leaflet_string(m, nested=nested, base_id=base_id)
 
-    return _replace_folium_vars(leaflet, mappings)
+    return _resolve_element_refs(_replace_folium_vars(leaflet, mappings))

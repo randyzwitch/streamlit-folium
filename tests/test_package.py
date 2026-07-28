@@ -162,3 +162,46 @@ def test_last_object_clicked_count_not_in_default_when_not_requested():
         assert "last_object_clicked_count" not in result
     finally:
         sf._component_func = original_component_func
+
+
+def test_geojson_fill_pattern():
+    """A pattern used in a style function must survive as a variable reference.
+
+    Folium can't put a live element into the JSON style map, so it substitutes
+    the Jinja expression ``{{'<var name>'}}`` and leaves it for the enclosing
+    render pass to resolve. We only render each script macro once, so without
+    resolving it ourselves the expression reaches the browser verbatim and the
+    whole GeoJson layer fails to draw.
+    """
+    import folium
+    from folium.plugins.pattern import StripePattern
+
+    from streamlit_folium import _get_map_string
+
+    map = folium.Map()
+    stripes = StripePattern(angle=-45)
+    stripes.add_to(map)
+
+    geojson = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {"name": "square"},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+                },
+            }
+        ],
+    }
+    folium.GeoJson(geojson, style_function=lambda _: {"fillPattern": stripes}).add_to(
+        map
+    )
+    map.render()
+
+    leaflet = _get_map_string(map)
+
+    assert "var stripe_pattern_div_1 = new L.StripePattern(" in leaflet
+    assert '"fillPattern": stripe_pattern_div_1' in leaflet
+    assert "{{" not in leaflet
