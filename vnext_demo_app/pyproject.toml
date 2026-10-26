@@ -1,0 +1,14 @@
+[project]
+name = "vnext-demo"
+version = "0.1.0"
+description = "Demo app for streamlit-folium vnext"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.55.0",
+    "streamlit-folium-vnext==0.0.1",
+]
+
+[tool.uv]
+index-url = "https://pypi.org/simple"
+extra-index-url = ["https://test.pypi.org/simple/"]
+index-strategy = "unsafe-best-match"
