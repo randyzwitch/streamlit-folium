@@ -404,3 +404,22 @@ def test_frame_height_matches_content_height(page: Page):
     iframe_height_px = int(iframe_height.replace("px", ""))
     iframe_html_height_px = int(iframe_html_height.replace("px", ""))
     assert abs(iframe_height_px - iframe_html_height_px) <= 20
+
+
+def test_locate_control(page: Page):
+    # Fake the browser location so the test doesn't depend on a real GPS
+    page.context.grant_permissions(["geolocation"])
+    page.context.set_geolocation({"latitude": 51.5074, "longitude": -0.1278})
+
+    page.get_by_role("link", name="locate control").click()
+    page.get_by_role("link", name="locate control").click()
+
+    expect(page).to_have_title("streamlit-folium documentation: LocateControl")
+    expect(page.get_by_text('"last_located":NULL')).to_be_visible()
+
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+        ".leaflet-control-locate a"
+    ).click()
+
+    expect(page.get_by_text('"last_located":NULL')).to_be_hidden()
+    expect(page.get_by_text("51.5074").first).to_be_visible()
