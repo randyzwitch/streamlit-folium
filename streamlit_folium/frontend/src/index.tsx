@@ -67,11 +67,29 @@ function onGeocoderResult(result: any) {
   debouncedUpdateComponentValue(window.map)
 }
 
+// Minimum distance (meters) the user must move from the last reported
+// location before last_located updates. Bounded so that a very poor fix
+// (e.g. indoor Wi-Fi location) doesn't block updates entirely.
+const LOCATE_MIN_DISTANCE_M = 10
+const LOCATE_MAX_DISTANCE_M = 100
+
 function onLocationFound(e: any) {
   // Fired by map.locate(), which is what folium's LocateControl uses under the
-  // hood. The timestamp is left out on purpose: with watch mode on, it changes
-  // on every GPS update and would rerun the app even when the user hasn't moved.
+  // hood. With watch mode on (the default) this fires on every GPS update, and
+  // lat/lng/accuracy drift slightly even when the user is standing still. To
+  // avoid rerunning the app on that noise, only report a new location once the
+  // user has moved more than the fix's accuracy (bounded by the limits above)
+  // from the last reported position.
   const global_data = window.__GLOBAL_DATA__
+  const prev = global_data.last_located
+  if (prev) {
+    const moved = e.latlng.distanceTo([prev.lat, prev.lng])
+    const threshold = Math.min(
+      Math.max(LOCATE_MIN_DISTANCE_M, e.accuracy),
+      LOCATE_MAX_DISTANCE_M
+    )
+    if (moved < threshold) return
+  }
   global_data.last_located = {
     lat: e.latlng.lat,
     lng: e.latlng.lng,

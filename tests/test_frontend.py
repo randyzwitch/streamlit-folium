@@ -409,7 +409,9 @@ def test_frame_height_matches_content_height(page: Page):
 def test_locate_control(page: Page):
     # Fake the browser location so the test doesn't depend on a real GPS
     page.context.grant_permissions(["geolocation"])
-    page.context.set_geolocation({"latitude": 51.5074, "longitude": -0.1278})
+    page.context.set_geolocation(
+        {"latitude": 51.5074, "longitude": -0.1278, "accuracy": 25}
+    )
 
     page.get_by_role("link", name="locate control").click()
     page.get_by_role("link", name="locate control").click()
@@ -422,4 +424,6 @@ def test_locate_control(page: Page):
     ).click()
 
     expect(page.get_by_text('"last_located":NULL')).to_be_hidden()
-    expect(page.get_by_text("51.5074").first).to_be_visible()
+    # The example only returns last_located, so these can't match center/bounds
+    expect(page.get_by_text('"lat":51.5074')).to_be_visible()
+    expect(page.get_by_text('"accuracy":25')).to_be_visible()
