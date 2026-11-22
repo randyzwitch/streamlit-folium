@@ -19,7 +19,9 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # ubuntu-latest moved to 26.04, which the pinned Playwright version can't
+    # install browsers on yet. Pin until Playwright is bumped in uv.lock.
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
