@@ -33,6 +33,7 @@ type GlobalData = {
   wrap_longitude: boolean
   selected_tags: Array<string>
   last_geocoder_result: any
+  last_located: any
 }
 
 declare global {
@@ -62,6 +63,37 @@ function onGeocoderResult(result: any) {
     name: geocode.name || null,
     html: geocode.html || null,
     properties: geocode.properties || null,
+  }
+  debouncedUpdateComponentValue(window.map)
+}
+
+// Minimum distance (meters) the user must move from the last reported
+// location before last_located updates. Bounded so that a very poor fix
+// (e.g. indoor Wi-Fi location) doesn't block updates entirely.
+const LOCATE_MIN_DISTANCE_M = 10
+const LOCATE_MAX_DISTANCE_M = 100
+
+function onLocationFound(e: any) {
+  // Fired by map.locate(), which is what folium's LocateControl uses under the
+  // hood. With watch mode on (the default) this fires on every GPS update, and
+  // lat/lng/accuracy drift slightly even when the user is standing still. To
+  // avoid rerunning the app on that noise, only report a new location once the
+  // user has moved more than the fix's accuracy (bounded by the limits above)
+  // from the last reported position.
+  const global_data = window.__GLOBAL_DATA__
+  const prev = global_data.last_located
+  if (prev) {
+    const moved = e.latlng.distanceTo([prev.lat, prev.lng])
+    const threshold = Math.min(
+      Math.max(LOCATE_MIN_DISTANCE_M, e.accuracy),
+      LOCATE_MAX_DISTANCE_M
+    )
+    if (moved < threshold) return
+  }
+  global_data.last_located = {
+    lat: e.latlng.lat,
+    lng: e.latlng.lng,
+    accuracy: e.accuracy,
   }
   debouncedUpdateComponentValue(window.map)
 }
@@ -101,6 +133,7 @@ function updateComponentValue(map: any) {
     all_drawings: global_data.all_drawings,
     last_active_drawing: global_data.last_active_drawing,
     last_geocoder_result: global_data.last_geocoder_result,
+    last_located: global_data.last_located,
     bounds: wrapBounds(bounds),
     zoom: zoom,
     last_circle_radius: global_data.last_circle_radius,
@@ -315,6 +348,7 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   const global_data = window.__GLOBAL_DATA__
   map.on("click", onMapClick)
   map.on("moveend", onMapMove)
+  map.on("locationfound", onLocationFound)
   for (let key in map._layers) {
     let layer = map._layers[key]
     if (!layer || typeof layer.on !== "function") continue
@@ -514,7 +548,8 @@ async function onRender(event: Event) {
         height: height,
         wrap_longitude: wrap_longitude,
         selected_tags: [],
-        last_geocoder_result: null
+        last_geocoder_result: null,
+        last_located: null
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")
