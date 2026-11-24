@@ -361,6 +361,7 @@ def st_folium(
         "selected_tags": None,
         "last_geocoder_result": None,
         "last_located": None,
+        "last_location_error": None,
     }
 
     # If the user passes a custom list of returned objects, we'll only return those
