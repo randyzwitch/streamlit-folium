@@ -21,6 +21,13 @@ meaningful distance (at least 10 m, or more when the location fix is less accura
 Note that `last_located` is filled by any call to `map.locate()` on the map, not
 only by `LocateControl`.
 
+If the browser can't get a location (for example because the user denied location
+access), the error is passed back via the `last_location_error` data field as
+`{"code": ..., "message": ...}`, using the
+[Geolocation API error codes](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPositionError/code):
+1 = permission denied, 2 = position unavailable, 3 = timeout. A later successful
+location clears it back to `None`.
+
 Click the location button on the map (and allow location access in your browser) to
 see the return value back to Streamlit!
 """
@@ -37,7 +44,12 @@ with st.echo(code_location="below"):
 
     c1, c2 = st.columns(2)
     with c1:
-        output = st_folium(m, width=700, height=500, returned_objects=["last_located"])
+        output = st_folium(
+            m,
+            width=700,
+            height=500,
+            returned_objects=["last_located", "last_location_error"],
+        )
 
     with c2:
         st.write(output)

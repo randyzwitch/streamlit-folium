@@ -34,6 +34,7 @@ type GlobalData = {
   selected_tags: Array<string>
   last_geocoder_result: any
   last_located: any
+  last_location_error: any
 }
 
 declare global {
@@ -81,19 +82,43 @@ function onLocationFound(e: any) {
   // user has moved more than the fix's accuracy (bounded by the limits above)
   // from the last reported position.
   const global_data = window.__GLOBAL_DATA__
+  let changed = false
+  // A successful fix clears an earlier error (e.g. the user denied access,
+  // then allowed it and clicked the button again).
+  if (global_data.last_location_error) {
+    global_data.last_location_error = null
+    changed = true
+  }
   const prev = global_data.last_located
+  let moved_enough = true
   if (prev) {
     const moved = e.latlng.distanceTo([prev.lat, prev.lng])
     const threshold = Math.min(
       Math.max(LOCATE_MIN_DISTANCE_M, e.accuracy),
       LOCATE_MAX_DISTANCE_M
     )
-    if (moved < threshold) return
+    moved_enough = moved >= threshold
   }
-  global_data.last_located = {
-    lat: e.latlng.lat,
-    lng: e.latlng.lng,
-    accuracy: e.accuracy,
+  if (moved_enough) {
+    global_data.last_located = {
+      lat: e.latlng.lat,
+      lng: e.latlng.lng,
+      accuracy: e.accuracy,
+    }
+    changed = true
+  }
+  if (changed) debouncedUpdateComponentValue(window.map)
+}
+
+function onLocationError(e: any) {
+  // Fired by map.locate() when the browser can't get a position. Leaflet passes
+  // the Geolocation API error code: 1 = permission denied, 2 = position
+  // unavailable, 3 = timeout. last_located is kept as it was, so apps can still
+  // use the last known position.
+  const global_data = window.__GLOBAL_DATA__
+  global_data.last_location_error = {
+    code: e.code,
+    message: e.message,
   }
   debouncedUpdateComponentValue(window.map)
 }
@@ -134,6 +159,7 @@ function updateComponentValue(map: any) {
     last_active_drawing: global_data.last_active_drawing,
     last_geocoder_result: global_data.last_geocoder_result,
     last_located: global_data.last_located,
+    last_location_error: global_data.last_location_error,
     bounds: wrapBounds(bounds),
     zoom: zoom,
     last_circle_radius: global_data.last_circle_radius,
@@ -349,6 +375,7 @@ window.initComponent = (map: any, return_on_hover: boolean) => {
   map.on("click", onMapClick)
   map.on("moveend", onMapMove)
   map.on("locationfound", onLocationFound)
+  map.on("locationerror", onLocationError)
   for (let key in map._layers) {
     let layer = map._layers[key]
     if (!layer || typeof layer.on !== "function") continue
@@ -549,7 +576,8 @@ async function onRender(event: Event) {
         wrap_longitude: wrap_longitude,
         selected_tags: [],
         last_geocoder_result: null,
-        last_located: null
+        last_located: null,
+        last_location_error: null
       }
       if (script.indexOf("map_div2") !== -1) {
         parent_div?.classList.remove("single")

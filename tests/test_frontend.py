@@ -424,6 +424,27 @@ def test_locate_control(page: Page):
     ).click()
 
     expect(page.get_by_text('"last_located":NULL')).to_be_hidden()
-    # The example only returns last_located, so these can't match center/bounds
+    # The example only returns the locate fields, so these can't match center/bounds
     expect(page.get_by_text('"lat":51.5074')).to_be_visible()
     expect(page.get_by_text('"accuracy":25')).to_be_visible()
+    expect(page.get_by_text('"last_location_error":NULL')).to_be_visible()
+
+
+def test_locate_control_error(page: Page):
+    # Location access is not granted, so the browser reports a permission error
+    page.context.clear_permissions()
+
+    page.get_by_role("link", name="locate control").click()
+    page.get_by_role("link", name="locate control").click()
+
+    expect(page).to_have_title("streamlit-folium documentation: LocateControl")
+    expect(page.get_by_text('"last_location_error":NULL')).to_be_visible()
+
+    page.frame_locator('iframe[title="streamlit_folium\\.st_folium"]').locator(
+        ".leaflet-control-locate a"
+    ).click()
+
+    expect(page.get_by_text('"last_location_error":NULL')).to_be_hidden()
+    expect(page.get_by_text('"code":1')).to_be_visible()
+    # The last known location is kept (still empty here)
+    expect(page.get_by_text('"last_located":NULL')).to_be_visible()
